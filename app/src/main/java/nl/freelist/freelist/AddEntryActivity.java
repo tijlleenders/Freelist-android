@@ -32,7 +32,7 @@ public class AddEntryActivity extends AppCompatActivity
 
     private EditText editTextTitle;
     private EditText editTextDescription;
-    private EditText editTextDueDate;
+    private static EditText editTextDueDate;
     private NumberPicker numberPickerDuration;
 
     private CalendarViewModel addEntryViewModel;
