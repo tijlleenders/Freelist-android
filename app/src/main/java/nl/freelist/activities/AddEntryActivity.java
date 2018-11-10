@@ -36,7 +36,7 @@ public class AddEntryActivity extends AppCompatActivity
 
   private EditText editTextTitle;
   private EditText editTextDescription;
-  private static EditText editTextDueDate;
+  private EditText editTextDueDate;
   private NumberPicker numberPickerDuration;
   private CalendarViewModel addEntryViewModel;
 
@@ -177,7 +177,7 @@ public class AddEntryActivity extends AppCompatActivity
       int day = c.get(Calendar.DAY_OF_MONTH);
 
       // Parse content of EditText to start datePicker with the date in the EditText - if possible
-      String editTextDateString = editTextDueDate.getText().toString();
+      String editTextDateString = ((AddEntryActivity)getActivity()).editTextDueDate.getText().toString();
 
       DateFormat formatter = new SimpleDateFormat(
           "yyyy-M-d"); //also works with leading zero in month or days field
