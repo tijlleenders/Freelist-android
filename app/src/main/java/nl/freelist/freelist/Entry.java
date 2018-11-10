@@ -9,80 +9,84 @@ import java.util.Locale;
 
 @Entity(tableName = "entry")
 class Entry {
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-    final private String title;
-    final private String description;
-    final private int duration;
-    private long date;
-    private boolean isCompletedStatus;
 
-    public Entry(String title, String description, int duration, long date, boolean isCompletedStatus) {
-        this.title = title;
-        this.description = description;
-        this.duration = duration;
-        this.date = date;
-        this.isCompletedStatus = isCompletedStatus;
-    }
+  @PrimaryKey(autoGenerate = true)
+  private int id;
+  final private String title;
+  final private String description;
+  final private int duration;
+  private long date;
+  private boolean isCompletedStatus;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+  public Entry(String title, String description, int duration, long date,
+      boolean isCompletedStatus) {
+    this.title = title;
+    this.description = description;
+    this.duration = duration;
+    this.date = date;
+    this.isCompletedStatus = isCompletedStatus;
+  }
 
-    public void setDate(long date) {
-        this.date = date;
-    }
+  public void setId(int id) {
+    this.id = id;
+  }
 
-    public void setCompletedStatus(boolean completedStatus) {
-        isCompletedStatus = completedStatus;
-    }
+  public void setDate(long date) {
+    this.date = date;
+  }
 
-    public int getId() {
-        return id;
-    }
+  public void setCompletedStatus(boolean completedStatus) {
+    isCompletedStatus = completedStatus;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public int getId() {
+    return id;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    int getDuration() {
-        return duration;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    String getFormattedDuration() {
-        if (duration > 0) {
-            int hours = (duration / 3600);
-            int minutes = (duration % 3600) / 60;
-            int seconds = duration % 60;
-            StringBuilder formattedDuration = new StringBuilder();
-            if (hours > 0) {
-                formattedDuration.append(Integer.toString(hours)).append("h");
-            }
-            if (minutes > 0) {
-                formattedDuration.append(Integer.toString(minutes)).append("m");
-            }
-            if (seconds > 0) {
-                formattedDuration.append(Integer.toString(seconds)).append("s");
-            }
-            return formattedDuration.toString();
-        } else return "...";
-    }
+  int getDuration() {
+    return duration;
+  }
 
-    long getDate() {
-        return date;
+  String getFormattedDuration() {
+    if (duration > 0) {
+      int hours = (duration / 3600);
+      int minutes = (duration % 3600) / 60;
+      int seconds = duration % 60;
+      StringBuilder formattedDuration = new StringBuilder();
+      if (hours > 0) {
+        formattedDuration.append(Integer.toString(hours)).append("h");
+      }
+      if (minutes > 0) {
+        formattedDuration.append(Integer.toString(minutes)).append("m");
+      }
+      if (seconds > 0) {
+        formattedDuration.append(Integer.toString(seconds)).append("s");
+      }
+      return formattedDuration.toString();
+    } else {
+      return "...";
     }
+  }
 
-    String getFormattedDate() {
-        Date date = new Date(this.date);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-M-d", Locale.US);
-        return formatter.format(date);
-    }
+  long getDate() {
+    return date;
+  }
 
-    boolean getIsCompletedStatus() {
-        return isCompletedStatus;
-    }
+  String getFormattedDate() {
+    Date date = new Date(this.date);
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-M-d", Locale.US);
+    return formatter.format(date);
+  }
+
+  boolean getIsCompletedStatus() {
+    return isCompletedStatus;
+  }
 }

@@ -11,42 +11,43 @@ import android.support.annotation.NonNull;
 @Database(entities = {Entry.class}, version = 1)
 public abstract class EntryDatabase extends RoomDatabase {
 
-    public abstract EntryDao entryDao();
+  public abstract EntryDao entryDao();
 
-    private static EntryDatabase instance;
+  private static EntryDatabase instance;
 
-    public static synchronized EntryDatabase getInstance(Context context) {
-        if (instance == null) {
-            instance = Room.databaseBuilder(context.getApplicationContext()
-                    ,EntryDatabase.class, "entry_database")
-                    .fallbackToDestructiveMigration()
-                    .addCallback(roomCallback)
-                    .build();
-        }
-        return instance;
+  public static synchronized EntryDatabase getInstance(Context context) {
+    if (instance == null) {
+      instance = Room.databaseBuilder(context.getApplicationContext()
+          , EntryDatabase.class, "entry_database")
+          .fallbackToDestructiveMigration()
+          .addCallback(roomCallback)
+          .build();
+    }
+    return instance;
+  }
+
+  final private static RoomDatabase.Callback roomCallback = new RoomDatabase.Callback() {
+    @Override
+    public void onCreate(@NonNull SupportSQLiteDatabase db) {
+      super.onCreate(db);
+      new PopulateDbAsyncTask(instance).execute();
+    }
+  };
+
+  private static class PopulateDbAsyncTask extends AsyncTask<Void, Void, Void> {
+
+    final private EntryDao entryDao;
+
+    private PopulateDbAsyncTask(EntryDatabase db) {
+      entryDao = db.entryDao();
     }
 
-    final private static RoomDatabase.Callback roomCallback = new RoomDatabase.Callback() {
-        @Override
-        public void onCreate(@NonNull SupportSQLiteDatabase db) {
-            super.onCreate(db);
-            new PopulateDbAsyncTask(instance).execute();
-        }
-    };
-
-    private static class PopulateDbAsyncTask extends AsyncTask<Void, Void, Void> {
-        final private EntryDao entryDao;
-
-        private PopulateDbAsyncTask(EntryDatabase db) {
-            entryDao = db.entryDao();
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            entryDao.insert(new Entry("Title 1", "Description 1", 1, 1539456867, false));
-            entryDao.insert(new Entry("Title 2", "Description 2", 2, 1539456867, false));
-            entryDao.insert(new Entry("Title 3", "Description 3", 3, 1539456867, false));
-            return null;
-        }
+    @Override
+    protected Void doInBackground(Void... voids) {
+      entryDao.insert(new Entry("Title 1", "Description 1", 1, 1539456867, false));
+      entryDao.insert(new Entry("Title 2", "Description 2", 2, 1539456867, false));
+      entryDao.insert(new Entry("Title 3", "Description 3", 3, 1539456867, false));
+      return null;
     }
+  }
 }

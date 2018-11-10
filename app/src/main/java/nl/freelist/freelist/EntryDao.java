@@ -12,19 +12,19 @@ import java.util.List;
 @Dao
 public interface EntryDao {
 
-    @Insert
-    void insert(Entry entry);
+  @Insert
+  void insert(Entry entry);
 
-    @Update
-    void update(Entry entry);
+  @Update
+  void update(Entry entry);
 
-    @Delete
-    void delete(Entry entry);
+  @Delete
+  void delete(Entry entry);
 
-    @Query("DELETE FROM entry")
-    void deleteAllEntries();
+  @Query("DELETE FROM entry")
+  void deleteAllEntries();
 
-    @Query("SELECT * FROM entry ORDER BY duration DESC")
-    LiveData<List<Entry>> getAllEntries();
+  @Query("SELECT * FROM entry ORDER BY duration DESC")
+  LiveData<List<Entry>> getAllEntries();
 
 }

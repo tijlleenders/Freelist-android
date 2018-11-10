@@ -9,34 +9,34 @@ import java.util.List;
 
 class CalendarViewModel extends AndroidViewModel {
 
-    final private EntryRepository repository;
-    final private LiveData<List<Entry>> allEntries;
+  final private EntryRepository repository;
+  final private LiveData<List<Entry>> allEntries;
 
-    public CalendarViewModel(@NonNull Application application) {
-        super(application);
-        //repository = new EntryRepository(application);
-        repository = EntryRepository.getInstance(application);
-        allEntries = repository.getAllEntries();
-    }
+  public CalendarViewModel(@NonNull Application application) {
+    super(application);
+    //repository = new EntryRepository(application);
+    repository = EntryRepository.getInstance(application);
+    allEntries = repository.getAllEntries();
+  }
 
-    public void insert(Entry entry) {
-        repository.insert(entry);
-    }
+  public void insert(Entry entry) {
+    repository.insert(entry);
+  }
 
-    public void update(Entry entry) {
-        repository.update(entry);
-    }
+  public void update(Entry entry) {
+    repository.update(entry);
+  }
 
-    public void delete(Entry entry) {
-        repository.delete(entry);
-    }
+  public void delete(Entry entry) {
+    repository.delete(entry);
+  }
 
-    public void deleteAllEntries() {
-        repository.deleteAllEntries();
-    }
+  public void deleteAllEntries() {
+    repository.deleteAllEntries();
+  }
 
-    public LiveData<List<Entry>> getAllEntries() {
-        return allEntries;
-    }
+  public LiveData<List<Entry>> getAllEntries() {
+    return allEntries;
+  }
 
 }
