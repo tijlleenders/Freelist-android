@@ -1,4 +1,4 @@
-package nl.freelist.freelist;
+package nl.freelist.database;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;

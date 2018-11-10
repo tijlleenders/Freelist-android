@@ -1,4 +1,4 @@
-package nl.freelist.freelist;
+package nl.freelist.activities;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -16,8 +16,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
 import java.util.List;
+import nl.freelist.freelist.R;
+import nl.freelist.userInterfaceHelpers.EntryAdapter;
+import nl.freelist.viewModels.CalendarViewModel;
+import nl.freelist.database.Entry;
 
 public class CalendarActivity extends AppCompatActivity {
 
@@ -100,7 +103,7 @@ public class CalendarActivity extends AppCompatActivity {
     switch (item.getItemId()) {
       case R.id.delete_all_entries:
         calendarViewModel.deleteAllEntries();
-        Toast.makeText(this, "All entries deleted", Toast.LENGTH_SHORT);
+        Toast.makeText(this, "All entries deleted", Toast.LENGTH_SHORT).show();
         return true;
       default:
         return super.onOptionsItemSelected(item);

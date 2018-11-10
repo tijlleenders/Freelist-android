@@ -1,10 +1,13 @@
-package nl.freelist.freelist;
+package nl.freelist.repository;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 
 import java.util.List;
+import nl.freelist.database.Entry;
+import nl.freelist.database.EntryDao;
+import nl.freelist.database.EntryDatabase;
 
 public class EntryRepository {
 

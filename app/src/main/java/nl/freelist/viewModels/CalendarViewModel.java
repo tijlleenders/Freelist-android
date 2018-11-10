@@ -1,4 +1,4 @@
-package nl.freelist.freelist;
+package nl.freelist.viewModels;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
@@ -6,8 +6,10 @@ import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
 import java.util.List;
+import nl.freelist.database.Entry;
+import nl.freelist.repository.EntryRepository;
 
-class CalendarViewModel extends AndroidViewModel {
+public class CalendarViewModel extends AndroidViewModel {
 
   final private EntryRepository repository;
   final private LiveData<List<Entry>> allEntries;

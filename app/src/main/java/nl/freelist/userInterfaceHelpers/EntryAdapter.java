@@ -1,4 +1,4 @@
-package nl.freelist.freelist;
+package nl.freelist.userInterfaceHelpers;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import nl.freelist.database.Entry;
+import nl.freelist.freelist.R;
 
 public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder> {
 
@@ -41,7 +43,7 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
     notifyDataSetChanged(); // change later for onInsert onDelete (not efficient and no animations)
   }
 
-  Entry getEntryAt(int position) {
+  public Entry getEntryAt(int position) {
     return entries.get(position);
   }
 

@@ -10,15 +10,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:fullBackupContent="@xml/backup_descriptor">
-        <activity android:name=".CalendarActivity">
+        <activity android:name="nl.freelist.activities.CalendarActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".AddEntryActivity"
-            android:parentActivityName=".CalendarActivity">
+            android:name="nl.freelist.activities.AddEntryActivity"
+            android:parentActivityName="nl.freelist.activities.CalendarActivity">
         </activity>
     </application>
 

@@ -1,4 +1,4 @@
-package nl.freelist.freelist;
+package nl.freelist.database;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.Locale;
 
 @Entity(tableName = "entry")
-class Entry {
+public class Entry {
 
   @PrimaryKey(autoGenerate = true)
   private int id;
@@ -55,7 +55,7 @@ class Entry {
     return duration;
   }
 
-  String getFormattedDuration() {
+  public String getFormattedDuration() {
     if (duration > 0) {
       int hours = (duration / 3600);
       int minutes = (duration % 3600) / 60;
@@ -80,7 +80,7 @@ class Entry {
     return date;
   }
 
-  String getFormattedDate() {
+  public String getFormattedDate() {
     Date date = new Date(this.date);
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-M-d", Locale.US);
     return formatter.format(date);

@@ -1,4 +1,4 @@
-package nl.freelist.freelist;
+package nl.freelist.activities;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -24,6 +24,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import nl.freelist.viewModels.CalendarViewModel;
+import nl.freelist.database.Entry;
+import nl.freelist.freelist.R;
 
 public class AddEntryActivity extends AppCompatActivity
     implements DatePickerDialog.OnDateSetListener {
@@ -35,7 +38,6 @@ public class AddEntryActivity extends AppCompatActivity
   private EditText editTextDescription;
   private static EditText editTextDueDate;
   private NumberPicker numberPickerDuration;
-
   private CalendarViewModel addEntryViewModel;
 
   @Override
@@ -148,7 +150,6 @@ public class AddEntryActivity extends AppCompatActivity
       default:
         return super.onOptionsItemSelected(item);
     }
-
   }
 
   public void showDatePickerDialog(View v) {
@@ -177,6 +178,7 @@ public class AddEntryActivity extends AppCompatActivity
 
       // Parse content of EditText to start datePicker with the date in the EditText - if possible
       String editTextDateString = editTextDueDate.getText().toString();
+
       DateFormat formatter = new SimpleDateFormat(
           "yyyy-M-d"); //also works with leading zero in month or days field
       try {
