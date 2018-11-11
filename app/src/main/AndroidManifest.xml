@@ -17,7 +17,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="nl.freelist.activities.AddEntryActivity"
+            android:name="nl.freelist.activities.AddEditEntryActivity"
             android:parentActivityName="nl.freelist.activities.CalendarActivity">
         </activity>
     </application>

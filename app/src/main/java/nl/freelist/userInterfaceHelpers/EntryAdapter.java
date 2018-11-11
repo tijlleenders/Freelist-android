@@ -1,18 +1,20 @@
 package nl.freelist.userInterfaceHelpers;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
-import nl.freelist.activities.CalendarActivity;
+import nl.freelist.activities.AddEditEntryActivity;
+import nl.freelist.constants.ActivityConstants;
 import nl.freelist.database.Entry;
 import nl.freelist.freelist.R;
 
@@ -68,8 +70,22 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
       itemView.setOnClickListener(new OnClickListener() {
         @Override
         public void onClick(View v) {
+
+          Intent intent = new Intent(v.getContext(), AddEditEntryActivity.class);
+          intent.putExtra(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT,
+              ActivityConstants.EDIT_ENTRY_REQUEST);
+
           int position = getAdapterPosition();
-          Toast.makeText(v.getContext(), "Entry " + Integer.toString(position) + " clicked!", Toast.LENGTH_SHORT).show();
+          Entry entry = getEntryAt(
+              position); //todo: make Entry parcelable (not serializable as this is heavy on system) and pass whole entry to edit Activity
+          intent.putExtra(ActivityConstants.EXTRA_ENTRY_ID, entry.getId());
+          intent.putExtra(ActivityConstants.EXTRA_ENTRY_TITLE, entry.getTitle());
+          intent.putExtra(ActivityConstants.EXTRA_ENTRY_DESCRIPTION, entry.getDescription());
+          intent.putExtra(ActivityConstants.EXTRA_ENTRY_FORMATTED_DATE, entry.getFormattedDate());
+          intent.putExtra(ActivityConstants.EXTRA_ENTRY_FORMATTED_DURATION, entry.getFormattedDuration());
+
+          ((Activity) v.getContext())
+              .startActivityForResult(intent, ActivityConstants.EDIT_ENTRY_REQUEST);
         }
       });
     }

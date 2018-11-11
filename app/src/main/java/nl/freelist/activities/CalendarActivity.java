@@ -1,5 +1,6 @@
 package nl.freelist.activities;
 
+import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -21,10 +22,9 @@ import nl.freelist.freelist.R;
 import nl.freelist.userInterfaceHelpers.EntryAdapter;
 import nl.freelist.viewModels.CalendarViewModel;
 import nl.freelist.database.Entry;
+import nl.freelist.constants.ActivityConstants;
 
 public class CalendarActivity extends AppCompatActivity {
-
-  private static final int ADD_ENTRY_REQUEST = 1;
 
   private CalendarViewModel calendarViewModel;
 
@@ -37,8 +37,9 @@ public class CalendarActivity extends AppCompatActivity {
     buttonAddEntry.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Intent intent = new Intent(CalendarActivity.this, AddEntryActivity.class);
-        startActivityForResult(intent, ADD_ENTRY_REQUEST);
+        Intent intent = new Intent(CalendarActivity.this, AddEditEntryActivity.class);
+        intent.putExtra(ActivityConstants.EXTRA_REQUEST_TYPE_ADD, ActivityConstants.ADD_ENTRY_REQUEST);
+        startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
       }
     });
 
@@ -83,8 +84,8 @@ public class CalendarActivity extends AppCompatActivity {
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
-    if (requestCode == ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
-      Toast.makeText(this, "Entry " + data.getStringExtra(AddEntryActivity.EXTRA_TITLE) + " saved!",
+    if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
+      Toast.makeText(this, "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " saved!",
           Toast.LENGTH_SHORT).show();
     } else {
       Toast.makeText(this, "Entry not saved.", Toast.LENGTH_SHORT).show();
