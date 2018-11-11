@@ -2,13 +2,17 @@ package nl.freelist.userInterfaceHelpers;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
+import nl.freelist.activities.CalendarActivity;
 import nl.freelist.database.Entry;
 import nl.freelist.freelist.R;
 
@@ -60,6 +64,14 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
       textViewDescription = itemView.findViewById(R.id.text_view_description);
       textViewDuration = itemView.findViewById(R.id.text_view_duration);
       textViewDate = itemView.findViewById(R.id.text_view_date);
+
+      itemView.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          int position = getAdapterPosition();
+          Toast.makeText(v.getContext(), "Entry " + Integer.toString(position) + " clicked!", Toast.LENGTH_SHORT).show();
+        }
+      });
     }
   }
 }
