@@ -18,15 +18,13 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.Toast;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import nl.freelist.viewModels.CalendarViewModel;
 import nl.freelist.database.Entry;
 import nl.freelist.freelist.R;
+import nl.freelist.userInterfaceHelpers.DateHelpers;
 
 public class AddEntryActivity extends AppCompatActivity
     implements DatePickerDialog.OnDateSetListener {
@@ -39,6 +37,7 @@ public class AddEntryActivity extends AppCompatActivity
   private EditText editTextDueDate;
   private NumberPicker numberPickerDuration;
   private CalendarViewModel addEntryViewModel;
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +115,7 @@ public class AddEntryActivity extends AppCompatActivity
     String title = editTextTitle.getText().toString();
     String description = editTextDescription.getText().toString();
     int duration = getNumberPicker(numberPickerDuration.getValue());
-    long date = 1539456867;
+    long date = DateHelpers.getDateFromString(editTextDueDate.getText().toString()).getTime();
     boolean isCompletedStatus = false;
 
     if (title.trim().isEmpty() || description.trim().isEmpty()) {
@@ -172,24 +171,15 @@ public class AddEntryActivity extends AppCompatActivity
     public Dialog onCreateDialog(Bundle savedInstanceState) {
       // Use the current date as the default date in the picker
       Calendar c = Calendar.getInstance();
+
+      // Parse content of EditText to start datePicker with the date in the EditText - if possible
+      String editTextDateString = ((AddEntryActivity) getActivity()).editTextDueDate.getText()
+          .toString();
+      Date convertedDate = DateHelpers.getDateFromString(editTextDateString);
+      c.setTime(convertedDate);
       int year = c.get(Calendar.YEAR);
       int month = c.get(Calendar.MONTH);
       int day = c.get(Calendar.DAY_OF_MONTH);
-
-      // Parse content of EditText to start datePicker with the date in the EditText - if possible
-      String editTextDateString = ((AddEntryActivity)getActivity()).editTextDueDate.getText().toString();
-
-      DateFormat formatter = new SimpleDateFormat(
-          "yyyy-M-d"); //also works with leading zero in month or days field
-      try {
-        Date convertedDate = formatter.parse(editTextDateString);
-        c.setTime(convertedDate);
-        year = c.get(Calendar.YEAR);
-        month = c.get(Calendar.MONTH);
-        day = c.get(Calendar.DAY_OF_MONTH);
-      } catch (ParseException e) {
-        e.printStackTrace();
-      }
 
       // Create a new instance of DatePickerDialog and return it
       return new DatePickerDialog(getActivity(), (DatePickerDialog.OnDateSetListener) getActivity(),
