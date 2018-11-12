@@ -87,8 +87,14 @@ public class CalendarActivity extends AppCompatActivity {
     if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
       Toast.makeText(this, "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " saved!",
           Toast.LENGTH_SHORT).show();
-    } else {
+    } else if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode != RESULT_OK) {
       Toast.makeText(this, "Entry not saved.", Toast.LENGTH_SHORT).show();
+    } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode == RESULT_OK) {
+      Toast.makeText(this, "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " edited!",
+          Toast.LENGTH_SHORT).show();
+    } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode != RESULT_OK) {
+      Toast.makeText(this, "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " not edited!",
+          Toast.LENGTH_SHORT).show();
     }
   }
 
