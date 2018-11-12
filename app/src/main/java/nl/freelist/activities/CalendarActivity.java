@@ -112,6 +112,12 @@ public class CalendarActivity extends AppCompatActivity {
         calendarViewModel.deleteAllEntries();
         Toast.makeText(this, "All entries deleted", Toast.LENGTH_SHORT).show();
         return true;
+      case R.id.settings:
+        Toast.makeText(this, "Settings selected", Toast.LENGTH_SHORT).show();
+        return true;
+      case R.id.undo:
+        Toast.makeText(this, "Undo selected", Toast.LENGTH_SHORT).show();
+        return true;
       default:
         return super.onOptionsItemSelected(item);
     }
