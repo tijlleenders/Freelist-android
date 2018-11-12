@@ -1,6 +1,5 @@
 package nl.freelist.activities;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.arch.lifecycle.Observer;
@@ -17,12 +16,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.NumberPicker;
 import android.widget.Toast;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import nl.freelist.constants.ActivityConstants;
+import nl.freelist.userInterfaceHelpers.NumberPickerDuration;
 import nl.freelist.viewModels.CalendarViewModel;
 import nl.freelist.database.Entry;
 import nl.freelist.freelist.R;
@@ -34,13 +33,13 @@ public class AddEditEntryActivity extends AppCompatActivity
   private EditText editTextTitle;
   private EditText editTextDescription;
   private EditText editTextDueDate;
-  private NumberPicker numberPickerDuration;
+  private NumberPickerDuration numberPickerDuration;
   private CalendarViewModel addEntryViewModel;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_add_entry);
+    setContentView(R.layout.activity_add_edit_entry);
 
     editTextTitle = findViewById(R.id.edit_text_title);
     editTextDescription = findViewById(R.id.edit_text_description);
@@ -61,7 +60,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) { //do edit setup
       editTextTitle.setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_TITLE));
       editTextDescription.setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_DESCRIPTION));
-      numberPickerDuration.setValue(getNumberPickerPosition(
+      numberPickerDuration.setValue(numberPickerDuration.getNumberPickerPosition(
           bundle.getString(ActivityConstants.EXTRA_ENTRY_FORMATTED_DURATION)));
       editTextDueDate
           .setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_FORMATTED_DATE, "01-01-2000"));
@@ -71,7 +70,7 @@ public class AddEditEntryActivity extends AppCompatActivity
       setTitle("Edit existing");
     } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_ADD)) { //do add setup
 
-      //get current date as default for due date
+      //get current date as default for due date todo: move to DateHelpers class
       final Calendar c = Calendar.getInstance();
 
       String currentDate = String.valueOf(c.get(Calendar.YEAR)) +
@@ -95,80 +94,11 @@ public class AddEditEntryActivity extends AppCompatActivity
     });
   }
 
-  private int getNumberPickerPosition(
-      String formattedDuration) { //todo: move to helper class or subclass numberpicker
-    int pickerPosition = 1;
-    switch (formattedDuration) {
-      case "5m":
-        pickerPosition = 1;
-        break;
-      case "15m":
-        pickerPosition = 2;
-        break;
-      case "45m":
-        pickerPosition = 3;
-        break;
-      case "2h":
-        pickerPosition = 4;
-        break;
-      case "4h":
-        pickerPosition = 5;
-        break;
-      case "8h":
-        pickerPosition = 6;
-        break;
-      case "12h":
-        pickerPosition = 7;
-        break;
-      case "24h":
-        pickerPosition = 8;
-        break;
-      default:
-        break;
-    }
-    return pickerPosition;
-  }
-
-  private int getNumberPicker(
-      int pickSelected) { //todo: move to helper class or subclass numberpicker
-    int seconds;
-    switch (pickSelected) {
-      case 1:
-        seconds = 300;
-        break;
-      case 2:
-        seconds = 900;
-        break;
-      case 3:
-        seconds = 2700;
-        break;
-      case 4:
-        seconds = 7200;
-        break;
-      case 5:
-        seconds = 14400;
-        break;
-      case 6:
-        seconds = 28800;
-        break;
-      case 7:
-        seconds = 43200;
-        break;
-      case 8:
-        seconds = 86400;
-        break;
-      default:
-        seconds = 540;
-        break;
-    }
-    return seconds;
-  }
-
   private void saveEntry() {
 
     String title = editTextTitle.getText().toString();
     String description = editTextDescription.getText().toString();
-    int duration = getNumberPicker(numberPickerDuration.getValue());
+    int duration = numberPickerDuration.getNumberPicker(numberPickerDuration.getValue()); //todo: replace by getDuration
     long date = DateHelpers.getDateFromString(editTextDueDate.getText().toString()).getTime();
     boolean isCompletedStatus = false;
 
@@ -177,25 +107,24 @@ public class AddEditEntryActivity extends AppCompatActivity
       return;
     }
 
-    Entry entry = new Entry(title, description, duration, date, isCompletedStatus);
-    // todo: make distinction between add or update entry
+    Entry entryToSave = new Entry(title, description, duration, date, isCompletedStatus);
 
+    Bundle bundle = getIntent().getExtras();
     //Intent.ACTION_* fields are String constant.
     //You cannot use switch with String until JDK 7 android use JDK 6 or 5 to compile. So you can't use that method on Android
     //So using if else if :(
-    Bundle bundle = getIntent().getExtras();
 
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) {
-      entry.setId((Integer) bundle.get(ActivityConstants.EXTRA_ENTRY_ID));
-      addEntryViewModel.update(entry);
-      Toast.makeText(this, "Existing entry updated!", Toast.LENGTH_SHORT).show();
-    } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) {
-      addEntryViewModel.insert(entry);
-      Toast.makeText(this, "New entry saved!", Toast.LENGTH_SHORT).show();
+      entryToSave.setId((Integer) bundle.get(ActivityConstants.EXTRA_ENTRY_ID));
+      addEntryViewModel.update(entryToSave);
+      Toast.makeText(this, "Existing entry updated!", Toast.LENGTH_LONG).show();
+    } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_ADD)) {
+      addEntryViewModel.insert(entryToSave);
+      Toast.makeText(this, "New entry saved!", Toast.LENGTH_LONG).show();
     }
 
     Intent data = new Intent();
-    // todo: make distinction between add or update entry
+    // todo: make distinction between add or update entry?
     data.putExtra(ActivityConstants.EXTRA_TITLE, title);
     setResult(RESULT_OK, data);
     finish();
