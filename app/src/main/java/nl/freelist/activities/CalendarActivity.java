@@ -38,7 +38,8 @@ public class CalendarActivity extends AppCompatActivity {
       @Override
       public void onClick(View v) {
         Intent intent = new Intent(CalendarActivity.this, AddEditEntryActivity.class);
-        intent.putExtra(ActivityConstants.EXTRA_REQUEST_TYPE_ADD, ActivityConstants.ADD_ENTRY_REQUEST);
+        intent.putExtra(ActivityConstants.EXTRA_REQUEST_TYPE_ADD,
+            ActivityConstants.ADD_ENTRY_REQUEST);
         startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
       }
     });
@@ -85,15 +86,18 @@ public class CalendarActivity extends AppCompatActivity {
     super.onActivityResult(requestCode, resultCode, data);
 
     if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
-      Toast.makeText(this, "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " saved!",
-          Toast.LENGTH_SHORT).show();
+      Toast
+          .makeText(this, "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " saved!",
+              Toast.LENGTH_SHORT).show();
     } else if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode != RESULT_OK) {
       Toast.makeText(this, "Entry not saved.", Toast.LENGTH_SHORT).show();
     } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode == RESULT_OK) {
-      Toast.makeText(this, "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " edited!",
+      Toast.makeText(this,
+          "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " edited!",
           Toast.LENGTH_SHORT).show();
     } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode != RESULT_OK) {
-      Toast.makeText(this, "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " not edited!",
+      Toast.makeText(this,
+          "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " not edited!",
           Toast.LENGTH_SHORT).show();
     }
   }
@@ -114,6 +118,8 @@ public class CalendarActivity extends AppCompatActivity {
         return true;
       case R.id.settings:
         Toast.makeText(this, "Settings selected", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(CalendarActivity.this, SettingsActivity.class);
+        startActivity(intent);
         return true;
       case R.id.undo:
         Toast.makeText(this, "Undo selected", Toast.LENGTH_SHORT).show();

@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -98,12 +99,20 @@ public class AddEditEntryActivity extends AppCompatActivity
 
     String title = editTextTitle.getText().toString();
     String description = editTextDescription.getText().toString();
-    int duration = numberPickerDuration.getNumberPicker(numberPickerDuration.getValue()); //todo: replace by getDuration
+    int duration = numberPickerDuration
+        .getNumberPicker(numberPickerDuration.getValue()); //todo: replace by getDuration
     long date = DateHelpers.getDateFromString(editTextDueDate.getText().toString()).getTime();
     boolean isCompletedStatus = false;
 
     if (title.trim().isEmpty() || description.trim().isEmpty()) {
-      Toast.makeText(this, "Please insert a title and description", Toast.LENGTH_SHORT).show();
+      boolean notificationBool = PreferenceManager.getDefaultSharedPreferences(this)
+          .getBoolean("notifications", false);
+      if (notificationBool) {
+        Toast.makeText(this, "setting true", Toast.LENGTH_SHORT).show();
+      } else {
+        Toast.makeText(this, "setting false", Toast.LENGTH_SHORT).show();
+      }
+      //Toast.makeText(this, "Please insert a title and description", Toast.LENGTH_SHORT).show();
       return;
     }
 

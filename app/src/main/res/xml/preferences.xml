@@ -1,0 +1,20 @@
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <SwitchPreferenceCompat
+    app:key="notifications"
+    app:title="Enable message notifications"/>
+
+  <Preference
+    app:key="feedback"
+    app:summary="Report technical issues or suggest new features"
+    app:title="Send feedback"/>
+
+  <CheckBoxPreference
+    android:key="pref_sync"
+    android:title="Sync?"
+    android:summary="Do u wanna sync?"
+    android:defaultValue="true"/>
+
+</PreferenceScreen>
