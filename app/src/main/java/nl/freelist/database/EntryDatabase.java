@@ -44,9 +44,9 @@ public abstract class EntryDatabase extends RoomDatabase {
 
     @Override
     protected Void doInBackground(Void... voids) {
-      entryDao.insert(new Entry("Title 1", "Description 1", 1, 1539456867, false));
-      entryDao.insert(new Entry("Title 2", "Description 2", 2, 1539456867, false));
-      entryDao.insert(new Entry("Title 3", "Description 3", 3, 1539456867, false));
+      entryDao.insert(new Entry("Title 1", "Description 1", 1, 1539456867, false, 0));
+      entryDao.insert(new Entry("Title 2", "Description 2", 2, 1539456867, false, 0));
+      entryDao.insert(new Entry("Title 3", "Description 3", 3, 1539456867, false, 0));
       return null;
     }
   }

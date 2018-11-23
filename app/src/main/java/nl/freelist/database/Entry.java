@@ -1,6 +1,7 @@
 package nl.freelist.database;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 import java.text.SimpleDateFormat;
@@ -12,14 +13,23 @@ public class Entry {
 
   @PrimaryKey(autoGenerate = true)
   private int id;
+  static final int DEFAULT_PARENT = 0;
+  private int parent;
   final private String title;
   final private String description;
   final private int duration;
   private long date;
   private boolean isCompletedStatus;
 
+  @Ignore
   public Entry(String title, String description, int duration, long date,
       boolean isCompletedStatus) {
+    this(title, description, duration, date, isCompletedStatus, DEFAULT_PARENT);
+  }
+
+  public Entry(String title, String description, int duration, long date,
+      boolean isCompletedStatus, int parent) {
+    this.parent = parent;
     this.title = title;
     this.description = description;
     this.duration = duration;
@@ -27,8 +37,17 @@ public class Entry {
     this.isCompletedStatus = isCompletedStatus;
   }
 
+
   public void setId(int id) {
     this.id = id;
+  }
+
+  public void setParent(int parent) {
+    this.parent = parent;
+  }
+
+  public int getParent() {
+    return parent;
   }
 
   public void setDate(long date) {
