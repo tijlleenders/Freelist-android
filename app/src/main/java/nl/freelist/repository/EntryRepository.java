@@ -2,6 +2,7 @@ package nl.freelist.repository;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Transformations;
 import android.os.AsyncTask;
 
 import java.util.List;
@@ -31,6 +32,23 @@ public class EntryRepository {
 
   public void insert(Entry entry) {
     new InsertEntryAsyncTask(entryDao).execute(entry);
+  }
+
+  public LiveData<ViewModelEntry> getViewModelEntry(int requestedEntryId) {
+    LiveData<Entry> entryToTransform = entryDao.getEntry(requestedEntryId);
+    LiveData<ViewModelEntry> viewModelEntry = Transformations.map(entryToTransform, entry -> {
+      int id = entry.getId();
+      int parentId = entry.getParent();
+      String parentTitle = entry.getTitle(); //Todo: implement getParentTitle
+      String title = entry.getTitle();
+      String description = entry.getDescription();
+      String duration = entry.getFormattedDuration();
+      String date = entry.getFormattedDate();
+      boolean isCompletedStatus = entry.getIsCompletedStatus();
+      return new ViewModelEntry(id, parentId, parentTitle, title, description, duration, date,
+          isCompletedStatus);
+    });
+    return viewModelEntry;
   }
 
   public void update(Entry entry) {

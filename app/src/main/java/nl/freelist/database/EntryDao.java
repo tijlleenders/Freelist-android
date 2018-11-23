@@ -27,4 +27,7 @@ public interface EntryDao {
   @Query("SELECT * FROM entry ORDER BY date ASC, duration DESC")
   LiveData<List<Entry>> getAllEntries();
 
+  @Query("SELECT * FROM entry WHERE id = :id")
+  LiveData<Entry> getEntry(int id);
+
 }

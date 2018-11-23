@@ -50,6 +50,7 @@ public class Entry {
     return parent;
   }
 
+
   public void setDate(long date) {
     this.date = date;
   }
@@ -105,7 +106,7 @@ public class Entry {
     return formatter.format(date);
   }
 
-  boolean getIsCompletedStatus() {
+  public boolean getIsCompletedStatus() {
     return isCompletedStatus;
   }
 }
