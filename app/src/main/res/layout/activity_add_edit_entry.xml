@@ -7,6 +7,12 @@
   android:orientation="vertical"
   tools:context="nl.freelist.activities.AddEditEntryActivity">
 
+  <Button
+    android:id="@+id/button_parent_change"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Parent Entry"/>
+
   <EditText
     android:id="@+id/edit_text_title"
     android:layout_width="match_parent"

@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -34,6 +35,7 @@ public class AddEditEntryActivity extends AppCompatActivity
   private EditText editTextTitle;
   private EditText editTextDescription;
   private EditText editTextDueDate;
+  private Button parentButton;
   private NumberPickerDuration numberPickerDuration;
   private CalendarViewModel addEntryViewModel;
 
@@ -46,6 +48,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     editTextDescription = findViewById(R.id.edit_text_description);
     numberPickerDuration = findViewById(R.id.number_picker_duration);
     editTextDueDate = findViewById(R.id.edit_due_date);
+    parentButton = findViewById(R.id.button_parent_change);
 
     numberPickerDuration.setMinValue(1);
     numberPickerDuration.setMaxValue(8); //todo: make configurable
@@ -59,6 +62,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     Bundle bundle = getIntent().getExtras();
 
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) { //do edit setup
+      parentButton.setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_PARENT_ID));
       editTextTitle.setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_TITLE));
       editTextDescription.setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_DESCRIPTION));
       numberPickerDuration.setValue(numberPickerDuration.getNumberPickerPosition(
@@ -83,7 +87,8 @@ public class AddEditEntryActivity extends AppCompatActivity
 
       getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
       setTitle("Add new");
-    }
+    } //Todo: Add else if (bundle.containsKey(ActivityConstants.EXTRA_PARENT_CHANGED_KEY)) {}
+
     editTextDueDate.setFocusable(false); // setting android:inputType="none" in XML is not enough
 
     addEntryViewModel = ViewModelProviders.of(this).get(CalendarViewModel.class);

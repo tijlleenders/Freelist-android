@@ -108,6 +108,8 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
                       position); // todo: make Entry parcelable (not serializable as this is heavy
               // on system) and pass whole entry to edit Activity
               intent.putExtra(ActivityConstants.EXTRA_ENTRY_ID, entry.getId());
+              intent.putExtra(ActivityConstants.EXTRA_ENTRY_PARENT_ID,
+                  Integer.toString(entry.getParent()));
               intent.putExtra(ActivityConstants.EXTRA_ENTRY_TITLE, entry.getTitle());
               intent.putExtra(ActivityConstants.EXTRA_ENTRY_DESCRIPTION, entry.getDescription());
               intent.putExtra(

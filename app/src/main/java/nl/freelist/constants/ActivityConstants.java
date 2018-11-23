@@ -6,6 +6,8 @@ public class ActivityConstants {
 
   public static final String EXTRA_ENTRY_ID = "nl.freelist.EXTRA_ENTRY_ID";
 
+  public static final String EXTRA_ENTRY_PARENT_ID = "nl.freelist.EXTRA_ENTRY_PARENT_ID";
+
   public static final String EXTRA_ENTRY_TITLE = "nl.freelist.EXTRA_ENTRY_TITLE";
 
   public static final String EXTRA_ENTRY_DESCRIPTION = "nl.freelist.EXTRA_ENTRY_DESCRIPTION";
