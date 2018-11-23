@@ -25,9 +25,35 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
   @NonNull
   @Override
   public EntryHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    View itemView = LayoutInflater.from(parent.getContext())
-        .inflate(R.layout.entry_item, parent, false);
-    return new EntryHolder(itemView);
+    if (viewType == ActivityConstants.PARENT_ENTRY_VIEW) {
+      View itemView =
+          LayoutInflater.from(parent.getContext())
+              .inflate(R.layout.entry_parent_item, parent, false);
+      return new EntryHolder(itemView);
+    } else if (viewType == ActivityConstants.MULTIPLE_ENTRY_VIEW) {
+      View itemView =
+          LayoutInflater.from(parent.getContext())
+              .inflate(R.layout.entry_multiple_item, parent, false);
+      return new EntryHolder(itemView);
+    } else {
+      View itemView =
+          LayoutInflater.from(parent.getContext())
+              .inflate(R.layout.entry_single_item, parent, false);
+      return new EntryHolder(itemView);
+    }
+  }
+
+  @Override
+  public int getItemViewType(int position) {
+    Entry entry = entries.get(position);
+    //Todo: get the itemType form Entry class
+    if (position == 0) {
+      return ActivityConstants.PARENT_ENTRY_VIEW;
+    } else if (position == 1) {
+      return ActivityConstants.MULTIPLE_ENTRY_VIEW;
+    } else {
+      return ActivityConstants.SINGLE_ENTRY_VIEW;
+    }
   }
 
   @Override
@@ -55,10 +81,10 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
 
   class EntryHolder extends RecyclerView.ViewHolder {
 
-    final private TextView textViewTitle;
-    final private TextView textViewDescription;
-    final private TextView textViewDuration;
-    final private TextView textViewDate;
+    private final TextView textViewTitle;
+    private final TextView textViewDescription;
+    private final TextView textViewDuration;
+    private final TextView textViewDate;
 
     EntryHolder(@NonNull View itemView) {
       super(itemView);
@@ -67,27 +93,32 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
       textViewDuration = itemView.findViewById(R.id.text_view_duration);
       textViewDate = itemView.findViewById(R.id.text_view_date);
 
-      itemView.setOnClickListener(new OnClickListener() {
-        @Override
-        public void onClick(View v) {
+      itemView.setOnClickListener(
+          new OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-          Intent intent = new Intent(v.getContext(), AddEditEntryActivity.class);
-          intent.putExtra(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT,
-              ActivityConstants.EDIT_ENTRY_REQUEST);
+              Intent intent = new Intent(v.getContext(), AddEditEntryActivity.class);
+              intent.putExtra(
+                  ActivityConstants.EXTRA_REQUEST_TYPE_EDIT, ActivityConstants.EDIT_ENTRY_REQUEST);
 
-          int position = getAdapterPosition();
-          Entry entry = getEntryAt(
-              position); //todo: make Entry parcelable (not serializable as this is heavy on system) and pass whole entry to edit Activity
-          intent.putExtra(ActivityConstants.EXTRA_ENTRY_ID, entry.getId());
-          intent.putExtra(ActivityConstants.EXTRA_ENTRY_TITLE, entry.getTitle());
-          intent.putExtra(ActivityConstants.EXTRA_ENTRY_DESCRIPTION, entry.getDescription());
-          intent.putExtra(ActivityConstants.EXTRA_ENTRY_FORMATTED_DATE, entry.getFormattedDate());
-          intent.putExtra(ActivityConstants.EXTRA_ENTRY_FORMATTED_DURATION, entry.getFormattedDuration());
+              int position = getAdapterPosition();
+              Entry entry =
+                  getEntryAt(
+                      position); // todo: make Entry parcelable (not serializable as this is heavy
+              // on system) and pass whole entry to edit Activity
+              intent.putExtra(ActivityConstants.EXTRA_ENTRY_ID, entry.getId());
+              intent.putExtra(ActivityConstants.EXTRA_ENTRY_TITLE, entry.getTitle());
+              intent.putExtra(ActivityConstants.EXTRA_ENTRY_DESCRIPTION, entry.getDescription());
+              intent.putExtra(
+                  ActivityConstants.EXTRA_ENTRY_FORMATTED_DATE, entry.getFormattedDate());
+              intent.putExtra(
+                  ActivityConstants.EXTRA_ENTRY_FORMATTED_DURATION, entry.getFormattedDuration());
 
-          ((Activity) v.getContext())
-              .startActivityForResult(intent, ActivityConstants.EDIT_ENTRY_REQUEST);
-        }
-      });
+              ((Activity) v.getContext())
+                  .startActivityForResult(intent, ActivityConstants.EDIT_ENTRY_REQUEST);
+            }
+          });
     }
   }
 }

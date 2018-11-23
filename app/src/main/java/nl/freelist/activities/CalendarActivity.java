@@ -34,15 +34,16 @@ public class CalendarActivity extends AppCompatActivity {
     setContentView(R.layout.activity_calendar);
 
     FloatingActionButton buttonAddEntry = findViewById(R.id.button_add_entry);
-    buttonAddEntry.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Intent intent = new Intent(CalendarActivity.this, AddEditEntryActivity.class);
-        intent.putExtra(ActivityConstants.EXTRA_REQUEST_TYPE_ADD,
-            ActivityConstants.ADD_ENTRY_REQUEST);
-        startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
-      }
-    });
+    buttonAddEntry.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            Intent intent = new Intent(CalendarActivity.this, AddEditEntryActivity.class);
+            intent.putExtra(
+                ActivityConstants.EXTRA_REQUEST_TYPE_ADD, ActivityConstants.ADD_ENTRY_REQUEST);
+            startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
+          }
+        });
 
     RecyclerView recyclerView = findViewById(R.id.recycler_view);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -52,33 +53,40 @@ public class CalendarActivity extends AppCompatActivity {
     recyclerView.setAdapter(adapter);
 
     calendarViewModel = ViewModelProviders.of(this).get(CalendarViewModel.class);
-    calendarViewModel.getAllEntries().observe(this, new Observer<List<Entry>>() {
-      @Override
-      public void onChanged(@Nullable List<Entry> entries) {
-        // update RecyclerView
-        adapter.setEntries(entries);
-        Toast.makeText(CalendarActivity.this, "calendarViewModel onChanged!", Toast.LENGTH_SHORT)
-            .show();
-      }
-    });
+    calendarViewModel
+        .getAllEntries()
+        .observe(
+            this,
+            new Observer<List<Entry>>() {
+              @Override
+              public void onChanged(@Nullable List<Entry> entries) {
+                // update RecyclerView
+                adapter.setEntries(entries);
+                Toast.makeText(
+                    CalendarActivity.this, "calendarViewModel onChanged!", Toast.LENGTH_SHORT)
+                    .show();
+              }
+            });
 
-    new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
-        ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-      @Override
-      public boolean onMove(@NonNull RecyclerView recyclerView,
-          @NonNull RecyclerView.ViewHolder viewHolder,
-          @NonNull RecyclerView.ViewHolder viewHolder1) {
-        // drag and drop functionality
-        return false;
-      }
+    new ItemTouchHelper(
+        new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+          @Override
+          public boolean onMove(
+              @NonNull RecyclerView recyclerView,
+              @NonNull RecyclerView.ViewHolder viewHolder,
+              @NonNull RecyclerView.ViewHolder viewHolder1) {
+            // drag and drop functionality
+            return false;
+          }
 
-      @Override
-      public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-        //viewHolder.getAdapterPosition() //where did we swipe?
-        calendarViewModel.delete(adapter.getEntryAt(viewHolder.getAdapterPosition()));
-        Toast.makeText(CalendarActivity.this, "Entry deleted", Toast.LENGTH_SHORT).show();
-      }
-    }).attachToRecyclerView(recyclerView);
+          @Override
+          public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+            // viewHolder.getAdapterPosition() //where did we swipe?
+            calendarViewModel.delete(adapter.getEntryAt(viewHolder.getAdapterPosition()));
+            Toast.makeText(CalendarActivity.this, "Entry deleted", Toast.LENGTH_SHORT).show();
+          }
+        })
+        .attachToRecyclerView(recyclerView);
   }
 
   @Override
@@ -86,19 +94,25 @@ public class CalendarActivity extends AppCompatActivity {
     super.onActivityResult(requestCode, resultCode, data);
 
     if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
-      Toast
-          .makeText(this, "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " saved!",
-              Toast.LENGTH_SHORT).show();
+      Toast.makeText(
+          this,
+          "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " saved!",
+          Toast.LENGTH_SHORT)
+          .show();
     } else if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode != RESULT_OK) {
       Toast.makeText(this, "Entry not saved.", Toast.LENGTH_SHORT).show();
     } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode == RESULT_OK) {
-      Toast.makeText(this,
+      Toast.makeText(
+          this,
           "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " edited!",
-          Toast.LENGTH_SHORT).show();
+          Toast.LENGTH_SHORT)
+          .show();
     } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode != RESULT_OK) {
-      Toast.makeText(this,
+      Toast.makeText(
+          this,
           "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " not edited!",
-          Toast.LENGTH_SHORT).show();
+          Toast.LENGTH_SHORT)
+          .show();
     }
   }
 
@@ -127,6 +141,5 @@ public class CalendarActivity extends AppCompatActivity {
       default:
         return super.onOptionsItemSelected(item);
     }
-
   }
 }
