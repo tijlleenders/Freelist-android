@@ -2,6 +2,7 @@ package nl.freelist.activities;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -21,7 +22,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import nl.freelist.constants.ActivityConstants;
 import nl.freelist.repository.ViewModelEntry;
 import nl.freelist.userInterfaceHelpers.NumberPickerDuration;
@@ -38,7 +38,7 @@ public class TestViewModelActivity extends AppCompatActivity
   private EditText editTextDueDate;
   private Button parentButton;
   private NumberPickerDuration numberPickerDuration;
-  private TestViewModelActivityViewModel addEntryViewModel;
+  private TestViewModelActivityViewModel testViewModelActivityViewModel;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +61,16 @@ public class TestViewModelActivity extends AppCompatActivity
     //You cannot use switch with String until JDK 7 android use JDK 6 or 5 to compile. So you can't use that method on Android
     //So using if else if :(
     Bundle bundle = getIntent().getExtras();
-
+    testViewModelActivityViewModel = ViewModelProviders.of(this)
+        .get(TestViewModelActivityViewModel.class);
+    testViewModelActivityViewModel.getViewModelEntry(1).observe(this,
+        new Observer<ViewModelEntry>() { //Todo: make returning viewModelEntry dynamic based on id
+          @Override
+          public void onChanged(@Nullable ViewModelEntry entry) {
+            // do nothing; just necessary for testViewModelActivityViewModel to load data
+            editTextTitle.setText(entry.getTitle());
+          }
+        });
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) { //do edit setup
       parentButton.setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_PARENT_ID));
       editTextTitle.setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_TITLE));
@@ -79,6 +88,9 @@ public class TestViewModelActivity extends AppCompatActivity
       //get current date as default for due date todo: move to DateHelpers class
       final Calendar c = Calendar.getInstance();
 
+      //get info from viewModel
+      //editTextTitle.setText(testViewModelActivityViewModel.getTitle());
+
       String currentDate = String.valueOf(c.get(Calendar.YEAR)) +
           "-" +
           (c.get(Calendar.MONTH) + 1) + //Android SDK says months are indexed starting at zero
@@ -92,13 +104,7 @@ public class TestViewModelActivity extends AppCompatActivity
 
     editTextDueDate.setFocusable(false); // setting android:inputType="none" in XML is not enough
 
-    addEntryViewModel = ViewModelProviders.of(this).get(TestViewModelActivityViewModel.class);
-    addEntryViewModel.getEntry().observe(this, new Observer<ViewModelEntry>() {
-      @Override
-      public void onChanged(@Nullable ViewModelEntry entry) {
-        // do nothing; just necessary for addEntryViewModel to load data
-      }
-    });
+
   }
 
   private void saveEntry() {
@@ -131,10 +137,10 @@ public class TestViewModelActivity extends AppCompatActivity
 
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) {
       entryToSave.setId((Integer) bundle.get(ActivityConstants.EXTRA_ENTRY_ID));
-      addEntryViewModel.update(entryToSave);
+//      testViewModelActivityViewModel.update(entryToSave);
       Toast.makeText(this, "Existing entry updated!", Toast.LENGTH_LONG).show();
     } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_ADD)) {
-      addEntryViewModel.insert(entryToSave);
+//      testViewModelActivityViewModel.insert(entryToSave);
       Toast.makeText(this, "New entry saved!", Toast.LENGTH_LONG).show();
     }
 

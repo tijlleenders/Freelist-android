@@ -5,6 +5,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Transformations;
 import android.os.AsyncTask;
 
+import android.view.View;
 import java.util.List;
 import nl.freelist.database.Entry;
 import nl.freelist.database.EntryDao;
@@ -35,19 +36,25 @@ public class EntryRepository {
   }
 
   public LiveData<ViewModelEntry> getViewModelEntry(int requestedEntryId) {
-    LiveData<Entry> entryToTransform = entryDao.getEntry(requestedEntryId);
-    LiveData<ViewModelEntry> viewModelEntry = Transformations.map(entryToTransform, entry -> {
-      int id = entry.getId();
-      int parentId = entry.getParent();
-      String parentTitle = entry.getTitle(); //Todo: implement getParentTitle
-      String title = entry.getTitle();
-      String description = entry.getDescription();
-      String duration = entry.getFormattedDuration();
-      String date = entry.getFormattedDate();
-      boolean isCompletedStatus = entry.getIsCompletedStatus();
-      return new ViewModelEntry(id, parentId, parentTitle, title, description, duration, date,
-          isCompletedStatus);
-    });
+    LiveData<Entry> entry = entryDao.getEntry(requestedEntryId);
+    LiveData<ViewModelEntry> viewModelEntry;
+    viewModelEntry =
+        Transformations.map(entry,
+            newData -> createViewModelEntryFromEntry(newData));
+    return viewModelEntry;
+  }
+
+  private ViewModelEntry createViewModelEntryFromEntry(Entry entry) {
+    int id = entry.getId();
+    int parentId = entry.getId(); //Todo: implement getParentId()
+    String parentTitle = entry.getTitle(); //Todo: implement getParentTitle
+    String title = entry.getTitle();
+    String description = entry.getDescription();
+    String duration = entry.getFormattedDuration();
+    String date = entry.getFormattedDate();
+    Boolean isCompletedStatus = entry.getIsCompletedStatus();
+    ViewModelEntry viewModelEntry = new ViewModelEntry(id, parentId, parentTitle, title,
+        description, duration, date, isCompletedStatus);
     return viewModelEntry;
   }
 
