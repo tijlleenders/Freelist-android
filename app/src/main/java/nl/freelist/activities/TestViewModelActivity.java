@@ -23,13 +23,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import nl.freelist.constants.ActivityConstants;
+import nl.freelist.repository.ViewModelEntry;
 import nl.freelist.userInterfaceHelpers.NumberPickerDuration;
-import nl.freelist.viewModels.CalendarActivityViewModel;
 import nl.freelist.database.Entry;
 import nl.freelist.freelist.R;
 import nl.freelist.userInterfaceHelpers.DateHelpers;
+import nl.freelist.viewModels.TestViewModelActivityViewModel;
 
-public class AddEditEntryActivity extends AppCompatActivity
+public class TestViewModelActivity extends AppCompatActivity
     implements DatePickerDialog.OnDateSetListener {
 
   private EditText editTextTitle;
@@ -37,12 +38,12 @@ public class AddEditEntryActivity extends AppCompatActivity
   private EditText editTextDueDate;
   private Button parentButton;
   private NumberPickerDuration numberPickerDuration;
-  private CalendarActivityViewModel addEntryViewModel;
+  private TestViewModelActivityViewModel addEntryViewModel;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_add_edit_entry);
+    setContentView(R.layout.activity_test_view_model);
 
     editTextTitle = findViewById(R.id.edit_text_title);
     editTextDescription = findViewById(R.id.edit_text_description);
@@ -91,10 +92,10 @@ public class AddEditEntryActivity extends AppCompatActivity
 
     editTextDueDate.setFocusable(false); // setting android:inputType="none" in XML is not enough
 
-    addEntryViewModel = ViewModelProviders.of(this).get(CalendarActivityViewModel.class);
-    addEntryViewModel.getAllEntries().observe(this, new Observer<List<Entry>>() {
+    addEntryViewModel = ViewModelProviders.of(this).get(TestViewModelActivityViewModel.class);
+    addEntryViewModel.getEntry().observe(this, new Observer<ViewModelEntry>() {
       @Override
-      public void onChanged(@Nullable List<Entry> entries) {
+      public void onChanged(@Nullable ViewModelEntry entry) {
         // do nothing; just necessary for addEntryViewModel to load data
       }
     });
@@ -184,7 +185,7 @@ public class AddEditEntryActivity extends AppCompatActivity
       Calendar c = Calendar.getInstance();
 
       // Parse content of EditText to start datePicker with the date in the EditText - if possible
-      String editTextDateString = ((AddEditEntryActivity) getActivity()).editTextDueDate.getText()
+      String editTextDateString = ((TestViewModelActivity) getActivity()).editTextDueDate.getText()
           .toString();
       Date convertedDate = DateHelpers.getDateFromString(editTextDateString);
       c.setTime(convertedDate);

@@ -1,6 +1,5 @@
 package nl.freelist.activities;
 
-import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -20,13 +19,13 @@ import android.widget.Toast;
 import java.util.List;
 import nl.freelist.freelist.R;
 import nl.freelist.userInterfaceHelpers.EntryAdapter;
-import nl.freelist.viewModels.CalendarViewModel;
+import nl.freelist.viewModels.CalendarActivityViewModel;
 import nl.freelist.database.Entry;
 import nl.freelist.constants.ActivityConstants;
 
 public class CalendarActivity extends AppCompatActivity {
 
-  private CalendarViewModel calendarViewModel;
+  private CalendarActivityViewModel calendarActivityViewModel;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +37,7 @@ public class CalendarActivity extends AppCompatActivity {
         new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            Intent intent = new Intent(CalendarActivity.this, AddEditEntryActivity.class);
+            Intent intent = new Intent(CalendarActivity.this, TestViewModelActivity.class);
             intent.putExtra(
                 ActivityConstants.EXTRA_REQUEST_TYPE_ADD, ActivityConstants.ADD_ENTRY_REQUEST);
             startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
@@ -52,8 +51,8 @@ public class CalendarActivity extends AppCompatActivity {
     final EntryAdapter adapter = new EntryAdapter();
     recyclerView.setAdapter(adapter);
 
-    calendarViewModel = ViewModelProviders.of(this).get(CalendarViewModel.class);
-    calendarViewModel
+    calendarActivityViewModel = ViewModelProviders.of(this).get(CalendarActivityViewModel.class);
+    calendarActivityViewModel
         .getAllEntries()
         .observe(
             this,
@@ -63,7 +62,8 @@ public class CalendarActivity extends AppCompatActivity {
                 // update RecyclerView
                 adapter.setEntries(entries);
                 Toast.makeText(
-                    CalendarActivity.this, "calendarViewModel onChanged!", Toast.LENGTH_SHORT)
+                    CalendarActivity.this, "calendarActivityViewModel onChanged!",
+                    Toast.LENGTH_SHORT)
                     .show();
               }
             });
@@ -82,7 +82,7 @@ public class CalendarActivity extends AppCompatActivity {
           @Override
           public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
             // viewHolder.getAdapterPosition() //where did we swipe?
-            calendarViewModel.delete(adapter.getEntryAt(viewHolder.getAdapterPosition()));
+            calendarActivityViewModel.delete(adapter.getEntryAt(viewHolder.getAdapterPosition()));
             Toast.makeText(CalendarActivity.this, "Entry deleted", Toast.LENGTH_SHORT).show();
           }
         })
@@ -127,7 +127,7 @@ public class CalendarActivity extends AppCompatActivity {
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.delete_all_entries:
-        calendarViewModel.deleteAllEntries();
+        calendarActivityViewModel.deleteAllEntries();
         Toast.makeText(this, "All entries deleted", Toast.LENGTH_SHORT).show();
         return true;
       case R.id.settings:

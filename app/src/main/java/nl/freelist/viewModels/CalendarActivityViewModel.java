@@ -8,17 +8,17 @@ import android.support.annotation.NonNull;
 import java.util.List;
 import nl.freelist.database.Entry;
 import nl.freelist.repository.EntryRepository;
-import nl.freelist.repository.ViewModelEntry;
 
-public class EntryViewModel extends AndroidViewModel {
+public class CalendarActivityViewModel extends AndroidViewModel {
 
   final private EntryRepository repository;
-  final private LiveData<ViewModelEntry> entry;
+  final private LiveData<List<Entry>> allEntries;
 
-  public EntryViewModel(@NonNull Application application) {
+  public CalendarActivityViewModel(@NonNull Application application) {
     super(application);
+    //repository = new EntryRepository(application);
     repository = EntryRepository.getInstance(application);
-    entry = repository.getViewModelEntry(1);
+    allEntries = repository.getAllEntries();
   }
 
   public void insert(Entry entry) {
@@ -33,5 +33,12 @@ public class EntryViewModel extends AndroidViewModel {
     repository.delete(entry);
   }
 
-}
+  public void deleteAllEntries() {
+    repository.deleteAllEntries();
+  }
 
+  public LiveData<List<Entry>> getAllEntries() {
+    return allEntries;
+  }
+
+}
