@@ -16,7 +16,7 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
 
   public AddEditEntryActivityViewModel(@NonNull Application application) {
     super(application);
-    repository = EntryRepository.getInstance(application);
+    repository = new EntryRepository(application);
   }
 
   public LiveData<ViewModelEntry> getViewModelEntry(int id) {

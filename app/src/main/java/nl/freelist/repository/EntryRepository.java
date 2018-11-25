@@ -18,19 +18,9 @@ public class EntryRepository {
   private final EntryDao entryDao;
   private LiveData<List<Entry>> allEntries;
 
-  private static EntryRepository instance;
-
-  private EntryRepository(Application application) {
+  public EntryRepository(Application application) {
     EntryDatabase database = EntryDatabase.getInstance(application);
     entryDao = database.entryDao();
-    allEntries = entryDao.getAllEntries();
-  }
-
-  public static synchronized EntryRepository getInstance(Application application) {
-    if (instance == null) {
-      instance = new EntryRepository(application);
-    }
-    return instance;
   }
 
   private Entry makeEntryFromViewModelEntry(ViewModelEntry viewModelEntry) {
@@ -61,6 +51,7 @@ public class EntryRepository {
 
   public LiveData<List<ViewModelEntry>> getAllEntries() {
     LiveData<List<ViewModelEntry>> allViewModelEntries;
+    allEntries = entryDao.getAllEntries();
     allViewModelEntries = Transformations.map(allEntries,
         entryList -> createViewModelEntryListFromEntryList(entryList));
     return allViewModelEntries;

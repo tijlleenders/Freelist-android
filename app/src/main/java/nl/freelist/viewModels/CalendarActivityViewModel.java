@@ -3,7 +3,6 @@ package nl.freelist.viewModels;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 
 import java.util.List;
@@ -17,8 +16,7 @@ public class CalendarActivityViewModel extends AndroidViewModel {
 
   public CalendarActivityViewModel(@NonNull Application application) {
     super(application);
-    //repository = new EntryRepository(application);
-    repository = EntryRepository.getInstance(application);
+    repository = new EntryRepository(application);
     allEntries = repository.getAllEntries();
   }
 
