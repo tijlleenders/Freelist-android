@@ -1,4 +1,4 @@
-package nl.freelist.nl.freelist.crossCuttingConcerns;
+package nl.freelist.crossCuttingConcerns;
 
 public class DurationHelper {
 

@@ -1,4 +1,4 @@
-package nl.freelist.nl.freelist.crossCuttingConcerns;
+package nl.freelist.crossCuttingConcerns;
 
 import java.text.DateFormat;
 import java.text.ParseException;

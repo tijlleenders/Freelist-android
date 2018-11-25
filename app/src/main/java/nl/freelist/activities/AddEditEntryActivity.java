@@ -22,7 +22,7 @@ import android.widget.Toast;
 import java.util.Calendar;
 import java.util.Date;
 import nl.freelist.constants.ActivityConstants;
-import nl.freelist.nl.freelist.crossCuttingConcerns.DateHelper;
+import nl.freelist.crossCuttingConcerns.DateHelper;
 import nl.freelist.repository.ViewModelEntry;
 import nl.freelist.userInterfaceHelpers.NumberPickerDuration;
 import nl.freelist.freelist.R;

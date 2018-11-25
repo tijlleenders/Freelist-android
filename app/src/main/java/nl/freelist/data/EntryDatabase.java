@@ -1,4 +1,4 @@
-package nl.freelist.database;
+package nl.freelist.data;
 
 import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Database;

@@ -6,13 +6,12 @@ import android.arch.lifecycle.Transformations;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import nl.freelist.database.Entry;
-import nl.freelist.nl.freelist.crossCuttingConcerns.DateHelper;
-import nl.freelist.nl.freelist.crossCuttingConcerns.DurationHelper;
-import nl.freelist.database.EntryDao;
-import nl.freelist.database.EntryDatabase;
+import nl.freelist.data.Entry;
+import nl.freelist.crossCuttingConcerns.DateHelper;
+import nl.freelist.crossCuttingConcerns.DurationHelper;
+import nl.freelist.data.EntryDao;
+import nl.freelist.data.EntryDatabase;
 
 public class EntryRepository {
 
