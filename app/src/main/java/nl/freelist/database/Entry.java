@@ -14,17 +14,24 @@ public class Entry {
   @PrimaryKey(autoGenerate = true)
   private int id;
   static final int DEFAULT_PARENT = 0;
-  private int parent;
   final private String title;
   final private String description;
   final private int duration;
   private long date;
   private boolean isCompletedStatus;
+  private int parent;
 
   @Ignore
   public Entry(String title, String description, int duration, long date,
       boolean isCompletedStatus) {
     this(title, description, duration, date, isCompletedStatus, DEFAULT_PARENT);
+  }
+
+  @Ignore
+  public Entry(int id, String title, String description, int duration, long date,
+      boolean isCompletedStatus, int parent) {
+    this(title, description, duration, date, isCompletedStatus, parent);
+    this.setId(id);
   }
 
   public Entry(String title, String description, int duration, long date,

@@ -20,7 +20,7 @@ import java.util.List;
 import nl.freelist.freelist.R;
 import nl.freelist.userInterfaceHelpers.EntryAdapter;
 import nl.freelist.viewModels.CalendarActivityViewModel;
-import nl.freelist.database.Entry;
+import nl.freelist.repository.ViewModelEntry;
 import nl.freelist.constants.ActivityConstants;
 
 public class CalendarActivity extends AppCompatActivity {
@@ -37,7 +37,7 @@ public class CalendarActivity extends AppCompatActivity {
         new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            Intent intent = new Intent(CalendarActivity.this, TestViewModelActivity.class);
+            Intent intent = new Intent(CalendarActivity.this, AddEditEntryActivity.class);
             intent.putExtra(
                 ActivityConstants.EXTRA_REQUEST_TYPE_ADD, ActivityConstants.ADD_ENTRY_REQUEST);
             startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
@@ -56,9 +56,9 @@ public class CalendarActivity extends AppCompatActivity {
         .getAllEntries()
         .observe(
             this,
-            new Observer<List<Entry>>() {
+            new Observer<List<ViewModelEntry>>() {
               @Override
-              public void onChanged(@Nullable List<Entry> entries) {
+              public void onChanged(@Nullable List<ViewModelEntry> entries) {
                 // update RecyclerView
                 adapter.setEntries(entries);
                 Toast.makeText(

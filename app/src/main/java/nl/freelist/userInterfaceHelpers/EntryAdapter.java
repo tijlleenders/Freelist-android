@@ -2,7 +2,6 @@ package nl.freelist.userInterfaceHelpers;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,12 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.activities.AddEditEntryActivity;
 import nl.freelist.constants.ActivityConstants;
-import nl.freelist.database.Entry;
+import nl.freelist.repository.ViewModelEntry;
 import nl.freelist.freelist.R;
 
 public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder> {
 
-  private List<Entry> entries = new ArrayList<>();
+  private List<ViewModelEntry> entries = new ArrayList<>();
 
   @NonNull
   @Override
@@ -45,7 +44,7 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
 
   @Override
   public int getItemViewType(int position) {
-    Entry entry = entries.get(position);
+    ViewModelEntry entry = entries.get(position);
     //Todo: get the itemType form Entry class
     if (position == 0) {
       return ActivityConstants.PARENT_ENTRY_VIEW;
@@ -58,11 +57,11 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
 
   @Override
   public void onBindViewHolder(@NonNull EntryHolder entryHolder, int position) {
-    Entry currentEntry = entries.get(position);
+    ViewModelEntry currentEntry = entries.get(position);
     entryHolder.textViewTitle.setText(currentEntry.getTitle());
     entryHolder.textViewDescription.setText(currentEntry.getDescription());
-    entryHolder.textViewDuration.setText(currentEntry.getFormattedDuration());
-    entryHolder.textViewDate.setText(currentEntry.getFormattedDate());
+    entryHolder.textViewDuration.setText(currentEntry.getDuration());
+    entryHolder.textViewDate.setText(currentEntry.getDate());
   }
 
   @Override
@@ -70,12 +69,12 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
     return entries.size();
   }
 
-  public void setEntries(List<Entry> entries) {
+  public void setEntries(List<ViewModelEntry> entries) {
     this.entries = entries;
     notifyDataSetChanged(); // change later for onInsert onDelete (not efficient and no animations)
   }
 
-  public Entry getEntryAt(int position) {
+  public ViewModelEntry getEntryAt(int position) {
     return entries.get(position);
   }
 
@@ -103,20 +102,12 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
                   ActivityConstants.EXTRA_REQUEST_TYPE_EDIT, ActivityConstants.EDIT_ENTRY_REQUEST);
 
               int position = getAdapterPosition();
-              Entry entry =
+              ViewModelEntry entry =
                   getEntryAt(
-                      position); // todo: make Entry parcelable (not serializable as this is heavy
-              // on system) and pass whole entry to edit Activity
-              intent.putExtra(ActivityConstants.EXTRA_ENTRY_ID, entry.getId());
-              intent.putExtra(ActivityConstants.EXTRA_ENTRY_PARENT_ID,
-                  Integer.toString(entry.getParent()));
-              intent.putExtra(ActivityConstants.EXTRA_ENTRY_TITLE, entry.getTitle());
-              intent.putExtra(ActivityConstants.EXTRA_ENTRY_DESCRIPTION, entry.getDescription());
-              intent.putExtra(
-                  ActivityConstants.EXTRA_ENTRY_FORMATTED_DATE, entry.getFormattedDate());
-              intent.putExtra(
-                  ActivityConstants.EXTRA_ENTRY_FORMATTED_DURATION, entry.getFormattedDuration());
-
+                      position); // Not_to_do: make Entry parcelable (not serializable as this is heavy
+              // on system) and pass whole entry to edit Activity.
+              // Actually, decided only to pass the ID and then construct a ViewModel in the other activity based on this ID
+              intent.putExtra(ActivityConstants.EXTRA_ENTRY_ID, Integer.toString(entry.getId()));
               ((Activity) v.getContext())
                   .startActivityForResult(intent, ActivityConstants.EDIT_ENTRY_REQUEST);
             }

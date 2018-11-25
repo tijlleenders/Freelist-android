@@ -9,20 +9,21 @@ import android.view.View;
 import nl.freelist.repository.EntryRepository;
 import nl.freelist.repository.ViewModelEntry;
 
-public class TestViewModelActivityViewModel extends AndroidViewModel {
+public class AddEditEntryActivityViewModel extends AndroidViewModel {
 
   final private EntryRepository repository;
   private LiveData<ViewModelEntry> viewModelEntry;
 
-  public TestViewModelActivityViewModel(@NonNull Application application) {
+  public AddEditEntryActivityViewModel(@NonNull Application application) {
     super(application);
     repository = EntryRepository.getInstance(application);
-    viewModelEntry = repository.getViewModelEntry(1);
   }
 
   public LiveData<ViewModelEntry> getViewModelEntry(int id) {
     viewModelEntry = repository.getViewModelEntry(id);
     return viewModelEntry;
   }
+
+  //Todo: set save method
 
 }

@@ -21,13 +21,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import nl.freelist.constants.ActivityConstants;
+import nl.freelist.nl.freelist.crossCuttingConcerns.DateHelper;
+import nl.freelist.repository.ViewModelEntry;
 import nl.freelist.userInterfaceHelpers.NumberPickerDuration;
-import nl.freelist.viewModels.CalendarActivityViewModel;
-import nl.freelist.database.Entry;
 import nl.freelist.freelist.R;
-import nl.freelist.userInterfaceHelpers.DateHelpers;
 
 public class AddEditEntryActivity extends AppCompatActivity
     implements DatePickerDialog.OnDateSetListener {
@@ -37,7 +35,7 @@ public class AddEditEntryActivity extends AppCompatActivity
   private EditText editTextDueDate;
   private Button parentButton;
   private NumberPickerDuration numberPickerDuration;
-  private CalendarActivityViewModel addEntryViewModel;
+  private nl.freelist.viewModels.AddEditEntryActivityViewModel AddEditEntryActivityViewModel;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -51,89 +49,102 @@ public class AddEditEntryActivity extends AppCompatActivity
     parentButton = findViewById(R.id.button_parent_change);
 
     numberPickerDuration.setMinValue(1);
-    numberPickerDuration.setMaxValue(8); //todo: make configurable
-    numberPickerDuration
-        .setDisplayedValues(new String[]{"5m", "15m", "45m", "2h", "4h", "8h", "12h",
-            "24h"}); //todo: make configurable, ie make custom subclass with functions to set with string or duration int?
+    numberPickerDuration.setMaxValue(8); // todo: make configurable
+    numberPickerDuration.setDisplayedValues(
+        new String[]{
+            "5m", "15m", "45m", "2h", "4h", "8h", "12h", "24h"
+        }); // todo: make configurable, ie make custom subclass with functions to set with string or
+    // duration int?
 
-    //Intent.ACTION_* fields are String constant.
-    //You cannot use switch with String until JDK 7 android use JDK 6 or 5 to compile. So you can't use that method on Android
-    //So using if else if :(
+    // Intent.ACTION_* fields are String constant.
+    // You cannot use switch with String until JDK 7 android use JDK 6 or 5 to compile. So you can't
+    // use that method on Android
+    // So using if else if :(
     Bundle bundle = getIntent().getExtras();
 
-    if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) { //do edit setup
-      parentButton.setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_PARENT_ID));
-      editTextTitle.setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_TITLE));
-      editTextDescription.setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_DESCRIPTION));
-      numberPickerDuration.setValue(numberPickerDuration.getNumberPickerPosition(
-          bundle.getString(ActivityConstants.EXTRA_ENTRY_FORMATTED_DURATION)));
-      editTextDueDate
-          .setText(bundle.getString(ActivityConstants.EXTRA_ENTRY_FORMATTED_DATE, "01-01-2000"));
-
+    if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
+      AddEditEntryActivityViewModel =
+          ViewModelProviders.of(this)
+              .get(nl.freelist.viewModels.AddEditEntryActivityViewModel.class);
+      String id = bundle.getString(ActivityConstants.EXTRA_ENTRY_ID);
+      AddEditEntryActivityViewModel
+          .getViewModelEntry(Integer.valueOf(id))
+          .observe(
+              this,
+              new Observer<
+                  ViewModelEntry>() { // Todo: make returning viewModelEntry dynamic based on id
+                @Override
+                public void onChanged(@Nullable ViewModelEntry entry) {
+                  // do nothing; just necessary for AddEditEntryActivityViewModel to load data
+                  editTextTitle.setText(entry.getTitle());
+                  editTextDescription.setText(entry.getDescription());
+                  numberPickerDuration.setValue(
+                      numberPickerDuration.getNumberPickerPosition(entry.getDuration()));
+                  editTextDueDate.setText(entry.getDate());
+                  parentButton.setText(entry.getParentTitle());
+                }
+              });
       getSupportActionBar()
-          .setHomeAsUpIndicator(R.drawable.ic_close); //todo: move outside of if else if?
+          .setHomeAsUpIndicator(R.drawable.ic_close); // todo: move outside of if else if?
       setTitle("Edit existing");
-    } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_ADD)) { //do add setup
-
-      //get current date as default for due date todo: move to DateHelpers class
+    } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_ADD)) { // do add setup
+      // get current date as default for due date todo: move to DateHelper class
       final Calendar c = Calendar.getInstance();
 
-      String currentDate = String.valueOf(c.get(Calendar.YEAR)) +
-          "-" +
-          (c.get(Calendar.MONTH) + 1) + //Android SDK says months are indexed starting at zero
-          "-" +
-          c.get(Calendar.DAY_OF_MONTH);
+      String currentDate =
+          String.valueOf(c.get(Calendar.YEAR))
+              + "-"
+              + (c.get(Calendar.MONTH) + 1)
+              + // Android SDK says months are indexed starting at zero
+              "-"
+              + c.get(Calendar.DAY_OF_MONTH);
       editTextDueDate.setText(currentDate);
 
       getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
       setTitle("Add new");
-    } //Todo: Add else if (bundle.containsKey(ActivityConstants.EXTRA_PARENT_CHANGED_KEY)) {}
+    } // Todo: Add else if (bundle.containsKey(ActivityConstants.EXTRA_PARENT_CHANGED_KEY)) {}
 
     editTextDueDate.setFocusable(false); // setting android:inputType="none" in XML is not enough
-
-    addEntryViewModel = ViewModelProviders.of(this).get(CalendarActivityViewModel.class);
-    addEntryViewModel.getAllEntries().observe(this, new Observer<List<Entry>>() {
-      @Override
-      public void onChanged(@Nullable List<Entry> entries) {
-        // do nothing; just necessary for addEntryViewModel to load data
-      }
-    });
   }
 
   private void saveEntry() {
-
+    int id = ActivityConstants.VIEWMODEL_ENTRY_ID_NOT_SET;
+    int parentId = 0; //Todo: replace with current ID from parent button value
+    String parentTitle = "parentTitle"; //Todo: replace with current ID from parent button value
     String title = editTextTitle.getText().toString();
     String description = editTextDescription.getText().toString();
-    int duration = numberPickerDuration
-        .getNumberPicker(numberPickerDuration.getValue()); //todo: replace by getDuration
-    long date = DateHelpers.getDateFromString(editTextDueDate.getText().toString()).getTime();
+    String duration = "5m"; //Todo: implement setNumberPicker and getNumberPicker based on string value only (abstract the rest) and get current value from numberPickerDuration
+    String date = editTextDueDate.getText().toString();
     boolean isCompletedStatus = false;
 
     if (title.trim().isEmpty() || description.trim().isEmpty()) {
-      boolean notificationBool = PreferenceManager.getDefaultSharedPreferences(this)
-          .getBoolean("notifications", false);
+      boolean notificationBool =
+          PreferenceManager.getDefaultSharedPreferences(this).getBoolean("notifications", false);
       if (notificationBool) {
         Toast.makeText(this, "setting true", Toast.LENGTH_SHORT).show();
       } else {
         Toast.makeText(this, "setting false", Toast.LENGTH_SHORT).show();
       }
-      //Toast.makeText(this, "Please insert a title and description", Toast.LENGTH_SHORT).show();
+      // Toast.makeText(this, "Please insert a title and description", Toast.LENGTH_SHORT).show();
       return;
     }
 
-    Entry entryToSave = new Entry(title, description, duration, date, isCompletedStatus);
+    ViewModelEntry entryToSave =
+        new ViewModelEntry(
+            id, parentId, parentTitle, title, description, duration, date, isCompletedStatus);
 
     Bundle bundle = getIntent().getExtras();
-    //Intent.ACTION_* fields are String constant.
-    //You cannot use switch with String until JDK 7 android use JDK 6 or 5 to compile. So you can't use that method on Android
-    //So using if else if :(
+    // Intent.ACTION_* fields are String constant.
+    // You cannot use switch with String until JDK 7 android use JDK 6 or 5 to compile. So you can't
+    // use that method on Android
+    // So using if else if :(
 
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) {
       entryToSave.setId((Integer) bundle.get(ActivityConstants.EXTRA_ENTRY_ID));
-      addEntryViewModel.update(entryToSave);
+      //      AddEditEntryActivityViewModel.update(entryToSave);
       Toast.makeText(this, "Existing entry updated!", Toast.LENGTH_LONG).show();
     } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_ADD)) {
-      addEntryViewModel.insert(entryToSave);
+      //      AddEditEntryActivityViewModel.insert(entryToSave);
       Toast.makeText(this, "New entry saved!", Toast.LENGTH_LONG).show();
     }
 
@@ -170,7 +181,7 @@ public class AddEditEntryActivity extends AppCompatActivity
   @Override
   public void onDateSet(DatePicker view, int year, int month, int day) {
     // Do something with the date chosen by the user
-    month += 1; //Android SDK says months are indexed starting at zero
+    month += 1; // Android SDK says months are indexed starting at zero
     String toShow = String.valueOf(year) + "-" + String.valueOf(month) + "-" + String.valueOf(day);
     editTextDueDate.setText(toShow);
   }
@@ -184,19 +195,17 @@ public class AddEditEntryActivity extends AppCompatActivity
       Calendar c = Calendar.getInstance();
 
       // Parse content of EditText to start datePicker with the date in the EditText - if possible
-      String editTextDateString = ((AddEditEntryActivity) getActivity()).editTextDueDate.getText()
-          .toString();
-      Date convertedDate = DateHelpers.getDateFromString(editTextDateString);
+      String editTextDateString =
+          ((AddEditEntryActivity) getActivity()).editTextDueDate.getText().toString();
+      Date convertedDate = DateHelper.getDateFromString(editTextDateString);
       c.setTime(convertedDate);
       int year = c.get(Calendar.YEAR);
       int month = c.get(Calendar.MONTH);
       int day = c.get(Calendar.DAY_OF_MONTH);
 
       // Create a new instance of DatePickerDialog and return it
-      return new DatePickerDialog(getActivity(), (DatePickerDialog.OnDateSetListener) getActivity(),
-          year, month, day);
+      return new DatePickerDialog(
+          getActivity(), (DatePickerDialog.OnDateSetListener) getActivity(), year, month, day);
     }
-
   }
-
 }

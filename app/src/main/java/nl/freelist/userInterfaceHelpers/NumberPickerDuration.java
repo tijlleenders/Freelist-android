@@ -52,10 +52,12 @@ public class NumberPickerDuration extends NumberPicker {
         pickerPosition = 8;
         break;
       default:
+        pickerPosition = 1; //Todo: what if user can customize their durations, then available choices on numberpicker will not match values from repository...
         break;
     }
     return pickerPosition;
   }
+
 
   public int getNumberPicker(
       int pickSelected) {

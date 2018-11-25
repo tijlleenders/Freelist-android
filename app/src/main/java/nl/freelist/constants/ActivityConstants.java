@@ -32,4 +32,7 @@ public class ActivityConstants {
   public static final int SINGLE_ENTRY_VIEW = 0;
   public static final int MULTIPLE_ENTRY_VIEW = 1;
   public static final int PARENT_ENTRY_VIEW = 2;
+
+  public static final int VIEWMODEL_ENTRY_ID_NOT_SET = 0;
+
 }

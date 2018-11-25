@@ -5,9 +5,12 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Transformations;
 import android.os.AsyncTask;
 
-import android.view.View;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import nl.freelist.database.Entry;
+import nl.freelist.nl.freelist.crossCuttingConcerns.DateHelper;
+import nl.freelist.nl.freelist.crossCuttingConcerns.DurationHelper;
 import nl.freelist.database.EntryDao;
 import nl.freelist.database.EntryDatabase;
 
@@ -31,7 +34,20 @@ public class EntryRepository {
     return instance;
   }
 
-  public void insert(Entry entry) {
+  private Entry makeEntryFromViewModelEntry(ViewModelEntry viewModelEntry) {
+    int id = viewModelEntry.getId();
+    String title = viewModelEntry.getTitle();
+    String description = viewModelEntry.getDescription();
+    int duration = DurationHelper.getDurationLongFromString(viewModelEntry.getDuration());
+    long date = DateHelper.getLongFromString(viewModelEntry.getDate());
+    boolean isCompletedStatus = viewModelEntry.getIsCompletedStatus();
+    int parentId = viewModelEntry.getParentId();
+    Entry entry = new Entry(id, title, description, duration, date, isCompletedStatus, parentId);
+    return entry;
+  }
+
+  public void insert(ViewModelEntry viewModelEntry) {
+    Entry entry = makeEntryFromViewModelEntry(viewModelEntry);
     new InsertEntryAsyncTask(entryDao).execute(entry);
   }
 
@@ -42,6 +58,23 @@ public class EntryRepository {
         Transformations.map(entry,
             newData -> createViewModelEntryFromEntry(newData));
     return viewModelEntry;
+  }
+
+  public LiveData<List<ViewModelEntry>> getAllEntries() {
+    LiveData<List<ViewModelEntry>> allViewModelEntries;
+    allViewModelEntries = Transformations.map(allEntries,
+        entryList -> createViewModelEntryListFromEntryList(entryList));
+    return allViewModelEntries;
+  }
+
+  private List<ViewModelEntry> createViewModelEntryListFromEntryList(List<Entry> entryList) {
+    List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
+    ViewModelEntry viewModelEntry;
+    for (Entry entry : entryList) {
+      viewModelEntry = createViewModelEntryFromEntry(entry);
+      allViewModelEntries.add(viewModelEntry);
+    }
+    return allViewModelEntries;
   }
 
   private ViewModelEntry createViewModelEntryFromEntry(Entry entry) {
@@ -58,20 +91,18 @@ public class EntryRepository {
     return viewModelEntry;
   }
 
-  public void update(Entry entry) {
+  public void update(ViewModelEntry viewModelEntry) {
+    Entry entry = makeEntryFromViewModelEntry(viewModelEntry);
     new UpdateEntryAsyncTask(entryDao).execute(entry);
   }
 
-  public void delete(Entry entry) {
+  public void delete(ViewModelEntry viewModelEntry) {
+    Entry entry = makeEntryFromViewModelEntry(viewModelEntry);
     new DeleteEntryAsyncTask(entryDao).execute(entry);
   }
 
   public void deleteAllEntries() {
     new DeleteAllEntriesAsyncTask(entryDao).execute();
-  }
-
-  public LiveData<List<Entry>> getAllEntries() {
-    return allEntries;
   }
 
   private static class InsertEntryAsyncTask extends AsyncTask<Entry, Void, Void> {
