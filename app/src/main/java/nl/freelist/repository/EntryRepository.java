@@ -13,7 +13,7 @@ import nl.freelist.crossCuttingConcerns.DurationHelper;
 import nl.freelist.data.EntryDao;
 import nl.freelist.data.EntryDatabase;
 
-public class EntryRepository {
+public class EntryRepository implements Repository<ViewModelEntry> {
 
   private final EntryDao entryDao;
   private LiveData<List<Entry>> allEntries;
@@ -33,11 +33,6 @@ public class EntryRepository {
     int parentId = viewModelEntry.getParentId();
     Entry entry = new Entry(id, title, description, duration, date, isCompletedStatus, parentId);
     return entry;
-  }
-
-  public void insert(ViewModelEntry viewModelEntry) {
-    Entry entry = makeEntryFromViewModelEntry(viewModelEntry);
-    new InsertEntryAsyncTask(entryDao).execute(entry);
   }
 
   public LiveData<ViewModelEntry> getViewModelEntry(int requestedEntryId) {
@@ -81,14 +76,38 @@ public class EntryRepository {
     return viewModelEntry;
   }
 
+  @Override
+  public void insert(ViewModelEntry viewModelEntry) {
+    Entry entry = makeEntryFromViewModelEntry(viewModelEntry);
+    new InsertEntryAsyncTask(entryDao).execute(entry);
+  }
+
+  @Override
+  public void insert(Iterable<ViewModelEntry> items) {
+    //Todo: implement
+  }
+
+  @Override
   public void update(ViewModelEntry viewModelEntry) {
     Entry entry = makeEntryFromViewModelEntry(viewModelEntry);
     new UpdateEntryAsyncTask(entryDao).execute(entry);
   }
 
+  @Override
   public void delete(ViewModelEntry viewModelEntry) {
     Entry entry = makeEntryFromViewModelEntry(viewModelEntry);
     new DeleteEntryAsyncTask(entryDao).execute(entry);
+  }
+
+  @Override
+  public void delete(Specification specification) {
+    //Todo: implement
+  }
+
+  @Override
+  public List<ViewModelEntry> query(Specification specification) {
+    //Todo: implement
+    return null;
   }
 
   public void deleteAllEntries() {
