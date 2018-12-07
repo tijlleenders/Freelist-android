@@ -1,8 +1,8 @@
 package nl.freelist.repository;
 
-import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Transformations;
+import android.content.Context;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
@@ -18,8 +18,8 @@ public class EntryRepository implements Repository<ViewModelEntry> {
   private final EntryDao entryDao;
   private LiveData<List<Entry>> allEntries;
 
-  public EntryRepository(Application application) {
-    EntryDatabase database = EntryDatabase.getInstance(application);
+  public EntryRepository(Context appContext) {
+    EntryDatabase database = EntryDatabase.getInstance(appContext);
     entryDao = database.entryDao();
   }
 

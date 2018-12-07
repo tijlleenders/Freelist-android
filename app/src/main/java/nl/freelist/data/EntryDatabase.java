@@ -15,9 +15,9 @@ public abstract class EntryDatabase extends RoomDatabase {
 
   private static EntryDatabase instance;
 
-  public static synchronized EntryDatabase getInstance(Context context) {
+  public static synchronized EntryDatabase getInstance(Context appContext) {
     if (instance == null) {
-      instance = Room.databaseBuilder(context.getApplicationContext()
+      instance = Room.databaseBuilder(appContext
           , EntryDatabase.class, "entry_database")
           .fallbackToDestructiveMigration()
           .addCallback(roomCallback)

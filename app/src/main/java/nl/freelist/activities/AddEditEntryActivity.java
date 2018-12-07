@@ -67,8 +67,9 @@ public class AddEditEntryActivity extends AppCompatActivity
           ViewModelProviders.of(this)
               .get(nl.freelist.viewModels.AddEditEntryActivityViewModel.class);
       String id = bundle.getString(ActivityConstants.EXTRA_ENTRY_ID);
+      AddEditEntryActivityViewModel.setViewModelEntryId(Integer.valueOf(id));
       AddEditEntryActivityViewModel
-          .getViewModelEntry(Integer.valueOf(id))
+          .getViewModelEntryMediatorLiveData()
           .observe(
               this,
               new Observer<

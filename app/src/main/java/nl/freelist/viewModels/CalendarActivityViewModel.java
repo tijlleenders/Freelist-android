@@ -16,7 +16,7 @@ public class CalendarActivityViewModel extends AndroidViewModel {
 
   public CalendarActivityViewModel(@NonNull Application application) {
     super(application);
-    repository = new EntryRepository(application);
+    repository = new EntryRepository(application.getApplicationContext());
     allEntries = repository.getAllEntries();
   }
 
