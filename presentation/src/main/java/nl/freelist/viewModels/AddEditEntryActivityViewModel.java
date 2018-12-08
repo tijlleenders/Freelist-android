@@ -39,7 +39,7 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel implements C
   public AddEditEntryActivityViewModel(@NonNull Application application) {
     super(application);
     getEntryByIdUseCase = new GetEntryByIdUseCase(
-        new EntryRepository(application.getApplicationContext()));
+        new EntryRepository(application.getApplicationContext())); //Todo:Fix dependency injection?
   }
 
   public MediatorLiveData<ViewModelEntry> getViewModelEntryMediatorLiveData() {

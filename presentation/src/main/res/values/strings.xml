@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Freelist</string>
+  <string name="app_name">Freelist</string>
   <string name="settings">Settings</string>
   <string name="delete_all_entries">Delete all entries</string>
   <string name="undo">Undo</string>
