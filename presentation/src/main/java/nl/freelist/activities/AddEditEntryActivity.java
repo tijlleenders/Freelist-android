@@ -2,12 +2,10 @@ package nl.freelist.activities;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,13 +17,15 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
+import io.reactivex.schedulers.Schedulers;
 import java.util.Calendar;
 import java.util.Date;
 import nl.freelist.constants.ActivityConstants;
-import nl.freelist.crossCuttingConcerns.DateHelper;
-import nl.freelist.repository.ViewModelEntry;
-import nl.freelist.userInterfaceHelpers.NumberPickerDuration;
+import nl.freelist.domain.crossCuttingConcerns.DateHelper;
+import nl.freelist.views.NumberPickerDuration;
 import nl.freelist.freelist.R;
+import nl.freelist.viewModels.ViewModelEntry;
+import nl.freelist.viewModels.AddEditEntryActivityViewModel;
 
 public class AddEditEntryActivity extends AppCompatActivity
     implements DatePickerDialog.OnDateSetListener {
@@ -65,26 +65,34 @@ public class AddEditEntryActivity extends AppCompatActivity
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
       AddEditEntryActivityViewModel =
           ViewModelProviders.of(this)
-              .get(nl.freelist.viewModels.AddEditEntryActivityViewModel.class);
+              .get(AddEditEntryActivityViewModel.class);
       String id = bundle.getString(ActivityConstants.EXTRA_ENTRY_ID);
-      AddEditEntryActivityViewModel.setViewModelEntryId(Integer.valueOf(id));
+
       AddEditEntryActivityViewModel
-          .getViewModelEntryMediatorLiveData()
-          .observe(
-              this,
-              new Observer<
-                  ViewModelEntry>() { // Todo: make returning viewModelEntry dynamic based on id
-                @Override
-                public void onChanged(@Nullable ViewModelEntry entry) {
-                  // do nothing; just necessary for AddEditEntryActivityViewModel to load data
-                  editTextTitle.setText(entry.getTitle());
-                  editTextDescription.setText(entry.getDescription());
-                  numberPickerDuration.setValue(
-                      numberPickerDuration.getNumberPickerPosition(entry.getDuration()));
-                  editTextDueDate.setText(entry.getDate());
-                  parentButton.setText(entry.getParentTitle());
-                }
-              });
+          .getViewModelEntry(Integer.valueOf(id))
+          .subscribeOn(Schedulers.io())
+          .observeOn(Schedulers.io())
+          .subscribe(
+              (
+                  viewModelEntry -> {
+                    // update View
+                    runOnUiThread(
+                        new Runnable() {
+                          @Override
+                          public void run() {
+                            editTextTitle.setText(viewModelEntry.getTitle());
+                            editTextDescription.setText(viewModelEntry.getDescription());
+                            numberPickerDuration.setValue(
+                                numberPickerDuration
+                                    .getNumberPickerPosition(viewModelEntry.getDuration()));
+                            editTextDueDate.setText(viewModelEntry.getDate());
+                            parentButton.setText(viewModelEntry.getParentTitle());
+                          }
+                        });
+
+                  }));
+
+
       getSupportActionBar()
           .setHomeAsUpIndicator(R.drawable.ic_close); // todo: move outside of if else if?
       setTitle("Edit existing");

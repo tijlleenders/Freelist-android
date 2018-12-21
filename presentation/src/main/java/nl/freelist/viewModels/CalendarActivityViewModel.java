@@ -2,42 +2,44 @@ package nl.freelist.viewModels;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import java.util.List;
-import nl.freelist.repository.EntryRepository;
-import nl.freelist.repository.ViewModelEntry;
+import nl.freelist.domain.entities.Entry;
+import nl.freelist.domain.useCases.GetAllEntriesUseCase;
+import nl.freelist.data.EntryRepository;
+
 
 public class CalendarActivityViewModel extends AndroidViewModel {
 
-  final private EntryRepository repository;
-  final private LiveData<List<ViewModelEntry>> allEntries;
 
   public CalendarActivityViewModel(@NonNull Application application) {
     super(application);
-    repository = new EntryRepository(application.getApplicationContext());
-    allEntries = repository.getAllEntries();
   }
 
-  public void insert(ViewModelEntry entry) {
-    repository.insert(entry);
+  @Override
+  protected void onCleared() {
+    //Todo: Unsubscribe if observing anything?
+    super.onCleared();
   }
 
-  public void update(ViewModelEntry entry) {
-    repository.update(entry);
-  }
-
-  public void delete(ViewModelEntry entry) {
-    repository.delete(entry);
+  public Single<List<ViewModelEntry>> getAllEntries() {
+    Single<List<Entry>> temp = Single.fromCallable(() -> new GetAllEntriesUseCase(
+        new EntryRepository(getApplication().getApplicationContext())).execute())
+        .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io());
+    Single<List<ViewModelEntry>> result = temp
+        .map(entries -> ViewModelEntry.createViewModelEntryListFromEntryList(entries));
+    return result;
   }
 
   public void deleteAllEntries() {
-    repository.deleteAllEntries();
+    // Todo: implement with UseCase
   }
 
-  public LiveData<List<ViewModelEntry>> getAllEntries() {
-    return allEntries;
+  public void delete(ViewModelEntry entryAt) {
+    // Todo: implement with UseCase
   }
-
 }

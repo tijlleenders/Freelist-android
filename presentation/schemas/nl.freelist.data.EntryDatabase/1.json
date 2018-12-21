@@ -2,10 +2,10 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d662981ac2da9b95680bdff0b252294b",
+    "identityHash": "657509dd157883c2aa5762599e22e2ab",
     "entities": [
       {
-        "tableName": "entry",
+        "tableName": "DataEntry",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `description` TEXT, `duration` INTEGER NOT NULL, `date` INTEGER NOT NULL, `isCompletedStatus` INTEGER NOT NULL, `parent` INTEGER NOT NULL)",
         "fields": [
           {
@@ -63,7 +63,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"d662981ac2da9b95680bdff0b252294b\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"657509dd157883c2aa5762599e22e2ab\")"
     ]
   }
 }

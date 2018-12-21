@@ -1,10 +1,8 @@
 package nl.freelist.activities;
 
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,11 +14,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-import java.util.List;
+import io.reactivex.schedulers.Schedulers;
+
 import nl.freelist.freelist.R;
-import nl.freelist.userInterfaceHelpers.EntryAdapter;
+import nl.freelist.recyclerviewAdapters.EntryAdapter;
 import nl.freelist.viewModels.CalendarActivityViewModel;
-import nl.freelist.repository.ViewModelEntry;
 import nl.freelist.constants.ActivityConstants;
 
 public class CalendarActivity extends AppCompatActivity {
@@ -52,20 +50,26 @@ public class CalendarActivity extends AppCompatActivity {
     recyclerView.setAdapter(adapter);
 
     calendarActivityViewModel = ViewModelProviders.of(this).get(CalendarActivityViewModel.class);
+
     calendarActivityViewModel
         .getAllEntries()
-        .observe(
-            this,
-            new Observer<List<ViewModelEntry>>() {
-              @Override
-              public void onChanged(@Nullable List<ViewModelEntry> entries) {
-                // update RecyclerView
-                adapter.setEntries(entries);
-                Toast.makeText(
-                    CalendarActivity.this, "calendarActivityViewModel onChanged!",
-                    Toast.LENGTH_SHORT)
-                    .show();
-              }
+        .observeOn(Schedulers.io())
+        .subscribeOn(Schedulers.io())
+        .subscribe(
+            entries -> {
+              // update RecyclerView
+              runOnUiThread(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      adapter.setEntries(entries);
+                      Toast.makeText(
+                          CalendarActivity.this,
+                          "calendarActivityViewModel onChanged!",
+                          Toast.LENGTH_SHORT)
+                          .show();
+                    }
+                  });
             });
 
     new ItemTouchHelper(
@@ -82,8 +86,10 @@ public class CalendarActivity extends AppCompatActivity {
           @Override
           public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
             // viewHolder.getAdapterPosition() //where did we swipe?
-            calendarActivityViewModel.delete(adapter.getEntryAt(viewHolder.getAdapterPosition()));
-            Toast.makeText(CalendarActivity.this, "Entry deleted", Toast.LENGTH_SHORT).show();
+            calendarActivityViewModel.delete(
+                adapter.getEntryAt(viewHolder.getAdapterPosition()));
+            Toast.makeText(CalendarActivity.this, "DataEntry deleted", Toast.LENGTH_SHORT)
+                .show();
           }
         })
         .attachToRecyclerView(recyclerView);
@@ -96,21 +102,21 @@ public class CalendarActivity extends AppCompatActivity {
     if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
       Toast.makeText(
           this,
-          "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " saved!",
+          "DataEntry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " saved!",
           Toast.LENGTH_SHORT)
           .show();
     } else if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode != RESULT_OK) {
-      Toast.makeText(this, "Entry not saved.", Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, "DataEntry not saved.", Toast.LENGTH_SHORT).show();
     } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode == RESULT_OK) {
       Toast.makeText(
           this,
-          "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " edited!",
+          "DataEntry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " edited!",
           Toast.LENGTH_SHORT)
           .show();
     } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode != RESULT_OK) {
       Toast.makeText(
           this,
-          "Entry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " not edited!",
+          "DataEntry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " not edited!",
           Toast.LENGTH_SHORT)
           .show();
     }

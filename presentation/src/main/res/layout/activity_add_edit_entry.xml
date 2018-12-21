@@ -34,7 +34,7 @@
     android:padding="16dp"
     android:orientation="horizontal">
 
-    <nl.freelist.userInterfaceHelpers.NumberPickerDuration
+    <nl.freelist.views.NumberPickerDuration
       android:id="@+id/number_picker_duration"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"/>
