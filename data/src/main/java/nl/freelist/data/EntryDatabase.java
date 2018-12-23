@@ -47,6 +47,10 @@ public abstract class EntryDatabase extends RoomDatabase {
       entryDao.insert(new DataEntry("Title 1", "Description 1", 300, 0));
       entryDao.insert(new DataEntry("Title 2", "Description 2", 300, 0));
       entryDao.insert(new DataEntry("Title 3", "Description 3", 300, 0));
+      entryDao.insert(new DataEntry("Sub 1 A", "Description 1A", 300, 1));
+      entryDao.insert(new DataEntry("Sub 1 B", "Description 1B", 300, 1));
+      entryDao.insert(new DataEntry("Sub 1 C", "Description 1C", 300, 1));
+      entryDao.insert(new DataEntry("Sub 1A A", "Description 1A A", 300, 4));
       return null;
     }
   }

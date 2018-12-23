@@ -20,4 +20,6 @@ public interface Repository<T> {
   T getById(int id);
 
   List<T> getAllEntries();
+
+  List<T> getAllEntriesForParent(int id);
 }

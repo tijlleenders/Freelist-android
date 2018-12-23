@@ -26,6 +26,9 @@ public interface EntryDao {
   @Query("SELECT * FROM DataEntry ORDER BY duration ASC")
   List<DataEntry> getAllEntries();
 
+  @Query("SELECT * FROM DataEntry WHERE parent = :id OR id = :id ORDER BY duration ASC")
+  List<DataEntry> getAllEntriesForParent(int id);
+
   @Query("SELECT * FROM DataEntry WHERE id = :id")
   DataEntry getEntry(int id);
 

@@ -16,7 +16,7 @@ import nl.freelist.freelist.R;
 import nl.freelist.presentationConstants.ActivityConstants;
 import nl.freelist.viewModelPerEntity.ViewModelEntry;
 
-public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder> {
+public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdapter.EntryHolder> {
 
   private List<ViewModelEntry> entries = new ArrayList<>();
 
