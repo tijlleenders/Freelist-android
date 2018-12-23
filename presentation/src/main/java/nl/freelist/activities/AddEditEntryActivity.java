@@ -30,6 +30,7 @@ import nl.freelist.views.NumberPickerDuration;
 public class AddEditEntryActivity extends AppCompatActivity
     implements DatePickerDialog.OnDateSetListener {
 
+  private int id;
   private EditText editTextTitle;
   private EditText editTextDescription;
   private EditText editTextDueDate;
@@ -68,10 +69,10 @@ public class AddEditEntryActivity extends AppCompatActivity
 
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
 
-      String id = bundle.getString(ActivityConstants.EXTRA_ENTRY_ID);
+      id = Integer.valueOf(bundle.getString(ActivityConstants.EXTRA_ENTRY_ID));
 
       AddEditEntryActivityViewModel
-          .getViewModelEntry(Integer.valueOf(id))
+          .getViewModelEntry(id)
           .subscribeOn(Schedulers.io())
           .observeOn(Schedulers.io())
           .subscribe(
@@ -119,7 +120,9 @@ public class AddEditEntryActivity extends AppCompatActivity
   }
 
   private void saveEntry() {
-    int id = ActivityConstants.VIEWMODEL_ENTRY_ID_NOT_SET;
+    if (id == 0) {
+      int id = ActivityConstants.VIEWMODEL_ENTRY_ID_NOT_SET;
+    }
     int parentId = 0; //Todo: replace with current ID from parent button value
     String parentTitle = "parentTitle"; //Todo: replace with current ID from parent button value
     String title = editTextTitle.getText().toString();
