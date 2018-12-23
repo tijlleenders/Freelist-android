@@ -23,7 +23,7 @@ public interface EntryDao {
   @Query("DELETE FROM DataEntry")
   void deleteAllEntries();
 
-  @Query("SELECT * FROM DataEntry ORDER BY date ASC, duration DESC")
+  @Query("SELECT * FROM DataEntry ORDER BY duration ASC")
   List<DataEntry> getAllEntries();
 
   @Query("SELECT * FROM DataEntry WHERE id = :id")

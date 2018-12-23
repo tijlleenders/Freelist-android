@@ -12,8 +12,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.activities.AddEditEntryActivity;
-import nl.freelist.constants.ActivityConstants;
 import nl.freelist.freelist.R;
+import nl.freelist.presentationConstants.ActivityConstants;
 import nl.freelist.viewModelPerEntity.ViewModelEntry;
 
 public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder> {
@@ -60,7 +60,6 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
     entryHolder.textViewTitle.setText(currentEntry.getTitle());
     entryHolder.textViewDescription.setText(currentEntry.getDescription());
     entryHolder.textViewDuration.setText(currentEntry.getDuration());
-    entryHolder.textViewDate.setText(currentEntry.getDate());
   }
 
   @Override
@@ -82,14 +81,12 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryHolder>
     private final TextView textViewTitle;
     private final TextView textViewDescription;
     private final TextView textViewDuration;
-    private final TextView textViewDate;
 
     EntryHolder(@NonNull View itemView) {
       super(itemView);
       textViewTitle = itemView.findViewById(R.id.text_view_title);
       textViewDescription = itemView.findViewById(R.id.text_view_description);
       textViewDuration = itemView.findViewById(R.id.text_view_duration);
-      textViewDate = itemView.findViewById(R.id.text_view_date);
 
       itemView.setOnClickListener(
           new OnClickListener() {

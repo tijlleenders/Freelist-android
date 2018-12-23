@@ -21,11 +21,9 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
     String title = entry.getTitle();
     String description = entry.getDescription();
     int duration = entry.getDuration();
-    long date = entry.getDate();
-    boolean isCompletedStatus = entry.isCompletedStatus();
     int parentId = entry.getParentId();
     DataEntry dataEntry =
-        new DataEntry(id, title, description, duration, date, isCompletedStatus, parentId);
+        new DataEntry(id, title, description, duration, parentId);
     return dataEntry;
   }
 
@@ -46,10 +44,8 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
     String title = dataEntry.getTitle();
     String description = dataEntry.getDescription();
     int duration = dataEntry.getDuration();
-    long date = dataEntry.getDate();
-    Boolean isCompletedStatus = dataEntry.getIsCompletedStatus();
     Entry entry =
-        new Entry(id, parentId, parentTitle, title, description, duration, date, isCompletedStatus);
+        new Entry(id, parentId, parentTitle, title, description, duration);
     return entry;
   }
 

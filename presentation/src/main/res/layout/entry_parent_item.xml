@@ -35,13 +35,6 @@
       android:layout_below="@id/text_view_title"
       android:text="Description"/>
 
-    <TextView
-      android:id="@+id/text_view_date"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignParentRight="true"
-      android:layout_below="@id/text_view_duration"
-      android:text="yyyy-M-d"/>
 
   </RelativeLayout>
 

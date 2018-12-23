@@ -1,4 +1,4 @@
-package nl.freelist.constants;
+package nl.freelist.presentationConstants;
 
 public class ActivityConstants {
 

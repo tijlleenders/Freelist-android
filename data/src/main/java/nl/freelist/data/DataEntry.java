@@ -4,10 +4,6 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 @Entity(tableName = "DataEntry")
 public class DataEntry {
 
@@ -17,31 +13,26 @@ public class DataEntry {
   final private String title;
   final private String description;
   final private int duration;
-  private long date;
-  private boolean isCompletedStatus;
   private int parent;
 
   @Ignore
-  public DataEntry(String title, String description, int duration, long date,
-      boolean isCompletedStatus) {
-    this(title, description, duration, date, isCompletedStatus, DEFAULT_PARENT);
+  public DataEntry(String title, String description, int duration) {
+    this(title, description, duration, DEFAULT_PARENT);
   }
 
   @Ignore
-  public DataEntry(int id, String title, String description, int duration, long date,
-      boolean isCompletedStatus, int parent) {
-    this(title, description, duration, date, isCompletedStatus, parent);
+  public DataEntry(int id, String title, String description, int duration,
+      int parent) {
+    this(title, description, duration, parent);
     this.setId(id);
   }
 
-  public DataEntry(String title, String description, int duration, long date,
-      boolean isCompletedStatus, int parent) {
+  public DataEntry(String title, String description, int duration,
+      int parent) {
     this.parent = parent;
     this.title = title;
     this.description = description;
     this.duration = duration;
-    this.date = date;
-    this.isCompletedStatus = isCompletedStatus;
   }
 
 
@@ -55,14 +46,6 @@ public class DataEntry {
 
   public int getParent() {
     return parent;
-  }
-
-  public void setDate(long date) {
-    this.date = date;
-  }
-
-  public void setCompletedStatus(boolean completedStatus) {
-    isCompletedStatus = completedStatus;
   }
 
   public int getId() {
@@ -100,19 +83,5 @@ public class DataEntry {
     } else {
       return "...";
     }
-  }
-
-  public long getDate() {
-    return date;
-  }
-
-  public String getFormattedDate() {
-    Date date = new Date(this.date);
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-M-d", Locale.US);
-    return formatter.format(date);
-  }
-
-  public boolean getIsCompletedStatus() {
-    return isCompletedStatus;
   }
 }

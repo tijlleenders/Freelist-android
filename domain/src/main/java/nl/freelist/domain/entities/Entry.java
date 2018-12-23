@@ -7,8 +7,6 @@ public class Entry {
   private String title;
   private String description;
   private int duration;
-  private long date;
-  private boolean isCompletedStatus;
   private int parent;
 
   public Entry(
@@ -17,16 +15,12 @@ public class Entry {
       String parentTitle,
       String title,
       String description,
-      int duration,
-      long date,
-      Boolean isCompletedStatus) {
+      int duration) {
     this.id = id;
     this.parentId = parentId;
     this.title = title;
     this.description = description;
     this.duration = duration;
-    this.date = date;
-    this.isCompletedStatus = isCompletedStatus;
   }
 
   public int getId() {
@@ -69,21 +63,6 @@ public class Entry {
     this.duration = duration;
   }
 
-  public long getDate() {
-    return date;
-  }
-
-  public void setDate(long date) {
-    this.date = date;
-  }
-
-  public boolean isCompletedStatus() {
-    return isCompletedStatus;
-  }
-
-  public void setCompletedStatus(boolean completedStatus) {
-    isCompletedStatus = completedStatus;
-  }
 
   public int getParent() {
     return parent;

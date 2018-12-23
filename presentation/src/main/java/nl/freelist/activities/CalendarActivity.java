@@ -14,8 +14,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-import nl.freelist.constants.ActivityConstants;
 import nl.freelist.freelist.R;
+import nl.freelist.presentationConstants.ActivityConstants;
 import nl.freelist.recyclerviewAdapters.EntryAdapter;
 import nl.freelist.viewModelPerActivity.CalendarActivityViewModel;
 
@@ -26,6 +26,12 @@ public class CalendarActivity extends AppCompatActivity {
   private RecyclerView recyclerView;
 
   public CalendarActivity() {
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    updateRecyclerView();
   }
 
   @Override
@@ -42,7 +48,6 @@ public class CalendarActivity extends AppCompatActivity {
     adapter = new EntryAdapter();
 
     recyclerView.setAdapter(adapter);
-    updateRecyclerView();
 
     FloatingActionButton buttonAddEntry = findViewById(R.id.button_add_entry);
     buttonAddEntry.setOnClickListener(
