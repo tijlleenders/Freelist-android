@@ -1,10 +1,11 @@
 package nl.freelist.domain.interfaces;
 
 import java.util.List;
+import nl.freelist.domain.crossCuttingConcerns.ResultObject;
 
 public interface Repository<T> {
 
-  void insert(T item);
+  ResultObject<T> insert(T item);
 
   void insert(Iterable<T> items);
 

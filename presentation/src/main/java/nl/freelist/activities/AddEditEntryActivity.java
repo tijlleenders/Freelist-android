@@ -4,11 +4,11 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -22,10 +22,10 @@ import java.util.Calendar;
 import java.util.Date;
 import nl.freelist.constants.ActivityConstants;
 import nl.freelist.domain.crossCuttingConcerns.DateHelper;
-import nl.freelist.views.NumberPickerDuration;
 import nl.freelist.freelist.R;
-import nl.freelist.viewModels.ViewModelEntry;
-import nl.freelist.viewModels.AddEditEntryActivityViewModel;
+import nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel;
+import nl.freelist.viewModelPerEntity.ViewModelEntry;
+import nl.freelist.views.NumberPickerDuration;
 
 public class AddEditEntryActivity extends AppCompatActivity
     implements DatePickerDialog.OnDateSetListener {
@@ -35,7 +35,7 @@ public class AddEditEntryActivity extends AppCompatActivity
   private EditText editTextDueDate;
   private Button parentButton;
   private NumberPickerDuration numberPickerDuration;
-  private nl.freelist.viewModels.AddEditEntryActivityViewModel AddEditEntryActivityViewModel;
+  private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel AddEditEntryActivityViewModel;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +56,10 @@ public class AddEditEntryActivity extends AppCompatActivity
         }); // todo: make configurable, ie make custom subclass with functions to set with string or
     // duration int?
 
+    AddEditEntryActivityViewModel =
+        ViewModelProviders.of(this)
+            .get(AddEditEntryActivityViewModel.class);
+
     // Intent.ACTION_* fields are String constant.
     // You cannot use switch with String until JDK 7 android use JDK 6 or 5 to compile. So you can't
     // use that method on Android
@@ -63,9 +67,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     Bundle bundle = getIntent().getExtras();
 
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
-      AddEditEntryActivityViewModel =
-          ViewModelProviders.of(this)
-              .get(AddEditEntryActivityViewModel.class);
+
       String id = bundle.getString(ActivityConstants.EXTRA_ENTRY_ID);
 
       AddEditEntryActivityViewModel
@@ -134,13 +136,30 @@ public class AddEditEntryActivity extends AppCompatActivity
       } else {
         Toast.makeText(this, "setting false", Toast.LENGTH_SHORT).show();
       }
-      // Toast.makeText(this, "Please insert a title and description", Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, "Please insert a title and description", Toast.LENGTH_SHORT).show();
       return;
     }
 
-    ViewModelEntry entryToSave =
+    ViewModelEntry viewModelEntryToSave =
         new ViewModelEntry(
             id, parentId, parentTitle, title, description, duration, date, isCompletedStatus);
+
+    AddEditEntryActivityViewModel
+        .saveViewModelEntry(viewModelEntryToSave)
+        .subscribe(
+            (
+                viewModelEntry -> {
+                  // update View
+                  runOnUiThread(
+                      new Runnable() {
+                        @Override
+                        public void run() {
+                          // Do stufff
+                        }
+                      });
+
+                }));
+
 
     Bundle bundle = getIntent().getExtras();
     // Intent.ACTION_* fields are String constant.
@@ -149,11 +168,8 @@ public class AddEditEntryActivity extends AppCompatActivity
     // So using if else if :(
 
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) {
-      entryToSave.setId((Integer) bundle.get(ActivityConstants.EXTRA_ENTRY_ID));
-      //      AddEditEntryActivityViewModel.update(entryToSave);
       Toast.makeText(this, "Existing entry updated!", Toast.LENGTH_LONG).show();
     } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_ADD)) {
-      //      AddEditEntryActivityViewModel.insert(entryToSave);
       Toast.makeText(this, "New entry saved!", Toast.LENGTH_LONG).show();
     }
 

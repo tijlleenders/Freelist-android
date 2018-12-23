@@ -2,10 +2,10 @@ package nl.freelist.activities;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -14,21 +14,35 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-import io.reactivex.schedulers.Schedulers;
-
+import nl.freelist.constants.ActivityConstants;
 import nl.freelist.freelist.R;
 import nl.freelist.recyclerviewAdapters.EntryAdapter;
-import nl.freelist.viewModels.CalendarActivityViewModel;
-import nl.freelist.constants.ActivityConstants;
+import nl.freelist.viewModelPerActivity.CalendarActivityViewModel;
 
 public class CalendarActivity extends AppCompatActivity {
 
   private CalendarActivityViewModel calendarActivityViewModel;
+  private EntryAdapter adapter;
+  private RecyclerView recyclerView;
+
+  public CalendarActivity() {
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_calendar);
+
+    calendarActivityViewModel = ViewModelProviders.of(this).get(CalendarActivityViewModel.class);
+
+    recyclerView = findViewById(R.id.recycler_view);
+    recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    recyclerView.setHasFixedSize(true);
+
+    adapter = new EntryAdapter();
+
+    recyclerView.setAdapter(adapter);
+    updateRecyclerView();
 
     FloatingActionButton buttonAddEntry = findViewById(R.id.button_add_entry);
     buttonAddEntry.setOnClickListener(
@@ -41,36 +55,6 @@ public class CalendarActivity extends AppCompatActivity {
             startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
           }
         });
-
-    RecyclerView recyclerView = findViewById(R.id.recycler_view);
-    recyclerView.setLayoutManager(new LinearLayoutManager(this));
-    recyclerView.setHasFixedSize(true);
-
-    final EntryAdapter adapter = new EntryAdapter();
-    recyclerView.setAdapter(adapter);
-
-    calendarActivityViewModel = ViewModelProviders.of(this).get(CalendarActivityViewModel.class);
-
-    calendarActivityViewModel
-        .getAllEntries()
-        .observeOn(Schedulers.io())
-        .subscribeOn(Schedulers.io())
-        .subscribe(
-            entries -> {
-              // update RecyclerView
-              runOnUiThread(
-                  new Runnable() {
-                    @Override
-                    public void run() {
-                      adapter.setEntries(entries);
-                      Toast.makeText(
-                          CalendarActivity.this,
-                          "calendarActivityViewModel onChanged!",
-                          Toast.LENGTH_SHORT)
-                          .show();
-                    }
-                  });
-            });
 
     new ItemTouchHelper(
         new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -95,6 +79,27 @@ public class CalendarActivity extends AppCompatActivity {
         .attachToRecyclerView(recyclerView);
   }
 
+  private void updateRecyclerView() {
+    calendarActivityViewModel
+        .getAllEntries()
+        .subscribe(
+            entries -> {
+              // update RecyclerView
+              runOnUiThread(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      adapter.setEntries(entries);
+                      Toast.makeText(
+                          CalendarActivity.this,
+                          "calendarActivityViewModel refreshed!",
+                          Toast.LENGTH_SHORT)
+                          .show();
+                    }
+                  });
+            });
+  }
+
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
@@ -105,6 +110,7 @@ public class CalendarActivity extends AppCompatActivity {
           "DataEntry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " saved!",
           Toast.LENGTH_SHORT)
           .show();
+      updateRecyclerView();
     } else if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode != RESULT_OK) {
       Toast.makeText(this, "DataEntry not saved.", Toast.LENGTH_SHORT).show();
     } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode == RESULT_OK) {
@@ -113,6 +119,7 @@ public class CalendarActivity extends AppCompatActivity {
           "DataEntry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " edited!",
           Toast.LENGTH_SHORT)
           .show();
+      updateRecyclerView();
     } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode != RESULT_OK) {
       Toast.makeText(
           this,

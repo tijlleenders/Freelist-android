@@ -3,8 +3,9 @@ package nl.freelist.data;
 import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
-import nl.freelist.domain.interfaces.Specifiable;
+import nl.freelist.domain.crossCuttingConcerns.ResultObject;
 import nl.freelist.domain.entities.Entry;
+import nl.freelist.domain.interfaces.Specifiable;
 
 public class EntryRepository implements nl.freelist.domain.interfaces.Repository<Entry> {
 
@@ -53,8 +54,10 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
   }
 
   @Override
-  public void insert(Entry item) {
-
+  public ResultObject<Entry> insert(Entry entry) {
+    DataEntry dataEntry = getDataEntryFromEntry(entry);
+    entryDao.insert(dataEntry);
+    return new ResultObject<>(true);
   }
 
   @Override

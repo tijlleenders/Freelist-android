@@ -1,4 +1,4 @@
-package nl.freelist.viewModels;
+package nl.freelist.viewModelPerEntity;
 
 import java.util.ArrayList;
 import java.util.List;

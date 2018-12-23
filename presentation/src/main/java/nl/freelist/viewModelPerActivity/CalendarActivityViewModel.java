@@ -1,23 +1,24 @@
-package nl.freelist.viewModels;
+package nl.freelist.viewModelPerActivity;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
-
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
+import nl.freelist.data.EntryRepository;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.useCases.GetAllEntriesUseCase;
-import nl.freelist.data.EntryRepository;
+import nl.freelist.viewModelPerEntity.ViewModelEntry;
 
 
 public class CalendarActivityViewModel extends AndroidViewModel {
 
+  private EntryRepository entryRepository;
 
   public CalendarActivityViewModel(@NonNull Application application) {
     super(application);
+    entryRepository = new EntryRepository(getApplication().getApplicationContext());
   }
 
   @Override
@@ -26,13 +27,13 @@ public class CalendarActivityViewModel extends AndroidViewModel {
     super.onCleared();
   }
 
-  public Single<List<ViewModelEntry>> getAllEntries() {
-    Single<List<Entry>> temp = Single.fromCallable(() -> new GetAllEntriesUseCase(
-        new EntryRepository(getApplication().getApplicationContext())).execute())
-        .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io());
-    Single<List<ViewModelEntry>> result = temp
+  public Observable<List<ViewModelEntry>> getAllEntries() {
+    Observable<List<Entry>> entryList = Observable.fromCallable(() -> new GetAllEntriesUseCase(
+        entryRepository).execute())
+        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
+    Observable<List<ViewModelEntry>> viewModelEntryList = entryList
         .map(entries -> ViewModelEntry.createViewModelEntryListFromEntryList(entries));
-    return result;
+    return viewModelEntryList;
   }
 
   public void deleteAllEntries() {
