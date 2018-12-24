@@ -15,7 +15,7 @@ public class GetAllEntriesForParentUseCase implements UseCaseWithParameter<Integ
 
   @Override
   public List<Entry> execute(Integer id) {
-    List<Entry> result = entryRepository.getAllEntriesForParent(id);
+    List<Entry> result = entryRepository.getAllEntriesForParent(1);
     return result;
   }
 }

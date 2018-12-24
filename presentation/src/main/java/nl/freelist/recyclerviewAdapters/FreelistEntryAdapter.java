@@ -23,12 +23,12 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
   @NonNull
   @Override
   public EntryHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    if (viewType == ActivityConstants.PARENT_ENTRY_VIEW) {
+    if (viewType == ActivityConstants.NODE_ENTRY_VIEW_TYPE) {
       View itemView =
           LayoutInflater.from(parent.getContext())
               .inflate(R.layout.entry_parent_item, parent, false);
       return new EntryHolder(itemView);
-    } else if (viewType == ActivityConstants.MULTIPLE_ENTRY_VIEW) {
+    } else if (viewType == ActivityConstants.MULTIPLE_ENTRY_VIEW_TYPE) {
       View itemView =
           LayoutInflater.from(parent.getContext())
               .inflate(R.layout.entry_multiple_item, parent, false);
@@ -44,14 +44,7 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
   @Override
   public int getItemViewType(int position) {
     ViewModelEntry entry = entries.get(position);
-    //Todo: get the itemType form DataEntry class
-    if (position == 0) {
-      return ActivityConstants.PARENT_ENTRY_VIEW;
-    } else if (position == 1) {
-      return ActivityConstants.MULTIPLE_ENTRY_VIEW;
-    } else {
-      return ActivityConstants.SINGLE_ENTRY_VIEW;
-    }
+    return entry.getType();
   }
 
   @Override

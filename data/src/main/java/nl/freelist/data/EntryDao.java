@@ -26,7 +26,23 @@ public interface EntryDao {
   @Query("SELECT * FROM DataEntry ORDER BY duration ASC")
   List<DataEntry> getAllEntries();
 
-  @Query("SELECT * FROM DataEntry WHERE parent = :id OR id = :id ORDER BY duration ASC")
+  @Query(
+      "SELECT * FROM DataEntry\n"
+          + "WHERE DataEntry.id IN \n"
+          + "(\n"
+          + "WITH RECURSIVE parents(x) AS (\n"
+          + "            SELECT :id\n"
+          + "                UNION ALL\n"
+          + "            SELECT DataEntry.parentId \n"
+          + "            FROM DataEntry, parents \n"
+          + "            WHERE DataEntry.id=parents.x AND DataEntry.parentId IS NOT NULL AND DataEntry.parentId != 0 LIMIT 10000\n"
+          + "        )\n"
+          + "        SELECT * FROM parents\n"
+          + ")\n"
+          + "UNION\n"
+          + "SELECT * FROM DataEntry\n"
+          + "WHERE DataEntry.parentId = :id;\n"
+  )
   List<DataEntry> getAllEntriesForParent(int id);
 
   @Query("SELECT * FROM DataEntry WHERE id = :id")

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
 import nl.freelist.domain.entities.Entry;
+import nl.freelist.presentationConstants.ActivityConstants;
 
 public class ViewModelEntry {
 
@@ -13,7 +14,7 @@ public class ViewModelEntry {
   private String title;
   private String description;
   private String duration;
-  private int parent;
+  private int type;
 
   public ViewModelEntry(
       int id,
@@ -21,13 +22,15 @@ public class ViewModelEntry {
       String parentTitle,
       String title,
       String description,
-      String duration) {
+      String duration,
+      int type) {
     this.id = id;
     this.parentId = parentId;
     this.parentTitle = parentTitle;
     this.title = title;
     this.description = description;
     this.duration = duration;
+    this.type = type;
   }
 
   public static Entry getEntryFromViewModelEntry(ViewModelEntry viewModelEntry) {
@@ -47,13 +50,33 @@ public class ViewModelEntry {
     String title = entry.getTitle();
     String description = entry.getDescription();
     String duration = "todo"; //Todo:fix entry.getDuration();
-    return new ViewModelEntry(id, parentId, parentTitle, title, description, duration);
+    int type = ActivityConstants.UNKNOWN_ENTRY_VIEW_TYPE;
+    return new ViewModelEntry(id, parentId, parentTitle, title, description, duration, type);
+  }
+
+  public int getType() {
+    return type;
+  }
+
+  public void setType(int type) {
+    this.type = type;
   }
 
   public static List<ViewModelEntry> createViewModelEntryListFromEntryList(List<Entry> entryList) {
+    //get list of parents
+    List<Integer> parentList = new ArrayList<Integer>();
+    for (Entry entry : entryList) {
+      parentList.add(entry.getParentId());
+    }
+    //check whether the id is in list of parents
     List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
     for (Entry entry : entryList) {
       ViewModelEntry viewModelEntry = ViewModelEntry.getViewModelEntryFromEntry(entry);
+      if (parentList.contains(entry.getId())) {
+        viewModelEntry.setType(ActivityConstants.NODE_ENTRY_VIEW_TYPE);
+      } else {
+        viewModelEntry.setType(ActivityConstants.LEAF_ENTRY_VIEW_TYPE);
+      }
       allViewModelEntries.add(viewModelEntry);
     }
     return allViewModelEntries;
@@ -97,14 +120,6 @@ public class ViewModelEntry {
 
   public void setDuration(String duration) {
     this.duration = duration;
-  }
-
-  public int getParent() {
-    return parent;
-  }
-
-  public void setParent(int parent) {
-    this.parent = parent;
   }
 
   public String getParentTitle() {

@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+import io.reactivex.schedulers.Schedulers;
 import nl.freelist.freelist.R;
 import nl.freelist.presentationConstants.ActivityConstants;
 import nl.freelist.recyclerviewAdapters.FreelistEntryAdapter;
@@ -88,6 +89,8 @@ public class NavigateFreelistActivity extends AppCompatActivity {
   private void updateRecyclerView() {
     navigateFreelistActivityViewModel
         .getAllEntries()
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
         .subscribe(
             entries -> {
               // update RecyclerView

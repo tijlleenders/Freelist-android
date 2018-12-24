@@ -21,6 +21,7 @@ import nl.freelist.views.NumberPickerDuration;
 public class AddEditEntryActivity extends AppCompatActivity {
 
   private int id;
+  private int parentId;
   private EditText editTextTitle;
   private EditText editTextDescription;
   private Button parentButton;
@@ -77,6 +78,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
                                 numberPickerDuration
                                     .getNumberPickerPosition(viewModelEntry.getDuration()));
                             parentButton.setText(viewModelEntry.getParentTitle());
+                            parentId = viewModelEntry.getParentId();
                           }
                         });
 
@@ -97,7 +99,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
     if (id == 0) {
       int id = ActivityConstants.VIEWMODEL_ENTRY_ID_NOT_SET;
     }
-    int parentId = 0; //Todo: replace with current ID from parent button value
+
+    //parentId initialized to 0 by default or set by lambda from observable
     String parentTitle = "parentTitle"; //Todo: replace with current ID from parent button value
     String title = editTextTitle.getText().toString();
     String description = editTextDescription.getText().toString();
@@ -117,7 +120,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
     ViewModelEntry viewModelEntryToSave =
         new ViewModelEntry(
-            id, parentId, parentTitle, title, description, duration);
+            id, parentId, parentTitle, title, description, duration,
+            ActivityConstants.UNKNOWN_ENTRY_VIEW_TYPE);
 
     AddEditEntryActivityViewModel
         .saveViewModelEntry(viewModelEntryToSave)

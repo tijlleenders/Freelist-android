@@ -10,10 +10,24 @@ public class DataEntry {
   @PrimaryKey(autoGenerate = true)
   private int id;
   static final int DEFAULT_PARENT = 0;
-  final private String title;
-  final private String description;
-  final private int duration;
-  private int parent;
+  static final String DEFAULT_TYPE = "";
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setDuration(int duration) {
+    this.duration = duration;
+  }
+
+  private String title;
+  private String description;
+  private int duration;
+  private int parentId;
 
   @Ignore
   public DataEntry(String title, String description, int duration) {
@@ -22,30 +36,29 @@ public class DataEntry {
 
   @Ignore
   public DataEntry(int id, String title, String description, int duration,
-      int parent) {
-    this(title, description, duration, parent);
+      int parentId) {
+    this(title, description, duration, parentId);
     this.setId(id);
   }
 
   public DataEntry(String title, String description, int duration,
-      int parent) {
-    this.parent = parent;
+      int parentId) {
+    this.parentId = parentId;
     this.title = title;
     this.description = description;
     this.duration = duration;
   }
 
-
   public void setId(int id) {
     this.id = id;
   }
 
-  public void setParent(int parent) {
-    this.parent = parent;
+  public void setParentId(int parent) {
+    this.parentId = parent;
   }
 
-  public int getParent() {
-    return parent;
+  public int getParentId() {
+    return parentId;
   }
 
   public int getId() {

@@ -6,7 +6,6 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import nl.freelist.data.EntryRepository;
 import nl.freelist.domain.crossCuttingConcerns.ResultObject;
@@ -27,8 +26,7 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
   public Single<ViewModelEntry> getViewModelEntry(int id) {
     Single<Entry> tempEntry = Single.fromCallable(
         () -> new GetEntryByIdUseCase(entryRepository)
-            .execute(id)).observeOn(AndroidSchedulers
-        .mainThread()).subscribeOn(Schedulers.io());
+            .execute(id)).observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     Single<ViewModelEntry> result = tempEntry
         .map(entry -> ViewModelEntry.getViewModelEntryFromEntry(entry));
     return result;
@@ -39,8 +37,7 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
     Single<ResultObject<Entry>> resultObject = Single.fromCallable(
         () -> new SaveEntry(entryRepository)
             .execute(entryToSave))
-        .observeOn(AndroidSchedulers
-            .mainThread()).subscribeOn(Schedulers.io());
+        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return resultObject;
   }
 

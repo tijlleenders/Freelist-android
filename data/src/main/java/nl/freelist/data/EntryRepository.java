@@ -39,7 +39,7 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
 
   private Entry getEntryFromDataEntry(DataEntry dataEntry) {
     int id = dataEntry.getId();
-    int parentId = dataEntry.getId(); // Todo: implement getParentId()
+    int parentId = dataEntry.getParentId();
     String parentTitle = dataEntry.getTitle(); // Todo: implement getParentTitle
     String title = dataEntry.getTitle();
     String description = dataEntry.getDescription();

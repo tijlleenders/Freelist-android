@@ -7,15 +7,9 @@ public class Entry {
   private String title;
   private String description;
   private int duration;
-  private int parent;
 
   public Entry(
-      int id,
-      int parentId,
-      String parentTitle,
-      String title,
-      String description,
-      int duration) {
+      int id, int parentId, String parentTitle, String title, String description, int duration) {
     this.id = id;
     this.parentId = parentId;
     this.title = title;
@@ -61,14 +55,5 @@ public class Entry {
 
   public void setDuration(int duration) {
     this.duration = duration;
-  }
-
-
-  public int getParent() {
-    return parent;
-  }
-
-  public void setParent(int parent) {
-    this.parent = parent;
   }
 }
