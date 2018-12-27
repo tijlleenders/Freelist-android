@@ -35,7 +35,7 @@ public interface EntryDao {
           + "                UNION ALL\n"
           + "            SELECT DataEntry.parentId \n"
           + "            FROM DataEntry, parents \n"
-          + "            WHERE DataEntry.id=parents.x AND DataEntry.parentId IS NOT NULL AND DataEntry.parentId != 0 LIMIT 10000\n"
+          + "            WHERE DataEntry.id=parents.x LIMIT 10000\n"
           + "        )\n"
           + "        SELECT * FROM parents\n"
           + ")\n"

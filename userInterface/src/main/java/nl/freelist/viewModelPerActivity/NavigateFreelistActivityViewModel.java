@@ -34,8 +34,12 @@ public class NavigateFreelistActivityViewModel extends AndroidViewModel {
             entryRepository).execute(parentId))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     Observable<List<ViewModelEntry>> viewModelEntryList = entryList
-        .map(entries -> ViewModelEntry.createViewModelEntryListFromEntryList(entries));
+        .map(entries -> ViewModelEntry.createViewModelEntryListFromEntryList(entries, parentId));
     return viewModelEntryList;
+  }
+
+  public void updateParentId(int parentId) {
+    this.parentId = parentId;
   }
 
   public void deleteAllEntries() {

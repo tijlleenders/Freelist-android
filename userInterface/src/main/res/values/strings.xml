@@ -3,4 +3,6 @@
   <string name="settings">Settings</string>
   <string name="delete_all_entries">Delete all entries</string>
   <string name="undo">Undo</string>
+  <string name="action_bar_title"></string>
+  <string name="freelists_action_bar_title">My Freelists</string>
 </resources>

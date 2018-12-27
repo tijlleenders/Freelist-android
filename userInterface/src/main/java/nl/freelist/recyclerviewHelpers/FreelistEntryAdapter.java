@@ -48,7 +48,7 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
 
   @Override
   public int getItemViewType(int position) {
-    ViewModelEntry entry = entries.get(position);
+    ViewModelEntry entry = getEntryAt(position);
     return entry.getType();
   }
 
@@ -86,19 +86,11 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
       textViewDescription = itemView.findViewById(R.id.text_view_description);
       textViewDuration = itemView.findViewById(R.id.text_view_duration);
 
+      // Using lambda as below is more efficient than new inner class for every call
       itemView
           .setOnClickListener(view -> onItemClickListener.onItemClick(view, getAdapterPosition()));
 
-//      itemView.setOnClickListener(
-//          new OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//              int position = getAdapterPosition();
-//
-//            }
-//          });
-
-      itemView.setOnLongClickListener(
+      itemView.setOnLongClickListener( //Todo: replace with lambda like with onItemClick?
           new OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {

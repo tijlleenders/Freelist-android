@@ -24,10 +24,6 @@
       android:name="nl.freelist.activities.SettingsActivity"
       android:parentActivityName="nl.freelist.activities.NavigateFreelistActivity">
     </activity>
-    <activity
-      android:name="nl.freelist.activities.ChooseParentActivity"
-      android:parentActivityName="nl.freelist.activities.ChooseParentActivity">
-    </activity>
   </application>
 
 </manifest>

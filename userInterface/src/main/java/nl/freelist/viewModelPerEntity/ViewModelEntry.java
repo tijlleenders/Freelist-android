@@ -62,7 +62,8 @@ public class ViewModelEntry {
     this.type = type;
   }
 
-  public static List<ViewModelEntry> createViewModelEntryListFromEntryList(List<Entry> entryList) {
+  public static List<ViewModelEntry> createViewModelEntryListFromEntryList(List<Entry> entryList,
+      int parentId) {
     //get list of parents
     List<Integer> parentList = new ArrayList<Integer>();
     for (Entry entry : entryList) {
@@ -72,7 +73,7 @@ public class ViewModelEntry {
     List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
     for (Entry entry : entryList) {
       ViewModelEntry viewModelEntry = ViewModelEntry.getViewModelEntryFromEntry(entry);
-      if (parentList.contains(entry.getId())) {
+      if (parentList.contains(entry.getId()) || entry.getId() == parentId) {
         viewModelEntry.setType(ActivityConstants.NODE_ENTRY_VIEW_TYPE);
       } else {
         viewModelEntry.setType(ActivityConstants.LEAF_ENTRY_VIEW_TYPE);
