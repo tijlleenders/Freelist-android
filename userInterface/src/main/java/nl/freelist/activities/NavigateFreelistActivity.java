@@ -17,10 +17,11 @@ import android.widget.Toast;
 import io.reactivex.schedulers.Schedulers;
 import nl.freelist.freelist.R;
 import nl.freelist.presentationConstants.ActivityConstants;
-import nl.freelist.recyclerviewAdapters.FreelistEntryAdapter;
+import nl.freelist.recyclerviewHelpers.FreelistEntryAdapter;
+import nl.freelist.recyclerviewHelpers.ItemClickListener;
 import nl.freelist.viewModelPerActivity.NavigateFreelistActivityViewModel;
 
-public class NavigateFreelistActivity extends AppCompatActivity {
+public class NavigateFreelistActivity extends AppCompatActivity implements ItemClickListener {
 
   private NavigateFreelistActivityViewModel navigateFreelistActivityViewModel;
   private FreelistEntryAdapter adapter;
@@ -47,7 +48,7 @@ public class NavigateFreelistActivity extends AppCompatActivity {
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
     recyclerView.setHasFixedSize(true);
 
-    adapter = new FreelistEntryAdapter();
+    adapter = new FreelistEntryAdapter(this);
 
     recyclerView.setAdapter(adapter);
 
@@ -82,6 +83,8 @@ public class NavigateFreelistActivity extends AppCompatActivity {
             Toast.makeText(NavigateFreelistActivity.this, "DataEntry deleted", Toast.LENGTH_SHORT)
                 .show();
           }
+
+
         })
         .attachToRecyclerView(recyclerView);
   }
@@ -163,5 +166,10 @@ public class NavigateFreelistActivity extends AppCompatActivity {
       default:
         return super.onOptionsItemSelected(item);
     }
+  }
+
+  @Override
+  public void onItemClick(View view, int position) {
+    Toast.makeText(this, "Click!", Toast.LENGTH_SHORT).show();
   }
 }

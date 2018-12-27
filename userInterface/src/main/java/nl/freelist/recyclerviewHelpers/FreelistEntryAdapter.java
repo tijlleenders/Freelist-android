@@ -1,4 +1,4 @@
-package nl.freelist.recyclerviewAdapters;
+package nl.freelist.recyclerviewHelpers;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import java.util.ArrayList;
@@ -19,6 +19,11 @@ import nl.freelist.viewModelPerEntity.ViewModelEntry;
 public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdapter.EntryHolder> {
 
   private List<ViewModelEntry> entries = new ArrayList<>();
+  private ItemClickListener onItemClickListener;
+
+  public FreelistEntryAdapter(ItemClickListener clickListener) {
+    onItemClickListener = clickListener;
+  }
 
   @NonNull
   @Override
@@ -81,15 +86,25 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
       textViewDescription = itemView.findViewById(R.id.text_view_description);
       textViewDuration = itemView.findViewById(R.id.text_view_duration);
 
-      itemView.setOnClickListener(
-          new OnClickListener() {
-            @Override
-            public void onClick(View v) {
+      itemView
+          .setOnClickListener(view -> onItemClickListener.onItemClick(view, getAdapterPosition()));
 
+//      itemView.setOnClickListener(
+//          new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//              int position = getAdapterPosition();
+//
+//            }
+//          });
+
+      itemView.setOnLongClickListener(
+          new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
               Intent intent = new Intent(v.getContext(), AddEditEntryActivity.class);
               intent.putExtra(
                   ActivityConstants.EXTRA_REQUEST_TYPE_EDIT, ActivityConstants.EDIT_ENTRY_REQUEST);
-
               int position = getAdapterPosition();
               ViewModelEntry entry =
                   getEntryAt(
@@ -99,8 +114,10 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
               intent.putExtra(ActivityConstants.EXTRA_ENTRY_ID, Integer.toString(entry.getId()));
               ((Activity) v.getContext())
                   .startActivityForResult(intent, ActivityConstants.EDIT_ENTRY_REQUEST);
+              return false;
             }
-          });
+          }
+      );
     }
   }
 }
