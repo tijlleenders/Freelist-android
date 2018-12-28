@@ -1,5 +1,7 @@
 package nl.freelist.viewModelPerEntity;
 
+import static java.lang.Math.max;
+
 import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
@@ -46,10 +48,12 @@ public class ViewModelEntry {
   public static ViewModelEntry getViewModelEntryFromEntry(Entry entry) {
     int id = entry.getId();
     int parentId = entry.getParentId();
-    String parentTitle = entry.getTitle(); //Todo: fix
+    String parentTitle = entry.getTitle(); // Todo: fix
     String title = entry.getTitle();
     String description = entry.getDescription();
-    String duration = "todo"; //Todo:fix entry.getDuration();
+    String duration =
+        DurationHelper.getDurationStringFromInt(
+            max(entry.getDuration(), entry.getChildrenDuration()));
     int type = ActivityConstants.UNKNOWN_ENTRY_VIEW_TYPE;
     return new ViewModelEntry(id, parentId, parentTitle, title, description, duration, type);
   }
@@ -62,19 +66,21 @@ public class ViewModelEntry {
     this.type = type;
   }
 
-  public static List<ViewModelEntry> createViewModelEntryListFromEntryList(List<Entry> entryList,
-      int parentId) {
-    //get list of parents
+  public static List<ViewModelEntry> createViewModelEntryListFromEntryList(
+      List<Entry> entryList, int parentId) {
+    // get list of parents
     List<Integer> parentList = new ArrayList<Integer>();
     for (Entry entry : entryList) {
       parentList.add(entry.getParentId());
     }
-    //check whether the id is in list of parents
+    // check whether the id is in list of parents
     List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
     for (Entry entry : entryList) {
       ViewModelEntry viewModelEntry = ViewModelEntry.getViewModelEntryFromEntry(entry);
       if (parentList.contains(entry.getId()) || entry.getId() == parentId) {
         viewModelEntry.setType(ActivityConstants.NODE_ENTRY_VIEW_TYPE);
+      } else if (entry.getChildrenCount() >= 1) {
+        viewModelEntry.setType(ActivityConstants.MULTIPLE_ENTRY_VIEW_TYPE);
       } else {
         viewModelEntry.setType(ActivityConstants.LEAF_ENTRY_VIEW_TYPE);
       }
@@ -127,4 +133,3 @@ public class ViewModelEntry {
     return parentTitle;
   }
 }
-

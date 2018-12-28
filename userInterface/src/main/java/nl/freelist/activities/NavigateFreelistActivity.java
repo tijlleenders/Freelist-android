@@ -199,6 +199,9 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
       case ActivityConstants.NODE_ENTRY_VIEW_TYPE:
         parentToSet = adapter.getEntryAt(position).getId();
         break;
+      case ActivityConstants.MULTIPLE_ENTRY_VIEW_TYPE:
+        parentToSet = adapter.getEntryAt(position).getId();
+        break;
       case ActivityConstants.LEAF_ENTRY_VIEW_TYPE:
         parentToSet = adapter.getEntryAt(position).getId();
         break;

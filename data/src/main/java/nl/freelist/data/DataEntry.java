@@ -35,6 +35,11 @@ public class DataEntry {
   }
 
   @Ignore
+  public DataEntry() throws Exception {
+    throw new Exception("Default constructor for DataEntry not allowed.");
+  }
+
+  @Ignore
   public DataEntry(int id, String title, String description, int duration,
       int parentId) {
     this(title, description, duration, parentId);

@@ -7,6 +7,8 @@ public class Entry {
   private String title;
   private String description;
   private int duration;
+  private int childrenCount;
+  private int childrenDuration;
 
   public Entry(
       int id, int parentId, String parentTitle, String title, String description, int duration) {
@@ -16,6 +18,37 @@ public class Entry {
     this.description = description;
     this.duration = duration;
   }
+
+  public Entry(
+      int id, int parentId, String parentTitle, String title, String description, int duration,
+      int childrenCount, int childrenDuration) {
+    this.id = id;
+    this.parentId = parentId;
+    this.title = title;
+
+    this.description = description;
+    this.duration = duration;
+    this.childrenCount = childrenCount;
+    this.childrenDuration = childrenDuration;
+  }
+
+  public int getChildrenCount() {
+    return childrenCount;
+  }
+
+  public void setChildrenCount(int childrenCount) {
+    this.childrenCount = childrenCount;
+  }
+
+  public int getChildrenDuration() {
+    return childrenDuration;
+  }
+
+  public void setChildrenDuration(int childrenDuration) {
+    this.childrenDuration = childrenDuration;
+  }
+
+
 
   public int getId() {
     return id;

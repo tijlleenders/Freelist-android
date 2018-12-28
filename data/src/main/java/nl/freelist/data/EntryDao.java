@@ -27,7 +27,7 @@ public interface EntryDao {
   List<DataEntry> getAllEntries();
 
   @Query(
-      "SELECT * FROM DataEntry\n"
+      "SELECT id FROM DataEntry\n"
           + "WHERE DataEntry.id IN \n"
           + "(\n"
           + "WITH RECURSIVE parents(x) AS (\n"
@@ -39,13 +39,41 @@ public interface EntryDao {
           + "        )\n"
           + "        SELECT * FROM parents\n"
           + ")\n"
-          + "UNION\n"
-          + "SELECT * FROM DataEntry\n"
-          + "WHERE DataEntry.parentId = :id;\n"
+          + "OR DataEntry.parentId = :id;\n"
   )
-  List<DataEntry> getAllEntriesForParent(int id);
+  List<Integer> getAllAncestorAndDirectChildrenIdsForParent(int id);
+
+  @Query(
+      "WITH RECURSIVE ChildrenCTE(x) AS (\n"
+          + "  SELECT  DataEntry.id\n"
+          + "  FROM DataEntry\n"
+          + "  WHERE DataEntry.id = :id\n"
+          + "  UNION ALL\n"
+          + "  SELECT  DataEntry.id\n"
+          + "  FROM    DataEntry, ChildrenCTE cte\n"
+          + "          WHERE DataEntry.parentId=cte.x LIMIT 10000\n"
+          + ") \n"
+          + "SELECT *\n"
+          + ", (\n"
+          + "\tSELECT count(*) FROM DataEntry\n"
+          + "\tWHERE DataEntry.id != :id\n"
+          + "\tAND DataEntry.id IN\n"
+          + "\t(select * from ChildrenCTE)\n"
+          + "\tAND DataEntry.id NOT IN\n"
+          + "\t(select parentId from DataEntry)\n"
+          + "\t) AS childrenCount\n"
+          + ", (\n"
+          + "\tSELECT sum(duration) FROM DataEntry\n"
+          + "\tWHERE DataEntry.id != :id\n"
+          + "\tAND DataEntry.id IN\n"
+          + "\t(select * from ChildrenCTE)\n"
+          + "\tAND DataEntry.id NOT IN\n"
+          + "\t(select parentId from DataEntry)\n"
+          + "\t) AS childrenDuration\n"
+          + "FROM DataEntry\n"
+          + "WHERE DataEntry.id = :id;")
+  DataEntryExtra getDataEntryExtra(int id);
 
   @Query("SELECT * FROM DataEntry WHERE id = :id")
   DataEntry getEntry(int id);
-
 }

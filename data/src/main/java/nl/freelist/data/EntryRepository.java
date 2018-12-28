@@ -22,8 +22,7 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
     String description = entry.getDescription();
     int duration = entry.getDuration();
     int parentId = entry.getParentId();
-    DataEntry dataEntry =
-        new DataEntry(id, title, description, duration, parentId);
+    DataEntry dataEntry = new DataEntry(id, title, description, duration, parentId);
     return dataEntry;
   }
 
@@ -37,6 +36,16 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
     return tempEntryList;
   }
 
+  private List<Entry> getEntryListFromDataExtraEntryList(List<DataEntryExtra> dataEntryExtraList) {
+    List<Entry> tempEntryList = new ArrayList<>();
+    Entry entry;
+    for (DataEntryExtra dataEntryExtra : dataEntryExtraList) {
+      entry = getEntryFromDataEntryExtra(dataEntryExtra);
+      tempEntryList.add(entry);
+    }
+    return tempEntryList;
+  }
+
   private Entry getEntryFromDataEntry(DataEntry dataEntry) {
     int id = dataEntry.getId();
     int parentId = dataEntry.getParentId();
@@ -44,8 +53,29 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
     String title = dataEntry.getTitle();
     String description = dataEntry.getDescription();
     int duration = dataEntry.getDuration();
+    Entry entry = new Entry(id, parentId, parentTitle, title, description, duration);
+    return entry;
+  }
+
+  private Entry getEntryFromDataEntryExtra(DataEntryExtra dataEntryExtra) {
+    int id = dataEntryExtra.getId();
+    int parentId = dataEntryExtra.getParentId();
+    String parentTitle = dataEntryExtra.getTitle(); // Todo: implement getParentTitle
+    String title = dataEntryExtra.getTitle();
+    String description = dataEntryExtra.getDescription();
+    int duration = dataEntryExtra.getDuration();
+    int childrenCount = dataEntryExtra.getChildrenCount();
+    int childrenDuration = dataEntryExtra.getChildrenDuration();
     Entry entry =
-        new Entry(id, parentId, parentTitle, title, description, duration);
+        new Entry(
+            id,
+            parentId,
+            parentTitle,
+            title,
+            description,
+            duration,
+            childrenCount,
+            childrenDuration);
     return entry;
   }
 
@@ -58,23 +88,19 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
 
   @Override
   public void insert(Iterable<Entry> items) {
-
   }
 
   @Override
   public void update(Entry item) {
-
   }
 
   @Override
   public void delete(Entry item) {
-
   }
 
   @Override
   public void delete(Specifiable specification) {
   }
-
 
   @Override
   public List<Entry> query(Specifiable specification) {
@@ -94,6 +120,11 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
 
   @Override
   public List<Entry> getAllEntriesForParent(int id) {
-    return getEntryListFromDataEntryList(entryDao.getAllEntriesForParent(id));
+    List<Integer> idList = entryDao.getAllAncestorAndDirectChildrenIdsForParent(id);
+    List<Entry> entryList = new ArrayList<>();
+    for (int idToFetch : idList) { // Todo: Fix n+1 query if possible/needed performance wise
+      entryList.add(getEntryFromDataEntryExtra(entryDao.getDataEntryExtra(idToFetch)));
+    }
+    return entryList;
   }
 }

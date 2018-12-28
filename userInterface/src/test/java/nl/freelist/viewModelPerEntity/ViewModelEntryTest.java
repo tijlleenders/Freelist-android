@@ -27,7 +27,7 @@ public class ViewModelEntryTest {
   @Test
   public void createViewModelEntryListFromEntryList() {
     List<ViewModelEntry> viewModelEntryList = new ArrayList<>();
-    viewModelEntryList = ViewModelEntry.createViewModelEntryListFromEntryList(entryList);
+    viewModelEntryList = ViewModelEntry.createViewModelEntryListFromEntryList(entryList, 1);
 
     assertEquals(ActivityConstants.NODE_ENTRY_VIEW_TYPE, viewModelEntryList.get(0).getType());
     assertEquals(ActivityConstants.LEAF_ENTRY_VIEW_TYPE, viewModelEntryList.get(1).getType());
