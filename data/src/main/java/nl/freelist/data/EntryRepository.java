@@ -36,31 +36,19 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
     return tempEntryList;
   }
 
-  private List<Entry> getEntryListFromDataExtraEntryList(List<DataEntryExtra> dataEntryExtraList) {
-    List<Entry> tempEntryList = new ArrayList<>();
-    Entry entry;
-    for (DataEntryExtra dataEntryExtra : dataEntryExtraList) {
-      entry = getEntryFromDataEntryExtra(dataEntryExtra);
-      tempEntryList.add(entry);
-    }
-    return tempEntryList;
-  }
-
   private Entry getEntryFromDataEntry(DataEntry dataEntry) {
     int id = dataEntry.getId();
     int parentId = dataEntry.getParentId();
-    String parentTitle = dataEntry.getTitle(); // Todo: implement getParentTitle
     String title = dataEntry.getTitle();
     String description = dataEntry.getDescription();
     int duration = dataEntry.getDuration();
-    Entry entry = new Entry(id, parentId, parentTitle, title, description, duration);
+    Entry entry = new Entry(id, parentId, title, description, duration);
     return entry;
   }
 
   private Entry getEntryFromDataEntryExtra(DataEntryExtra dataEntryExtra) {
     int id = dataEntryExtra.getId();
     int parentId = dataEntryExtra.getParentId();
-    String parentTitle = dataEntryExtra.getTitle(); // Todo: implement getParentTitle
     String title = dataEntryExtra.getTitle();
     String description = dataEntryExtra.getDescription();
     int duration = dataEntryExtra.getDuration();
@@ -70,7 +58,6 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
         new Entry(
             id,
             parentId,
-            parentTitle,
             title,
             description,
             duration,

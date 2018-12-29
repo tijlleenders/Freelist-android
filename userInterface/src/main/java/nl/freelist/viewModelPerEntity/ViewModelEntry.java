@@ -12,7 +12,6 @@ public class ViewModelEntry {
 
   private int id;
   private int parentId;
-  private String parentTitle;
   private String title;
   private String description;
   private String duration;
@@ -21,14 +20,12 @@ public class ViewModelEntry {
   public ViewModelEntry(
       int id,
       int parentId,
-      String parentTitle,
       String title,
       String description,
       String duration,
       int type) {
     this.id = id;
     this.parentId = parentId;
-    this.parentTitle = parentTitle;
     this.title = title;
     this.description = description;
     this.duration = duration;
@@ -38,24 +35,22 @@ public class ViewModelEntry {
   public static Entry getEntryFromViewModelEntry(ViewModelEntry viewModelEntry) {
     int id = viewModelEntry.id;
     int parentId = viewModelEntry.parentId;
-    String parentTitle = viewModelEntry.parentTitle;
     String title = viewModelEntry.title;
     String description = viewModelEntry.description;
     int duration = DurationHelper.getDurationIntFromString(viewModelEntry.duration);
-    return new Entry(id, parentId, parentTitle, title, description, duration);
+    return new Entry(id, parentId, title, description, duration);
   }
 
   public static ViewModelEntry getViewModelEntryFromEntry(Entry entry) {
     int id = entry.getId();
     int parentId = entry.getParentId();
-    String parentTitle = entry.getTitle(); // Todo: fix
     String title = entry.getTitle();
     String description = entry.getDescription();
     String duration =
         DurationHelper.getDurationStringFromInt(
             max(entry.getDuration(), entry.getChildrenDuration()));
     int type = ActivityConstants.UNKNOWN_ENTRY_VIEW_TYPE;
-    return new ViewModelEntry(id, parentId, parentTitle, title, description, duration, type);
+    return new ViewModelEntry(id, parentId, title, description, duration, type);
   }
 
   public int getType() {
@@ -129,7 +124,4 @@ public class ViewModelEntry {
     this.duration = duration;
   }
 
-  public String getParentTitle() {
-    return parentTitle;
-  }
 }

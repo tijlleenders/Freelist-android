@@ -22,6 +22,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
   private int id;
   private int parentId;
+  private int parentOfParentId;
   private EditText editTextTitle;
   private EditText editTextDescription;
   private Button parentButton;
@@ -72,13 +73,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
                         new Runnable() {
                           @Override
                           public void run() {
-                            editTextTitle.setText(viewModelEntry.getTitle());
-                            editTextDescription.setText(viewModelEntry.getDescription());
-                            numberPickerDuration.setValue(
-                                numberPickerDuration
-                                    .getNumberPickerPosition(viewModelEntry.getDuration()));
-                            parentButton.setText(viewModelEntry.getParentTitle());
-                            parentId = viewModelEntry.getParentId();
+                            updateEditActivityWith(viewModelEntry);
                           }
                         });
 
@@ -101,7 +96,6 @@ public class AddEditEntryActivity extends AppCompatActivity {
     }
 
     //parentId initialized to 0 by default or set by lambda from observable
-    String parentTitle = "parentTitle"; //Todo: replace with current ID from parent button value
     String title = editTextTitle.getText().toString();
     String description = editTextDescription.getText().toString();
     String duration = "5m"; //Todo: implement setNumberPicker and getNumberPicker based on string value only (abstract the rest) and get current value from numberPickerDuration
@@ -120,14 +114,14 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
     ViewModelEntry viewModelEntryToSave =
         new ViewModelEntry(
-            id, parentId, parentTitle, title, description, duration,
+            id, parentId, title, description, duration,
             ActivityConstants.UNKNOWN_ENTRY_VIEW_TYPE);
 
     AddEditEntryActivityViewModel
         .saveViewModelEntry(viewModelEntryToSave)
         .subscribe(
             (
-                viewModelEntry -> {
+                resultObject -> {
                   // update View
                   runOnUiThread(
                       new Runnable() {
@@ -175,6 +169,33 @@ public class AddEditEntryActivity extends AppCompatActivity {
       default:
         return super.onOptionsItemSelected(item);
     }
+  }
+
+  private void updateEditActivityWith(ViewModelEntry viewModelEntry) {
+    editTextTitle.setText(viewModelEntry.getTitle());
+    editTextDescription.setText(viewModelEntry.getDescription());
+    numberPickerDuration.setValue(
+        numberPickerDuration
+            .getNumberPickerPosition(viewModelEntry.getDuration()));
+    parentId = viewModelEntry.getParentId();
+    AddEditEntryActivityViewModel
+        .getViewModelEntry(parentId)
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .subscribe(
+            (
+                viewModelEntryParent -> {
+                  // update View
+                  runOnUiThread(
+                      new Runnable() {
+                        @Override
+                        public void run() {
+                          parentOfParentId = viewModelEntryParent.getParentId();
+                          parentButton.setText(viewModelEntryParent.getTitle());
+                        }
+                      });
+
+                }));
   }
 
 }

@@ -11,7 +11,7 @@ public class Entry {
   private int childrenDuration;
 
   public Entry(
-      int id, int parentId, String parentTitle, String title, String description, int duration) {
+      int id, int parentId, String title, String description, int duration) {
     this.id = id;
     this.parentId = parentId;
     this.title = title;
@@ -20,7 +20,7 @@ public class Entry {
   }
 
   public Entry(
-      int id, int parentId, String parentTitle, String title, String description, int duration,
+      int id, int parentId, String title, String description, int duration,
       int childrenCount, int childrenDuration) {
     this.id = id;
     this.parentId = parentId;
