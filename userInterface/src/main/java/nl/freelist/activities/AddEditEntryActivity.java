@@ -178,6 +178,11 @@ public class AddEditEntryActivity extends AppCompatActivity {
         numberPickerDuration
             .getNumberPickerPosition(viewModelEntry.getDuration()));
     parentId = viewModelEntry.getParentId();
+
+    if (parentId == 0) {
+      parentButton.setText("");
+      return;
+    }
     AddEditEntryActivityViewModel
         .getViewModelEntry(parentId)
         .subscribeOn(Schedulers.io())
@@ -196,6 +201,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
                       });
 
                 }));
+    return;
   }
 
 }
