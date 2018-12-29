@@ -14,7 +14,15 @@ public class ViewModelEntry {
   private int parentId;
   private String title;
   private String description;
-  private String duration;
+  private String durationString;
+  private int duration;
+  private int years;
+  private int weeks;
+  private int days;
+  private int hours;
+  private int minutes;
+  private int seconds;
+
   private int type;
 
   public ViewModelEntry(
@@ -22,22 +30,37 @@ public class ViewModelEntry {
       int parentId,
       String title,
       String description,
-      String duration,
+      String durationString,
+      int duration,
+      int years,
+      int weeks,
+      int days,
+      int hours,
+      int minutes,
+      int seconds,
       int type) {
     this.id = id;
     this.parentId = parentId;
     this.title = title;
     this.description = description;
+    this.durationString = durationString;
     this.duration = duration;
+    this.years = years;
+    this.weeks = weeks;
+    this.days = days;
+    this.hours = hours;
+    this.minutes = minutes;
+    this.seconds = seconds;
     this.type = type;
   }
+
 
   public static Entry getEntryFromViewModelEntry(ViewModelEntry viewModelEntry) {
     int id = viewModelEntry.id;
     int parentId = viewModelEntry.parentId;
     String title = viewModelEntry.title;
     String description = viewModelEntry.description;
-    int duration = DurationHelper.getDurationIntFromString(viewModelEntry.duration);
+    int duration = viewModelEntry.duration;
     return new Entry(id, parentId, title, description, duration);
   }
 
@@ -46,11 +69,18 @@ public class ViewModelEntry {
     int parentId = entry.getParentId();
     String title = entry.getTitle();
     String description = entry.getDescription();
-    String duration =
-        DurationHelper.getDurationStringFromInt(
-            max(entry.getDuration(), entry.getChildrenDuration()));
+    int duration = max(entry.getDuration(), entry.getChildrenDuration());
+    String durationString =
+        DurationHelper.getDurationStringFromInt(duration);
+    int years = DurationHelper.getYearsIntFrom(duration);
+    int weeks = DurationHelper.getWeeksIntFrom(duration);
+    int days = DurationHelper.getDaysIntFrom(duration);
+    int hours = DurationHelper.getHoursIntFrom(duration);
+    int minutes = DurationHelper.getMinutesIntFrom(duration);
+    int seconds = DurationHelper.getSecondsIntFrom(duration);
     int type = ActivityConstants.UNKNOWN_ENTRY_VIEW_TYPE;
-    return new ViewModelEntry(id, parentId, title, description, duration, type);
+    return new ViewModelEntry(id, parentId, title, description, durationString, duration, years,
+        weeks, days, hours, minutes, seconds, type);
   }
 
   public int getType() {
@@ -116,12 +146,16 @@ public class ViewModelEntry {
     this.description = description;
   }
 
-  public String getDuration() {
-    return duration;
+  public String getDurationString() {
+    return durationString;
   }
 
-  public void setDuration(String duration) {
-    this.duration = duration;
+  public int getMinutes() {
+    return 1; //Todo: fix
+  }
+
+  public void setDurationString(String durationString) {
+    this.durationString = durationString;
   }
 
 }

@@ -35,7 +35,32 @@
     android:orientation="horizontal">
 
     <nl.freelist.views.NumberPickerDuration
-      android:id="@+id/number_picker_duration"
+      android:id="@+id/year_picker"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"/>
+
+    <nl.freelist.views.NumberPickerDuration
+      android:id="@+id/week_picker"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"/>
+
+    <nl.freelist.views.NumberPickerDuration
+      android:id="@+id/day_picker"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"/>
+
+    <nl.freelist.views.NumberPickerDuration
+      android:id="@+id/hour_picker"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"/>
+
+    <nl.freelist.views.NumberPickerDuration
+      android:id="@+id/minute_picker"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"/>
+
+    <nl.freelist.views.NumberPickerDuration
+      android:id="@+id/second_picker"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"/>
 

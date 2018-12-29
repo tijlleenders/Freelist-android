@@ -57,7 +57,7 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
     ViewModelEntry currentEntry = entries.get(position);
     entryHolder.textViewTitle.setText(currentEntry.getTitle());
     entryHolder.textViewDescription.setText(currentEntry.getDescription());
-    entryHolder.textViewDuration.setText(currentEntry.getDuration());
+    entryHolder.textViewDuration.setText(currentEntry.getDurationString());
   }
 
   @Override

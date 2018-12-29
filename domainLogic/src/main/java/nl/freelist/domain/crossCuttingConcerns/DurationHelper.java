@@ -2,50 +2,51 @@ package nl.freelist.domain.crossCuttingConcerns;
 
 public class DurationHelper { //Todo: move to value object in domain model
 
-  public static int getDurationIntFromString(String durationString) {
-    int durationInt = 1;
-    switch (durationString) {
-      case "5m":
-        durationInt = 1;
-        break;
-      case "15m":
-        durationInt = 2;
-        break;
-      case "45m":
-        durationInt = 3;
-        break;
-      case "2h":
-        durationInt = 4;
-        break;
-      case "4h":
-        durationInt = 5;
-        break;
-      case "8h":
-        durationInt = 6;
-        break;
-      case "12h":
-        durationInt = 7;
-        break;
-      case "24h":
-        durationInt = 8;
-        break;
-      default:
-        durationInt = 1; //Todo: what if user can customize their durations, then available choices on numberpicker will not match values from repository...
-        break;
-    }
-    return durationInt;
+  public static int getDurationIntFromInts(int years, int weeks, int days, int hours, int minutes,
+      int seconds) {
+    int result = 0;
+    result += years * (3600 * 24 * 365 + 3600 * 6);
+    result += weeks * (3600 * 24 * 7);
+    result += days * (3600 * 24);
+    result += hours * 3600;
+    result += minutes * 60;
+    result += seconds;
+    return result;
+  }
+
+  public static int getYearsIntFrom(int duration) {
+    return (duration) / (3600 * 24 * 365 + 3600 * 6);
+  }
+
+  public static int getWeeksIntFrom(int duration) {
+    return (duration % (3600 * 24 * 365 + 3600 * 6)) / (3600 * 24 * 7);
+  }
+
+  public static int getDaysIntFrom(int duration) {
+    return ((duration % (3600 * 24 * 365 + 3600 * 6)) % (3600 * 24 * 7)) / (3600 * 24);
+  }
+
+  public static int getHoursIntFrom(int duration) {
+    return (duration % (3600 * 24)) / 3600;
+  }
+
+  public static int getMinutesIntFrom(int duration) {
+    return (duration % 3600) / 60;
+  }
+
+  public static int getSecondsIntFrom(int duration) {
+    return (duration % 60);
   }
 
   public static String getDurationStringFromInt(int duration) {
 
-    int years = (duration) / (3600 * 24 * 365 + 3600 * 6);
-    int weeks = (duration % (3600 * 24 * 365 + 3600 * 6)) / (3600 * 24 * 7);
-    int days = ((duration % (3600 * 24 * 365 + 3600 * 6)) % (3600 * 24 * 7)) / (3600 * 24);
-    int hours = (duration % (3600 * 24)) / 3600;
-    int minutes = (duration % 3600) / 60;
-    int seconds = (duration % 60);
+    int years = getYearsIntFrom(duration);
+    int weeks = getWeeksIntFrom(duration);
+    int days = getDaysIntFrom(duration);
+    int hours = getHoursIntFrom(duration);
+    int minutes = getMinutesIntFrom(duration);
+    int seconds = getSecondsIntFrom(duration);
 
-    StringBuilder durationString = new StringBuilder();
     if (seconds >= 30 && hours > 0) {
       minutes += 1;
       seconds = 0;
@@ -62,6 +63,8 @@ public class DurationHelper { //Todo: move to value object in domain model
       weeks += 1;
       days = 0;
     }
+
+    StringBuilder durationString = new StringBuilder();
 
     if (years != 0) {
       durationString.append(years).append("y");
