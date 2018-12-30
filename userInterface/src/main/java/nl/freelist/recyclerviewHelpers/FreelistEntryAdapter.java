@@ -106,6 +106,8 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
               intent.putExtra(ActivityConstants.EXTRA_ENTRY_ID, Integer.toString(entry.getId()));
               ((Activity) v.getContext())
                   .startActivityForResult(intent, ActivityConstants.EDIT_ENTRY_REQUEST);
+              ((Activity) v.getContext())
+                  .overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
               return false;
             }
           }

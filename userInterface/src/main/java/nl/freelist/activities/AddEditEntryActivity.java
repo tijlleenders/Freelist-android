@@ -197,6 +197,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
     // todo: make distinction between add or update entry?
     data.putExtra(ActivityConstants.EXTRA_TITLE, title);
     setResult(RESULT_OK, data);
+    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     finish();
   }
 
