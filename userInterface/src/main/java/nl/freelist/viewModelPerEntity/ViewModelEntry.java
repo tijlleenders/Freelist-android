@@ -10,6 +10,30 @@ import nl.freelist.presentationConstants.ActivityConstants;
 
 public class ViewModelEntry {
 
+  public int getDuration() {
+    return duration;
+  }
+
+  public int getYears() {
+    return years;
+  }
+
+  public int getWeeks() {
+    return weeks;
+  }
+
+  public int getDays() {
+    return days;
+  }
+
+  public int getHours() {
+    return hours;
+  }
+
+  public int getSeconds() {
+    return seconds;
+  }
+
   private int id;
   private int parentId;
   private String title;
@@ -54,7 +78,6 @@ public class ViewModelEntry {
     this.type = type;
   }
 
-
   public static Entry getEntryFromViewModelEntry(ViewModelEntry viewModelEntry) {
     int id = viewModelEntry.id;
     int parentId = viewModelEntry.parentId;
@@ -70,8 +93,7 @@ public class ViewModelEntry {
     String title = entry.getTitle();
     String description = entry.getDescription();
     int duration = max(entry.getDuration(), entry.getChildrenDuration());
-    String durationString =
-        DurationHelper.getDurationStringFromInt(duration);
+    String durationString = DurationHelper.getDurationStringFromInt(duration);
     int years = DurationHelper.getYearsIntFrom(duration);
     int weeks = DurationHelper.getWeeksIntFrom(duration);
     int days = DurationHelper.getDaysIntFrom(duration);
@@ -79,8 +101,20 @@ public class ViewModelEntry {
     int minutes = DurationHelper.getMinutesIntFrom(duration);
     int seconds = DurationHelper.getSecondsIntFrom(duration);
     int type = ActivityConstants.UNKNOWN_ENTRY_VIEW_TYPE;
-    return new ViewModelEntry(id, parentId, title, description, durationString, duration, years,
-        weeks, days, hours, minutes, seconds, type);
+    return new ViewModelEntry(
+        id,
+        parentId,
+        title,
+        description,
+        durationString,
+        duration,
+        years,
+        weeks,
+        days,
+        hours,
+        minutes,
+        seconds,
+        type);
   }
 
   public int getType() {
@@ -151,11 +185,10 @@ public class ViewModelEntry {
   }
 
   public int getMinutes() {
-    return 1; //Todo: fix
+    return minutes;
   }
 
   public void setDurationString(String durationString) {
     this.durationString = durationString;
   }
-
 }

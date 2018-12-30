@@ -74,6 +74,4 @@ public interface EntryDao {
           + "WHERE DataEntry.id = :id;")
   DataEntryExtra getDataEntryExtra(int id);
 
-  @Query("SELECT * FROM DataEntry WHERE id = :id")
-  DataEntry getEntry(int id);
 }

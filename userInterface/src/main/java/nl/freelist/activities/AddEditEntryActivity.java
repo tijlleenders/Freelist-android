@@ -29,7 +29,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
   private EditText editTextDescription;
   private Button parentButton;
 
-  //Todo: move to fragment invoked by tapping the (readable) duration display button
+  // Todo: move to fragment invoked by tapping the (readable) duration display button
   private NumberPickerDuration yearPicker;
   private NumberPickerDuration weekPicker;
   private NumberPickerDuration dayPicker;
@@ -37,7 +37,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
   private NumberPickerDuration minutePicker;
   private NumberPickerDuration secondPicker;
 
-  private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel AddEditEntryActivityViewModel;
+  private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel
+      AddEditEntryActivityViewModel;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +48,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
     initializeViews();
 
     AddEditEntryActivityViewModel =
-        ViewModelProviders.of(this)
-            .get(AddEditEntryActivityViewModel.class);
+        ViewModelProviders.of(this).get(AddEditEntryActivityViewModel.class);
 
     Bundle bundle = getIntent().getExtras();
 
@@ -56,23 +56,20 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
       id = Integer.valueOf(bundle.getString(ActivityConstants.EXTRA_ENTRY_ID));
 
-      AddEditEntryActivityViewModel
-          .getViewModelEntry(id)
+      AddEditEntryActivityViewModel.getViewModelEntry(id)
           .subscribeOn(Schedulers.io())
           .observeOn(Schedulers.io())
           .subscribe(
-              (
-                  viewModelEntry -> {
-                    // update View
-                    runOnUiThread(
-                        new Runnable() {
-                          @Override
-                          public void run() {
-                            updateEditActivityWith(viewModelEntry);
-                          }
-                        });
-
-                  }));
+              (viewModelEntry -> {
+                // update View
+                runOnUiThread(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        updateEditActivityWith(viewModelEntry);
+                      }
+                    });
+              }));
 
       getSupportActionBar()
           .setHomeAsUpIndicator(R.drawable.ic_close); // todo: move outside of if else if?
@@ -90,60 +87,65 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
     yearPicker = findViewById(R.id.year_picker);
     yearPicker.setMaxValue(99);
-    yearPicker.setFormatter(new Formatter() {
-      @Override
-      public String format(int value) {
-        return Integer.toString(value) + "y";
-      }
-    });
+    yearPicker.setFormatter(
+        new Formatter() {
+          @Override
+          public String format(int value) {
+            return Integer.toString(value) + "y";
+          }
+        });
 
     weekPicker = findViewById(R.id.week_picker);
     weekPicker.setMaxValue(51);
-    weekPicker.setFormatter(new Formatter() {
-      @Override
-      public String format(int value) {
-        return Integer.toString(value) + "w";
-      }
-    });
+    weekPicker.setFormatter(
+        new Formatter() {
+          @Override
+          public String format(int value) {
+            return Integer.toString(value) + "w";
+          }
+        });
 
     dayPicker = findViewById(R.id.day_picker);
     dayPicker.setMaxValue(6);
-    dayPicker.setFormatter(new Formatter() {
-      @Override
-      public String format(int value) {
-        return Integer.toString(value) + "d";
-      }
-    });
+    dayPicker.setFormatter(
+        new Formatter() {
+          @Override
+          public String format(int value) {
+            return Integer.toString(value) + "d";
+          }
+        });
 
     hourPicker = findViewById(R.id.hour_picker);
     hourPicker.setMaxValue(23);
-    hourPicker.setFormatter(new Formatter() {
-      @Override
-      public String format(int value) {
-        return Integer.toString(value) + "h";
-      }
-    });
+    hourPicker.setFormatter(
+        new Formatter() {
+          @Override
+          public String format(int value) {
+            return Integer.toString(value) + "h";
+          }
+        });
 
     minutePicker = findViewById(R.id.minute_picker);
     minutePicker.setMinValue(0);
     minutePicker.setMaxValue(59);
-    minutePicker.setFormatter(new Formatter() {
-      @Override
-      public String format(int value) {
-        return Integer.toString(value) + "m";
-      }
-    });
+    minutePicker.setFormatter(
+        new Formatter() {
+          @Override
+          public String format(int value) {
+            return Integer.toString(value) + "m";
+          }
+        });
 
     secondPicker = findViewById(R.id.second_picker);
     secondPicker.setMinValue(0);
     secondPicker.setMaxValue(59);
-    secondPicker.setFormatter(new Formatter() {
-      @Override
-      public String format(int value) {
-        return Integer.toString(value) + "s";
-      }
-    });
-
+    secondPicker.setFormatter(
+        new Formatter() {
+          @Override
+          public String format(int value) {
+            return Integer.toString(value) + "s";
+          }
+        });
   }
 
   private void saveEntry() {
@@ -159,31 +161,37 @@ public class AddEditEntryActivity extends AppCompatActivity {
     int hours = hourPicker.getValue();
     int minutes = minutePicker.getValue();
     int seconds = secondPicker.getValue();
-    int duration = DurationHelper
-        .getDurationIntFromInts(years, weeks, days, hours, minutes, seconds);
+    int duration =
+        DurationHelper.getDurationIntFromInts(years, weeks, days, hours, minutes, seconds);
     String durationString = DurationHelper.getDurationStringFromInt(duration);
     ViewModelEntry viewModelEntryToSave =
         new ViewModelEntry(
-            id, parentId, title, description, durationString, duration, years, weeks, days, hours,
-            minutes, seconds,
+            id,
+            parentId,
+            title,
+            description,
+            durationString,
+            duration,
+            years,
+            weeks,
+            days,
+            hours,
+            minutes,
+            seconds,
             ActivityConstants.UNKNOWN_ENTRY_VIEW_TYPE);
 
-    AddEditEntryActivityViewModel
-        .saveViewModelEntry(viewModelEntryToSave)
+    AddEditEntryActivityViewModel.saveViewModelEntry(viewModelEntryToSave)
         .subscribe(
-            (
-                resultObject -> {
-                  // update View
-                  runOnUiThread(
-                      new Runnable() {
-                        @Override
-                        public void run() {
-                          // Do stufff
-                        }
-                      });
-
-                }));
-
+            (resultObject -> {
+              // update View
+              runOnUiThread(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      // Do stufff
+                    }
+                  });
+            }));
 
     Bundle bundle = getIntent().getExtras();
 
@@ -232,32 +240,35 @@ public class AddEditEntryActivity extends AppCompatActivity {
   private void updateEditActivityWith(ViewModelEntry viewModelEntry) {
     editTextTitle.setText(viewModelEntry.getTitle());
     editTextDescription.setText(viewModelEntry.getDescription());
+    //Todo: fix bug in NumberPicker that doesn't display formatting on first rendering
+    yearPicker.setValue(viewModelEntry.getYears());
+    weekPicker.setValue(viewModelEntry.getWeeks());
+    dayPicker.setValue(viewModelEntry.getDays());
+    hourPicker.setValue(viewModelEntry.getHours());
     minutePicker.setValue(viewModelEntry.getMinutes());
-    parentId = viewModelEntry.getParentId();
+    secondPicker.setValue(viewModelEntry.getSeconds());
 
+    parentId = viewModelEntry.getParentId();
     if (parentId == 0) {
       parentButton.setText("");
       return;
     }
-    AddEditEntryActivityViewModel
-        .getViewModelEntry(parentId)
+
+    AddEditEntryActivityViewModel.getViewModelEntry(parentId)
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .subscribe(
-            (
-                viewModelEntryParent -> {
-                  // update View
-                  runOnUiThread(
-                      new Runnable() {
-                        @Override
-                        public void run() {
-                          parentOfParentId = viewModelEntryParent.getParentId();
-                          parentButton.setText(viewModelEntryParent.getTitle());
-                        }
-                      });
-
-                }));
+            (viewModelEntryParent -> {
+              // update View
+              runOnUiThread(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      parentOfParentId = viewModelEntryParent.getParentId();
+                      parentButton.setText(viewModelEntryParent.getTitle());
+                    }
+                  });
+            }));
     return;
   }
-
 }

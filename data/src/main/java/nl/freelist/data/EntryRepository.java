@@ -97,7 +97,7 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
 
   @Override
   public Entry getById(int id) {
-    return getEntryFromDataEntry(entryDao.getEntry(id));
+    return getEntryFromDataEntryExtra(entryDao.getDataEntryExtra(id));
   }
 
   @Override
