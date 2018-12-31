@@ -5,4 +5,5 @@
   <string name="undo">Undo</string>
   <string name="action_bar_title"></string>
   <string name="freelists_action_bar_title">My Freelists</string>
+  <string name="choose_parent_action_bar_title">Choose parent</string>
 </resources>

@@ -3,10 +3,13 @@ package nl.freelist.activities;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker.Formatter;
@@ -20,6 +23,8 @@ import nl.freelist.viewModelPerEntity.ViewModelEntry;
 import nl.freelist.views.NumberPickerDuration;
 
 public class AddEditEntryActivity extends AppCompatActivity {
+
+  private static final String TAG = "AddEditEntryActivity";
 
   private int id;
   private int parentId;
@@ -39,6 +44,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
   private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel
       AddEditEntryActivityViewModel;
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +155,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
   }
 
   private void saveEntry() {
+    Log.d(TAG, "saveEntry called");
     if (!isValidInput()) {
       return;
     }
@@ -227,6 +234,37 @@ public class AddEditEntryActivity extends AppCompatActivity {
   }
 
   @Override
+  protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    Log.d(TAG, "onActivityResult called.");
+
+    if (requestCode == ActivityConstants.CHOOSE_PARENT_REQUEST && resultCode == RESULT_OK) {
+      Bundle bundle = data.getExtras();
+      parentId = Integer.valueOf(bundle.getString(ActivityConstants.EXTRA_ENTRY_ID));
+
+      if (parentId == 0) {
+        parentButton.setText("");
+      } else {
+
+        AddEditEntryActivityViewModel.getViewModelEntry(parentId)
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe(
+                (viewModelEntry -> {
+                  // update View
+                  runOnUiThread(
+                      new Runnable() {
+                        @Override
+                        public void run() {
+                          parentButton.setText(viewModelEntry.getTitle());
+                        }
+                      });
+                }));
+      }
+    }
+  }
+
+  @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.save_entry:
@@ -238,17 +276,35 @@ public class AddEditEntryActivity extends AppCompatActivity {
   }
 
   private void updateEditActivityWith(ViewModelEntry viewModelEntry) {
+    Log.d(TAG, "updateEditActivityWith viewModelEntry " + viewModelEntry.getTitle() + "called");
     editTextTitle.setText(viewModelEntry.getTitle());
     editTextDescription.setText(viewModelEntry.getDescription());
-    //Todo: fix bug in NumberPicker that doesn't display formatting on first rendering
+    // Todo: fix bug in NumberPicker that doesn't display formatting on first rendering
     yearPicker.setValue(viewModelEntry.getYears());
     weekPicker.setValue(viewModelEntry.getWeeks());
     dayPicker.setValue(viewModelEntry.getDays());
     hourPicker.setValue(viewModelEntry.getHours());
     minutePicker.setValue(viewModelEntry.getMinutes());
     secondPicker.setValue(viewModelEntry.getSeconds());
-
+    //id already set
     parentId = viewModelEntry.getParentId();
+    parentButton.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            Intent chooseParentActivityIntent =
+                new Intent(AddEditEntryActivity.this, ChooseEntryActivity.class);
+            chooseParentActivityIntent.putExtra(
+                ActivityConstants.EXTRA_REQUEST_TYPE_CHOOSE_PARENT,
+                ActivityConstants.CHOOSE_PARENT_REQUEST);
+            chooseParentActivityIntent.putExtra(
+                ActivityConstants.EXTRA_ENTRY_ID, Integer.toString(id));
+            startActivityForResult(
+                chooseParentActivityIntent, ActivityConstants.CHOOSE_PARENT_REQUEST);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+          }
+        });
+
     if (parentId == 0) {
       parentButton.setText("");
       return;

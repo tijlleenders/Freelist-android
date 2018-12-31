@@ -21,11 +21,11 @@ import nl.freelist.freelist.R;
 import nl.freelist.presentationConstants.ActivityConstants;
 import nl.freelist.recyclerviewHelpers.FreelistEntryAdapter;
 import nl.freelist.recyclerviewHelpers.ItemClickListener;
-import nl.freelist.viewModelPerActivity.NavigateFreelistActivityViewModel;
+import nl.freelist.viewModelPerActivity.NavigateEntriesViewModel;
 
 public class NavigateFreelistActivity extends AppCompatActivity implements ItemClickListener {
 
-  private NavigateFreelistActivityViewModel navigateFreelistActivityViewModel;
+  private NavigateEntriesViewModel navigateEntriesViewModel;
   private FreelistEntryAdapter adapter;
   private RecyclerView recyclerView;
 
@@ -43,9 +43,8 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigate_freelist);
 
-
-    navigateFreelistActivityViewModel = ViewModelProviders.of(this)
-        .get(NavigateFreelistActivityViewModel.class);
+    navigateEntriesViewModel = ViewModelProviders.of(this)
+        .get(NavigateEntriesViewModel.class);
 
     recyclerView = findViewById(R.id.recycler_view);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -69,7 +68,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     getSupportActionBar().getCustomView().setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        navigateFreelistActivityViewModel.updateParentId(0);
+        navigateEntriesViewModel.updateParentId(0);
         updateRecyclerView();
       }
     });
@@ -102,7 +101,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
           @Override
           public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
             // viewHolder.getAdapterPosition() //where did we swipe?
-            navigateFreelistActivityViewModel.delete(
+            navigateEntriesViewModel.delete(
                 adapter.getEntryAt(viewHolder.getAdapterPosition()));
             Toast.makeText(NavigateFreelistActivity.this, "DataEntry deleted", Toast.LENGTH_SHORT)
                 .show();
@@ -114,7 +113,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   }
 
   private void updateRecyclerView() {
-    navigateFreelistActivityViewModel
+    navigateEntriesViewModel
         .getAllEntries()
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
@@ -128,7 +127,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
                       adapter.setEntries(entries);
                       Toast.makeText(
                           NavigateFreelistActivity.this,
-                          "navigateFreelistActivityViewModel refreshed!",
+                          "navigateEntriesViewModel refreshed!",
                           Toast.LENGTH_SHORT)
                           .show();
                     }
@@ -163,6 +162,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
           Toast.LENGTH_SHORT)
           .show();
     }
+    updateRecyclerView();
   }
 
   @Override
@@ -176,7 +176,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.delete_all_entries:
-        navigateFreelistActivityViewModel.deleteAllEntries();
+        navigateEntriesViewModel.deleteAllEntries();
         Toast.makeText(this, "All entries deleted", Toast.LENGTH_SHORT).show();
         return true;
       case R.id.settings:
@@ -209,7 +209,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
       default:
         parentToSet = 0;
     }
-    navigateFreelistActivityViewModel.updateParentId(parentToSet);
+    navigateEntriesViewModel.updateParentId(parentToSet);
     updateRecyclerView();
   }
 

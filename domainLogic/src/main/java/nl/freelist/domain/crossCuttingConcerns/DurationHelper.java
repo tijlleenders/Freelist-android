@@ -111,7 +111,7 @@ public class DurationHelper { //Todo: move to value object in domain model
       return durationString.toString();
     }
 
-    return "error";
+    return "";
   }
 
 }

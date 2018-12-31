@@ -36,4 +36,49 @@
     <item name="android:text">Title</item>
   </style>
 
+  <style name="leaf_item_textview" parent="TextAppearance.AppCompat.Large">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_alignParentLeft">true</item>
+    <item name="android:layout_alignParentStart">true</item>
+    <item name="android:layout_toLeftOf">@id/text_view_duration</item>
+    <item name="android:layout_toStartOf">@id/text_view_duration</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:text">Title</item>
+  </style>
+
+  <style name="selected_parent_item_textview" parent="TextAppearance.AppCompat.Large">
+    <item name="android:textColor">@color/colorAccent</item>
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_alignParentLeft">true</item>
+    <item name="android:layout_alignParentStart">true</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:text">Title</item>
+  </style>
+
+  <style name="selected_multiple_item_textview" parent="TextAppearance.AppCompat.Large">
+    <item name="android:textColor">@color/colorAccent</item>
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_alignParentLeft">true</item>
+    <item name="android:layout_alignParentStart">true</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:text">Title</item>
+  </style>
+
+  <style name="selected_leaf_item_textview" parent="TextAppearance.AppCompat.Large">
+    <item name="android:textColor">@color/colorAccent</item>
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_alignParentLeft">true</item>
+    <item name="android:layout_alignParentStart">true</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:text">Title</item>
+  </style>
+
 </resources>

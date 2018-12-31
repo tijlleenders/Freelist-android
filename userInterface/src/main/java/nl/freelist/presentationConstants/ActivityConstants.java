@@ -25,14 +25,18 @@ public class ActivityConstants {
   public static final int EDIT_ENTRY_REQUEST = 2;
   public static final String EXTRA_REQUEST_TYPE_EDIT = "nl.freelist.REQUEST_TYPE_EDIT";
 
-  public static final int SUB_ENTRY_REQUEST = 3;
-  public static final String EXTRA_REQUEST_TYPE_SUB_ENTRY = "nl.freelist.REQUEST_TYPE_SUB_ENTRY";
+  public static final int CHOOSE_PARENT_REQUEST = 3;
+  public static final String EXTRA_REQUEST_TYPE_CHOOSE_PARENT = "nl.freelist.REQUEST_TYPE_CHOOSE_PARENT";
 
   // For rendering layout of different entry types
   public static final int UNKNOWN_ENTRY_VIEW_TYPE = 0;
   public static final int LEAF_ENTRY_VIEW_TYPE = 1;
   public static final int MULTIPLE_ENTRY_VIEW_TYPE = 2;
   public static final int NODE_ENTRY_VIEW_TYPE = 3;
+  public static final int LEAF_SELECTED_ENTRY_VIEW_TYPE = 4;
+  public static final int MULTIPLE_SELECTED_ENTRY_VIEW_TYPE = 5;
+  public static final int NODE_SELECTED_ENTRY_VIEW_TYPE = 6;
+
 
   public static final int VIEWMODEL_ENTRY_ID_NOT_SET = 0;
 

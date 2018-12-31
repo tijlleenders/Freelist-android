@@ -2,6 +2,7 @@ package nl.freelist.viewModelPerEntity;
 
 import static java.lang.Math.max;
 
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
@@ -9,6 +10,8 @@ import nl.freelist.domain.entities.Entry;
 import nl.freelist.presentationConstants.ActivityConstants;
 
 public class ViewModelEntry {
+
+  private static final String TAG = "ChooseEntryActivity";
 
   public int getDuration() {
     return duration;
@@ -76,6 +79,9 @@ public class ViewModelEntry {
     this.minutes = minutes;
     this.seconds = seconds;
     this.type = type;
+
+    Log.d(TAG,
+        "ViewModelEntry " + title + " (id:" + Integer.toString(id) + ")" + " parentId:" + parentId);
   }
 
   public static Entry getEntryFromViewModelEntry(ViewModelEntry viewModelEntry) {

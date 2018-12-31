@@ -6,7 +6,7 @@ public class DurationHelperTest {
 
   @org.junit.Test
   public void getDurationStringFromInt() {
-    assertEquals("error", DurationHelper.getDurationStringFromInt(0));
+    assertEquals("", DurationHelper.getDurationStringFromInt(0));
 
     assertEquals("1y", DurationHelper.getDurationStringFromInt(24 * 3600 * 365 + 3600 * 6));
     assertEquals("1y1w",

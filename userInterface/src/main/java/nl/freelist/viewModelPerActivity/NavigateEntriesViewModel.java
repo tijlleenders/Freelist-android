@@ -12,12 +12,12 @@ import nl.freelist.domain.useCases.GetAllEntriesForParentUseCase;
 import nl.freelist.viewModelPerEntity.ViewModelEntry;
 
 
-public class NavigateFreelistActivityViewModel extends AndroidViewModel {
+public class NavigateEntriesViewModel extends AndroidViewModel {
 
   private int parentId;
   private EntryRepository entryRepository;
 
-  public NavigateFreelistActivityViewModel(@NonNull Application application) {
+  public NavigateEntriesViewModel(@NonNull Application application) {
     super(application);
     entryRepository = new EntryRepository(getApplication().getApplicationContext());
   }
