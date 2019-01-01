@@ -65,6 +65,9 @@ public class AddEditEntryActivity extends AppCompatActivity {
   }
 
   private void initializeForAddNew(Bundle bundle) {
+    if (bundle.containsKey(ActivityConstants.EXTRA_ENTRY_PARENT_ID)) {
+      initializeParentButtonWithId(bundle.getInt(ActivityConstants.EXTRA_ENTRY_PARENT_ID));
+    }
     setTitle("Add new");
   }
 
@@ -81,7 +84,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
                   new Runnable() {
                     @Override
                     public void run() {
-                      updateEditActivityWith(viewModelEntry);
+                      initializeEditActivityWith(viewModelEntry);
                     }
                   });
             }));
@@ -285,19 +288,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
     }
   }
 
-  private void updateEditActivityWith(ViewModelEntry viewModelEntry) {
-    Log.d(TAG, "updateEditActivityWith viewModelEntry " + viewModelEntry.getTitle() + "called");
-    editTextTitle.setText(viewModelEntry.getTitle());
-    editTextDescription.setText(viewModelEntry.getDescription());
-    // Todo: fix bug in NumberPicker that doesn't display formatting on first rendering
-    yearPicker.setValue(viewModelEntry.getYears());
-    weekPicker.setValue(viewModelEntry.getWeeks());
-    dayPicker.setValue(viewModelEntry.getDays());
-    hourPicker.setValue(viewModelEntry.getHours());
-    minutePicker.setValue(viewModelEntry.getMinutes());
-    secondPicker.setValue(viewModelEntry.getSeconds());
-    //id already set
-    parentId = viewModelEntry.getParentId();
+  private void initializeParentButtonWithId(int parentId) {
+    this.parentId = parentId;
     parentButton.setOnClickListener(
         new View.OnClickListener() {
           @Override
@@ -334,6 +326,20 @@ public class AddEditEntryActivity extends AppCompatActivity {
                     }
                   });
             }));
+  }
+
+  private void initializeEditActivityWith(ViewModelEntry viewModelEntry) {
+    Log.d(TAG, "initializeEditActivityWith viewModelEntry " + viewModelEntry.getTitle() + "called");
+    editTextTitle.setText(viewModelEntry.getTitle());
+    editTextDescription.setText(viewModelEntry.getDescription());
+    // Todo: fix bug in NumberPicker that doesn't display formatting on first rendering
+    yearPicker.setValue(viewModelEntry.getYears());
+    weekPicker.setValue(viewModelEntry.getWeeks());
+    dayPicker.setValue(viewModelEntry.getDays());
+    hourPicker.setValue(viewModelEntry.getHours());
+    minutePicker.setValue(viewModelEntry.getMinutes());
+    secondPicker.setValue(viewModelEntry.getSeconds());
+    initializeParentButtonWithId(viewModelEntry.getParentId());
     return;
   }
 }

@@ -106,6 +106,8 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
             Intent intent = new Intent(NavigateFreelistActivity.this, AddEditEntryActivity.class);
             intent.putExtra(
                 ActivityConstants.EXTRA_REQUEST_TYPE_ADD, ActivityConstants.ADD_ENTRY_REQUEST);
+            intent.putExtra(
+                ActivityConstants.EXTRA_ENTRY_PARENT_ID, navigateEntriesViewModel.getParentId());
             startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }

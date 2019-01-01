@@ -22,6 +22,10 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
     entryRepository = new EntryRepository(getApplication().getApplicationContext());
   }
 
+  public int getParentId() {
+    return parentId;
+  }
+
   @Override
   protected void onCleared() {
     //Todo: Unsubscribe if observing anything?
