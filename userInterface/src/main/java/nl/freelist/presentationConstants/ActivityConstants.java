@@ -37,7 +37,5 @@ public class ActivityConstants {
   public static final int MULTIPLE_SELECTED_ENTRY_VIEW_TYPE = 5;
   public static final int NODE_SELECTED_ENTRY_VIEW_TYPE = 6;
 
-
   public static final int VIEWMODEL_ENTRY_ID_NOT_SET = 0;
-
 }

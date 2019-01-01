@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLongClickListener;
@@ -18,42 +19,81 @@ import nl.freelist.viewModelPerEntity.ViewModelEntry;
 
 public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdapter.EntryHolder> {
 
+  private static final String TAG = "FreelistEntryAdapter";
+
   private List<ViewModelEntry> entries = new ArrayList<>();
   private ItemClickListener onItemClickListener;
 
+  public int getCurrentId() {
+    return currentId;
+  }
+
+  private int currentId = 0;
+
   public FreelistEntryAdapter(ItemClickListener clickListener) {
+    Log.d(TAG, "FreelistEntryAdapter called.");
     onItemClickListener = clickListener;
   }
 
   @NonNull
   @Override
   public EntryHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    Log.d(TAG, "onCreateViewHolder called.");
+    View itemView;
     if (viewType == ActivityConstants.NODE_ENTRY_VIEW_TYPE) {
-      View itemView =
+      itemView =
           LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.entry_parent_item, parent, false);
-      return new EntryHolder(itemView);
+              .inflate(R.layout.main_entry_parent_item, parent, false);
     } else if (viewType == ActivityConstants.MULTIPLE_ENTRY_VIEW_TYPE) {
-      View itemView =
+      itemView =
           LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.entry_multiple_item, parent, false);
-      return new EntryHolder(itemView);
+              .inflate(R.layout.main_entry_multiple_item, parent, false);
+    } else if (viewType == ActivityConstants.NODE_SELECTED_ENTRY_VIEW_TYPE) {
+      itemView =
+          LayoutInflater.from(parent.getContext())
+              .inflate(R.layout.main_selected_entry_parent_item, parent, false);
+    } else if (viewType == ActivityConstants.MULTIPLE_SELECTED_ENTRY_VIEW_TYPE) {
+      itemView =
+          LayoutInflater.from(parent.getContext())
+              .inflate(R.layout.main_selected_entry_multiple_item, parent, false);
+    } else if (viewType == ActivityConstants.LEAF_SELECTED_ENTRY_VIEW_TYPE) {
+      itemView =
+          LayoutInflater.from(parent.getContext())
+              .inflate(R.layout.main_selected_entry_single_item, parent, false);
     } else {
-      View itemView =
+      itemView =
           LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.entry_single_item, parent, false);
-      return new EntryHolder(itemView);
+              .inflate(R.layout.main_entry_single_item, parent, false);
     }
+    return new EntryHolder(itemView);
   }
 
   @Override
   public int getItemViewType(int position) {
+    Log.d(TAG, "getItemViewType called.");
     ViewModelEntry entry = getEntryAt(position);
-    return entry.getType();
+    int type = entry.getType();
+    if (currentId == entry.getId()) {
+      switch (type) {
+        case ActivityConstants.NODE_ENTRY_VIEW_TYPE:
+          type = ActivityConstants.NODE_SELECTED_ENTRY_VIEW_TYPE;
+          break;
+        case ActivityConstants.MULTIPLE_ENTRY_VIEW_TYPE:
+          type = ActivityConstants.MULTIPLE_SELECTED_ENTRY_VIEW_TYPE;
+          break;
+        case ActivityConstants.LEAF_ENTRY_VIEW_TYPE:
+          type = ActivityConstants.LEAF_SELECTED_ENTRY_VIEW_TYPE;
+          break;
+        default:
+          break;
+      }
+    }
+    return type;
   }
 
   @Override
   public void onBindViewHolder(@NonNull EntryHolder entryHolder, int position) {
+    Log.d(TAG, "onBindViewHolder called.");
     ViewModelEntry currentEntry = entries.get(position);
     entryHolder.textViewTitle.setText(currentEntry.getTitle());
     entryHolder.textViewDescription.setText(currentEntry.getDescription());
@@ -62,15 +102,24 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
 
   @Override
   public int getItemCount() {
+    Log.d(TAG, "getItemCount called.");
     return entries.size();
   }
 
   public void setEntries(List<ViewModelEntry> entries) {
+    Log.d(TAG, "setEntries called.");
     this.entries = entries;
     notifyDataSetChanged(); // change later for onInsert onDelete (not efficient and no animations)
   }
 
+  public void setCurrentId(int id) {
+
+    Log.d(TAG, "setCurrentId called.");
+    this.currentId = id;
+  }
+
   public ViewModelEntry getEntryAt(int position) {
+    Log.d(TAG, "getEntryAt called.");
     return entries.get(position);
   }
 
@@ -82,6 +131,7 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
 
     EntryHolder(@NonNull View itemView) {
       super(itemView);
+      Log.d(TAG, "EntryHolder called sets OnClick and OnLongClickListener.");
       textViewTitle = itemView.findViewById(R.id.text_view_title);
       textViewDescription = itemView.findViewById(R.id.text_view_description);
       textViewDuration = itemView.findViewById(R.id.text_view_duration);

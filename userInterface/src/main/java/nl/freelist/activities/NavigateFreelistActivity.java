@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -25,6 +26,8 @@ import nl.freelist.viewModelPerActivity.NavigateEntriesViewModel;
 
 public class NavigateFreelistActivity extends AppCompatActivity implements ItemClickListener {
 
+  private static final String TAG = "NavigateFreelistActivity";
+
   private NavigateEntriesViewModel navigateEntriesViewModel;
   private FreelistEntryAdapter adapter;
   private RecyclerView recyclerView;
@@ -34,59 +37,40 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   @Override
   protected void onResume() {
+    Log.d(TAG, "onResume called.");
     super.onResume();
     updateRecyclerView();
   }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    Log.d(TAG, "onCreate called.");
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigate_freelist);
 
     navigateEntriesViewModel = ViewModelProviders.of(this)
         .get(NavigateEntriesViewModel.class);
 
+    initializeViews();
+
+    setupActionBar();
+
+    setupFloatingActionButton();
+
+    setupSwipeActions();
+  }
+
+  private void initializeViews() {
+    Log.d(TAG, "initializeViews called.");
     recyclerView = findViewById(R.id.recycler_view);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
     recyclerView.setHasFixedSize(true);
-
     adapter = new FreelistEntryAdapter(this);
-
     recyclerView.setAdapter(adapter);
+  }
 
-    ActionBar actionbar = getSupportActionBar();
-
-// Applies the custom action bar style
-    getSupportActionBar().setDisplayOptions
-        (actionbar.DISPLAY_SHOW_CUSTOM);
-    getSupportActionBar().setCustomView(R.layout.action_bar);
-
-    TextView actionBarTitle = getSupportActionBar().getCustomView()
-        .findViewById(R.id.action_bar_title);
-    actionBarTitle.setText(R.string.freelists_action_bar_title);
-
-    getSupportActionBar().getCustomView().setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        navigateEntriesViewModel.updateParentId(0);
-        updateRecyclerView();
-      }
-    });
-
-
-    FloatingActionButton buttonAddEntry = findViewById(R.id.button_add_entry);
-    buttonAddEntry.setOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            Intent intent = new Intent(NavigateFreelistActivity.this, AddEditEntryActivity.class);
-            intent.putExtra(
-                ActivityConstants.EXTRA_REQUEST_TYPE_ADD, ActivityConstants.ADD_ENTRY_REQUEST);
-            startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-          }
-        });
-
+  private void setupSwipeActions() {
+    Log.d(TAG, "setupSwipeActions called.");
     new ItemTouchHelper(
         new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
           @Override
@@ -112,7 +96,47 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
         .attachToRecyclerView(recyclerView);
   }
 
+  private void setupFloatingActionButton() {
+    Log.d(TAG, "setupFloatingActionButton called.");
+    FloatingActionButton buttonAddEntry = findViewById(R.id.button_add_entry);
+    buttonAddEntry.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            Intent intent = new Intent(NavigateFreelistActivity.this, AddEditEntryActivity.class);
+            intent.putExtra(
+                ActivityConstants.EXTRA_REQUEST_TYPE_ADD, ActivityConstants.ADD_ENTRY_REQUEST);
+            startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+          }
+        });
+  }
+
+  private void setupActionBar() {
+    Log.d(TAG, "setupActionBar called.");
+    ActionBar actionbar = getSupportActionBar();
+
+// Applies the custom action bar style
+    getSupportActionBar().setDisplayOptions
+        (actionbar.DISPLAY_SHOW_CUSTOM);
+    getSupportActionBar().setCustomView(R.layout.action_bar);
+
+    TextView actionBarTitle = getSupportActionBar().getCustomView()
+        .findViewById(R.id.action_bar_title);
+    actionBarTitle.setText(R.string.freelists_action_bar_title);
+
+    getSupportActionBar().getCustomView().setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        navigateEntriesViewModel.updateParentId(0);
+        adapter.setCurrentId(0);
+        updateRecyclerView();
+      }
+    });
+  }
+
   private void updateRecyclerView() {
+    Log.d(TAG, "updateRecyclerView called.");
     navigateEntriesViewModel
         .getAllEntries()
         .subscribeOn(Schedulers.io())
@@ -137,6 +161,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    Log.d(TAG, "onActivityResult called.");
     super.onActivityResult(requestCode, resultCode, data);
 
     if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
@@ -167,6 +192,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
+    Log.d(TAG, "onCreateOptionsMenu called.");
     MenuInflater menuInflater = getMenuInflater();
     menuInflater.inflate(R.menu.main_menu, menu);
     return true;
@@ -174,6 +200,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
+    Log.d(TAG, "onOptionsItemSelected called.");
     switch (item.getItemId()) {
       case R.id.delete_all_entries:
         navigateEntriesViewModel.deleteAllEntries();
@@ -194,6 +221,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   @Override
   public void onItemClick(View view, int position) {
+    Log.d(TAG, "onItemClick called.");
     int viewType = adapter.getItemViewType(position);
     int parentToSet;
     switch (viewType) {
@@ -211,6 +239,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     }
     navigateEntriesViewModel.updateParentId(parentToSet);
     updateRecyclerView();
+    adapter.setCurrentId(parentToSet);
   }
 
 

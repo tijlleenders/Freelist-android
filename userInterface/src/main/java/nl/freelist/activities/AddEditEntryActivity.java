@@ -28,7 +28,6 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
   private int id;
   private int parentId;
-  private int parentOfParentId;
 
   private EditText editTextTitle;
   private EditText editTextDescription;
@@ -59,31 +58,35 @@ public class AddEditEntryActivity extends AppCompatActivity {
     Bundle bundle = getIntent().getExtras();
 
     if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
-
-      id = Integer.valueOf(bundle.getString(ActivityConstants.EXTRA_ENTRY_ID));
-
-      AddEditEntryActivityViewModel.getViewModelEntry(id)
-          .subscribeOn(Schedulers.io())
-          .observeOn(Schedulers.io())
-          .subscribe(
-              (viewModelEntry -> {
-                // update View
-                runOnUiThread(
-                    new Runnable() {
-                      @Override
-                      public void run() {
-                        updateEditActivityWith(viewModelEntry);
-                      }
-                    });
-              }));
-
-      getSupportActionBar()
-          .setHomeAsUpIndicator(R.drawable.ic_close); // todo: move outside of if else if?
-      setTitle("Edit existing");
+      initializeForEditExisting(bundle);
     } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_ADD)) { // do add setup
-      getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
-      setTitle("Add new");
-    } // Todo: Add else if (bundle.containsKey(ActivityConstants.EXTRA_PARENT_CHANGED_KEY)) {}
+      initializeForAddNew(bundle);
+    }
+  }
+
+  private void initializeForAddNew(Bundle bundle) {
+    setTitle("Add new");
+  }
+
+  private void initializeForEditExisting(Bundle bundle) {
+    id = Integer.valueOf(bundle.getString(ActivityConstants.EXTRA_ENTRY_ID));
+
+    AddEditEntryActivityViewModel.getViewModelEntry(id)
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .subscribe(
+            (viewModelEntry -> {
+              // update View
+              runOnUiThread(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      updateEditActivityWith(viewModelEntry);
+                    }
+                  });
+            }));
+
+    setTitle("Edit existing");
   }
 
   private void initializeViews() {
@@ -91,6 +94,13 @@ public class AddEditEntryActivity extends AppCompatActivity {
     editTextDescription = findViewById(R.id.edit_text_description);
     parentButton = findViewById(R.id.button_parent_change);
 
+    initializeDurationPicker();
+
+    getSupportActionBar()
+        .setHomeAsUpIndicator(R.drawable.ic_close);
+  }
+
+  private void initializeDurationPicker() {
     yearPicker = findViewById(R.id.year_picker);
     yearPicker.setMaxValue(99);
     yearPicker.setFormatter(
@@ -171,6 +181,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
     int duration =
         DurationHelper.getDurationIntFromInts(years, weeks, days, hours, minutes, seconds);
     String durationString = DurationHelper.getDurationStringFromInt(duration);
+
     ViewModelEntry viewModelEntryToSave =
         new ViewModelEntry(
             id,
@@ -209,7 +220,6 @@ public class AddEditEntryActivity extends AppCompatActivity {
     }
 
     Intent data = new Intent();
-    // todo: make distinction between add or update entry?
     data.putExtra(ActivityConstants.EXTRA_TITLE, title);
     setResult(RESULT_OK, data);
     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -320,7 +330,6 @@ public class AddEditEntryActivity extends AppCompatActivity {
                   new Runnable() {
                     @Override
                     public void run() {
-                      parentOfParentId = viewModelEntryParent.getParentId();
                       parentButton.setText(viewModelEntryParent.getTitle());
                     }
                   });

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLongClickListener;
@@ -18,6 +19,8 @@ import nl.freelist.viewModelPerEntity.ViewModelEntry;
 
 public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.EntryHolder> {
 
+  private static final String TAG = "ChooseEntryAdapter";
+
   private List<ViewModelEntry> entries = new ArrayList<>();
   private ItemClickListener onItemClickListener;
 
@@ -28,12 +31,15 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
   private int currentId = 0;
 
   public ChooseEntryAdapter(ItemClickListener clickListener) {
+    Log.d(TAG, "ChooseEntryAdapter called.");
     onItemClickListener = clickListener;
   }
+
 
   @NonNull
   @Override
   public EntryHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    Log.d(TAG, "onCreateViewHolder called.");
     View itemView;
     if (viewType == ActivityConstants.NODE_ENTRY_VIEW_TYPE) {
       itemView =
@@ -65,6 +71,7 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
 
   @Override
   public int getItemViewType(int position) {
+    Log.d(TAG, "getItemViewType called.");
     ViewModelEntry entry = getEntryAt(position);
     int type = entry.getType();
     if (currentId == entry.getId()) {
@@ -87,25 +94,31 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
 
   @Override
   public void onBindViewHolder(@NonNull EntryHolder entryHolder, int position) {
+    Log.d(TAG, "onBindViewHolder called.");
     ViewModelEntry currentEntry = entries.get(position);
     entryHolder.textViewTitle.setText(currentEntry.getTitle());
   }
 
   @Override
   public int getItemCount() {
+    Log.d(TAG, "getItemCount called.");
     return entries.size();
   }
 
   public void setEntries(List<ViewModelEntry> entries) {
+    Log.d(TAG, "setEntries called.");
     this.entries = entries;
     notifyDataSetChanged(); // change later for onInsert onDelete (not efficient and no animations)
   }
 
   public void setCurrentId(int id) {
+
+    Log.d(TAG, "setCurrentId called.");
     this.currentId = id;
   }
 
   public ViewModelEntry getEntryAt(int position) {
+    Log.d(TAG, "getEntryAt called.");
     return entries.get(position);
   }
 
@@ -115,13 +128,12 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
 
     EntryHolder(@NonNull View itemView) {
       super(itemView);
+      Log.d(TAG, "EntryHolder called sets OnClick and OnLongClickListener.");
       textViewTitle = itemView.findViewById(R.id.text_view_title);
 
       // Using lambda as below is more efficient than new inner class for every call
       itemView
-          .setOnClickListener(view -> {
-            onItemClickListener.onItemClick(view, getAdapterPosition());
-          });
+          .setOnClickListener(view -> onItemClickListener.onItemClick(view, getAdapterPosition()));
 
       itemView.setOnLongClickListener( //Todo: replace with lambda like with onItemClick?
           new OnLongClickListener() {

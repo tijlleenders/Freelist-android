@@ -9,6 +9,6 @@
     android:id="@+id/recycler_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:listitem="@layout/entry_single_item"/>
+    tools:listitem="@layout/main_entry_single_item"/>
 
 </android.support.design.widget.CoordinatorLayout>
