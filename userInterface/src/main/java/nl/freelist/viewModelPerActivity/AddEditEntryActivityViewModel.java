@@ -10,7 +10,6 @@ import io.reactivex.schedulers.Schedulers;
 import nl.freelist.data.EntryRepository;
 import nl.freelist.domain.crossCuttingConcerns.ResultObject;
 import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.useCases.GetEntryByIdUseCase;
 import nl.freelist.domain.useCases.SaveEntry;
 import nl.freelist.viewModelPerEntity.ViewModelEntry;
 
@@ -25,8 +24,7 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
 
   public Single<ViewModelEntry> getViewModelEntry(int id) {
     Single<Entry> tempEntry = Single.fromCallable(
-        () -> new GetEntryByIdUseCase(entryRepository)
-            .execute(id)).observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
+        () -> entryRepository.getById(id)).observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     Single<ViewModelEntry> result = tempEntry
         .map(entry -> ViewModelEntry.getViewModelEntryFromEntry(entry));
     return result;

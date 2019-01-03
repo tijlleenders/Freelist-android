@@ -8,7 +8,6 @@ import io.reactivex.schedulers.Schedulers;
 import java.util.List;
 import nl.freelist.data.EntryRepository;
 import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.useCases.GetAllEntriesForParentUseCase;
 import nl.freelist.viewModelPerEntity.ViewModelEntry;
 
 
@@ -34,8 +33,7 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
 
   public Observable<List<ViewModelEntry>> getAllEntries() {
     Observable<List<Entry>> entryList = Observable
-        .fromCallable(() -> new GetAllEntriesForParentUseCase(
-            entryRepository).execute(parentId))
+        .fromCallable(() -> entryRepository.getAllEntriesForParent(parentId))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     Observable<List<ViewModelEntry>> viewModelEntryList = entryList
         .map(entries -> ViewModelEntry.createViewModelEntryListFromEntryList(entries, parentId));
