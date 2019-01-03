@@ -11,6 +11,9 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
         }
+        testOptions { //http://tools.android.com/tech-docs/unit-testing-support#TOC-Method-...-not-mocked.- :(
+            unitTests.returnDefaultValues = true
+        }
     }
     buildTypes {
         release {

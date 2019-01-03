@@ -30,12 +30,10 @@ public class ActivityConstants {
 
   // For rendering layout of different entry types
   public static final int UNKNOWN_ENTRY_VIEW_TYPE = 0;
-  public static final int LEAF_ENTRY_VIEW_TYPE = 1;
-  public static final int MULTIPLE_ENTRY_VIEW_TYPE = 2;
-  public static final int NODE_ENTRY_VIEW_TYPE = 3;
-  public static final int LEAF_SELECTED_ENTRY_VIEW_TYPE = 4;
-  public static final int MULTIPLE_SELECTED_ENTRY_VIEW_TYPE = 5;
-  public static final int NODE_SELECTED_ENTRY_VIEW_TYPE = 6;
+  public static final int SINGLE_ENTRY_UPSTREAM_VIEW_TYPE = 1;
+  public static final int SINGLE_ENTRY_DOWNSTREAM_VIEW_TYPE = 2;
+  public static final int STACK_ENTRY_VIEW_TYPE = 3;
+  public static final int SELECTED_ENTRY_VIEW_TYPE = 4;
 
   public static final int VIEWMODEL_ENTRY_ID_NOT_SET = 0;
 }

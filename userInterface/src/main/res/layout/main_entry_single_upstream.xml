@@ -24,8 +24,10 @@
 
     <TextView
       android:id="@+id/text_view_title"
-      style="@style/multiple_item_textview"
-      android:text="Title"/>
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Title"
+      android:textAppearance="@style/single_upstream_item_textview"/>
 
     <TextView
       android:id="@+id/text_view_description"

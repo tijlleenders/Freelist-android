@@ -142,12 +142,14 @@ public class ViewModelEntry {
     List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
     for (Entry entry : entryList) {
       ViewModelEntry viewModelEntry = ViewModelEntry.getViewModelEntryFromEntry(entry);
-      if (parentList.contains(entry.getId()) || entry.getId() == parentId) {
-        viewModelEntry.setType(ActivityConstants.NODE_ENTRY_VIEW_TYPE);
+      if (parentList.contains(entry.getId())) {
+        viewModelEntry.setType(ActivityConstants.SINGLE_ENTRY_UPSTREAM_VIEW_TYPE);
+      } else if (entry.getId() == parentId) {
+        viewModelEntry.setType(ActivityConstants.SELECTED_ENTRY_VIEW_TYPE);
       } else if (entry.getChildrenCount() >= 1) {
-        viewModelEntry.setType(ActivityConstants.MULTIPLE_ENTRY_VIEW_TYPE);
+        viewModelEntry.setType(ActivityConstants.STACK_ENTRY_VIEW_TYPE);
       } else {
-        viewModelEntry.setType(ActivityConstants.LEAF_ENTRY_VIEW_TYPE);
+        viewModelEntry.setType(ActivityConstants.SINGLE_ENTRY_DOWNSTREAM_VIEW_TYPE);
       }
       allViewModelEntries.add(viewModelEntry);
     }

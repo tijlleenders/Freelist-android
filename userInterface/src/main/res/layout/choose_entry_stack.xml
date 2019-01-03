@@ -6,8 +6,17 @@
   android:layout_marginTop="8dp"
   android:layout_marginStart="8dp"
   android:layout_marginEnd="8dp"
-  app:cardBackgroundColor="@color/colorEntryParentBackground">
+  app:cardBackgroundColor="@color/colorEntryParentBackground"
+  android:elevation="10dp">
 
+
+  <android.support.v7.widget.CardView
+
+    android:layout_marginBottom="3dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorEntryParentBackground"
+    app:cardElevation="10dp">
 
   <RelativeLayout
     android:layout_width="wrap_content"
@@ -16,9 +25,11 @@
 
     <TextView
       android:id="@+id/text_view_title"
-      android:text="Title"
-      style="@style/parent_item_textview"/>
+      style="@style/stack_title_textview"
+      android:text="Title"/>
+
 
   </RelativeLayout>
+  </android.support.v7.widget.CardView>
 
 </android.support.v7.widget.CardView>

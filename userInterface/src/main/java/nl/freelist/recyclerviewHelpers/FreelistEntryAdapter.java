@@ -40,30 +40,22 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
   public EntryHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     Log.d(TAG, "onCreateViewHolder called.");
     View itemView;
-    if (viewType == ActivityConstants.NODE_ENTRY_VIEW_TYPE) {
+    if (viewType == ActivityConstants.STACK_ENTRY_VIEW_TYPE) {
       itemView =
           LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.main_entry_parent_item, parent, false);
-    } else if (viewType == ActivityConstants.MULTIPLE_ENTRY_VIEW_TYPE) {
+              .inflate(R.layout.main_entry_stack, parent, false);
+    } else if (viewType == ActivityConstants.SELECTED_ENTRY_VIEW_TYPE) {
       itemView =
           LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.main_entry_multiple_item, parent, false);
-    } else if (viewType == ActivityConstants.NODE_SELECTED_ENTRY_VIEW_TYPE) {
+              .inflate(R.layout.main_entry_selected, parent, false);
+    } else if (viewType == ActivityConstants.SINGLE_ENTRY_UPSTREAM_VIEW_TYPE) {
       itemView =
           LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.main_selected_entry_parent_item, parent, false);
-    } else if (viewType == ActivityConstants.MULTIPLE_SELECTED_ENTRY_VIEW_TYPE) {
-      itemView =
-          LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.main_selected_entry_multiple_item, parent, false);
-    } else if (viewType == ActivityConstants.LEAF_SELECTED_ENTRY_VIEW_TYPE) {
-      itemView =
-          LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.main_selected_entry_single_item, parent, false);
+              .inflate(R.layout.main_entry_single_upstream, parent, false);
     } else {
       itemView =
           LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.main_entry_single_item, parent, false);
+              .inflate(R.layout.main_entry_single_downstream, parent, false);
     }
     return new EntryHolder(itemView);
   }
@@ -74,19 +66,7 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
     ViewModelEntry entry = getEntryAt(position);
     int type = entry.getType();
     if (currentId == entry.getId()) {
-      switch (type) {
-        case ActivityConstants.NODE_ENTRY_VIEW_TYPE:
-          type = ActivityConstants.NODE_SELECTED_ENTRY_VIEW_TYPE;
-          break;
-        case ActivityConstants.MULTIPLE_ENTRY_VIEW_TYPE:
-          type = ActivityConstants.MULTIPLE_SELECTED_ENTRY_VIEW_TYPE;
-          break;
-        case ActivityConstants.LEAF_ENTRY_VIEW_TYPE:
-          type = ActivityConstants.LEAF_SELECTED_ENTRY_VIEW_TYPE;
-          break;
-        default:
-          break;
-      }
+      type = ActivityConstants.SELECTED_ENTRY_VIEW_TYPE;
     }
     return type;
   }

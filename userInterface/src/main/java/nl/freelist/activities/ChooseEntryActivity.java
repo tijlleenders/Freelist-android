@@ -125,20 +125,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
   public void onItemClick(View view, int position) {
     Log.d(TAG, "onItemClick called.");
     int viewType = adapter.getItemViewType(position);
-    int parentToSet;
-    switch (viewType) {
-      case ActivityConstants.NODE_ENTRY_VIEW_TYPE:
-        parentToSet = adapter.getEntryAt(position).getId();
-        break;
-      case ActivityConstants.MULTIPLE_ENTRY_VIEW_TYPE:
-        parentToSet = adapter.getEntryAt(position).getId();
-        break;
-      case ActivityConstants.LEAF_ENTRY_VIEW_TYPE:
-        parentToSet = adapter.getEntryAt(position).getId();
-        break;
-      default:
-        parentToSet = 0;
-    }
+    int parentToSet = adapter.getEntryAt(position).getId();
     navigateEntriesViewModel.updateParentId(parentToSet);
     updateRecyclerView();
     adapter.setCurrentId(parentToSet);
