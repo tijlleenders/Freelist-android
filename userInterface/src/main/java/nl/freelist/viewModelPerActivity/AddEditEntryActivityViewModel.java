@@ -8,10 +8,10 @@ import android.support.annotation.NonNull;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import nl.freelist.data.EntryRepository;
+import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.ResultObject;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.useCases.SaveEntry;
-import nl.freelist.viewModelPerEntity.ViewModelEntry;
 
 public class AddEditEntryActivityViewModel extends AndroidViewModel {
 
@@ -23,10 +23,9 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
   }
 
   public Single<ViewModelEntry> getViewModelEntry(int id) {
-    Single<Entry> tempEntry = Single.fromCallable(
-        () -> entryRepository.getById(id)).observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
-    Single<ViewModelEntry> result = tempEntry
-        .map(entry -> ViewModelEntry.getViewModelEntryFromEntry(entry));
+    Single<ViewModelEntry> result = Single.fromCallable(
+        () -> entryRepository.getViewModelEntryById(id)).observeOn(Schedulers.io())
+        .subscribeOn(Schedulers.io());
     return result;
   }
 

@@ -15,11 +15,11 @@ import android.widget.EditText;
 import android.widget.NumberPicker.Formatter;
 import android.widget.Toast;
 import io.reactivex.schedulers.Schedulers;
+import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
 import nl.freelist.freelist.R;
-import nl.freelist.presentationConstants.ActivityConstants;
 import nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel;
-import nl.freelist.viewModelPerEntity.ViewModelEntry;
 import nl.freelist.views.NumberPickerDuration;
 
 public class AddEditEntryActivity extends AppCompatActivity {
@@ -57,22 +57,22 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
     Bundle bundle = getIntent().getExtras();
 
-    if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
+    if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
       initializeForEditExisting(bundle);
-    } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_ADD)) { // do add setup
+    } else if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) { // do add setup
       initializeForAddNew(bundle);
     }
   }
 
   private void initializeForAddNew(Bundle bundle) {
-    if (bundle.containsKey(ActivityConstants.EXTRA_ENTRY_PARENT_ID)) {
-      initializeParentButtonWithId(bundle.getInt(ActivityConstants.EXTRA_ENTRY_PARENT_ID));
+    if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
+      initializeParentButtonWithId(bundle.getInt(Constants.EXTRA_ENTRY_PARENT_ID));
     }
     setTitle("Add new");
   }
 
   private void initializeForEditExisting(Bundle bundle) {
-    id = Integer.valueOf(bundle.getString(ActivityConstants.EXTRA_ENTRY_ID));
+    id = Integer.valueOf(bundle.getString(Constants.EXTRA_ENTRY_ID));
 
     AddEditEntryActivityViewModel.getViewModelEntry(id)
         .subscribeOn(Schedulers.io())
@@ -191,15 +191,11 @@ public class AddEditEntryActivity extends AppCompatActivity {
             parentId,
             title,
             description,
-            durationString,
             duration,
-            years,
-            weeks,
-            days,
-            hours,
-            minutes,
-            seconds,
-            ActivityConstants.UNKNOWN_ENTRY_VIEW_TYPE);
+            Constants.UNKNOWN_ENTRY_VIEW_TYPE,
+            Constants.UNKNOWN_CHILDRENCOUNT,
+            Constants.UNKNOWN_CHILDRENDURATION
+        );
 
     AddEditEntryActivityViewModel.saveViewModelEntry(viewModelEntryToSave)
         .subscribe(
@@ -216,14 +212,14 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
     Bundle bundle = getIntent().getExtras();
 
-    if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_EDIT)) {
+    if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_EDIT)) {
       Toast.makeText(this, "Existing entry updated!", Toast.LENGTH_LONG).show();
-    } else if (bundle.containsKey(ActivityConstants.EXTRA_REQUEST_TYPE_ADD)) {
+    } else if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) {
       Toast.makeText(this, "New entry saved!", Toast.LENGTH_LONG).show();
     }
 
     Intent data = new Intent();
-    data.putExtra(ActivityConstants.EXTRA_TITLE, title);
+    data.putExtra(Constants.EXTRA_TITLE, title);
     setResult(RESULT_OK, data);
     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     finish();
@@ -251,9 +247,9 @@ public class AddEditEntryActivity extends AppCompatActivity {
     super.onActivityResult(requestCode, resultCode, data);
     Log.d(TAG, "onActivityResult called.");
 
-    if (requestCode == ActivityConstants.CHOOSE_PARENT_REQUEST && resultCode == RESULT_OK) {
+    if (requestCode == Constants.CHOOSE_PARENT_REQUEST && resultCode == RESULT_OK) {
       Bundle bundle = data.getExtras();
-      parentId = Integer.valueOf(bundle.getString(ActivityConstants.EXTRA_ENTRY_ID));
+      parentId = Integer.valueOf(bundle.getString(Constants.EXTRA_ENTRY_ID));
 
       if (parentId == 0) {
         parentButton.setText("");
@@ -297,12 +293,12 @@ public class AddEditEntryActivity extends AppCompatActivity {
             Intent chooseParentActivityIntent =
                 new Intent(AddEditEntryActivity.this, ChooseEntryActivity.class);
             chooseParentActivityIntent.putExtra(
-                ActivityConstants.EXTRA_REQUEST_TYPE_CHOOSE_PARENT,
-                ActivityConstants.CHOOSE_PARENT_REQUEST);
+                Constants.EXTRA_REQUEST_TYPE_CHOOSE_PARENT,
+                Constants.CHOOSE_PARENT_REQUEST);
             chooseParentActivityIntent.putExtra(
-                ActivityConstants.EXTRA_ENTRY_ID, Integer.toString(id));
+                Constants.EXTRA_ENTRY_ID, Integer.toString(id));
             startActivityForResult(
-                chooseParentActivityIntent, ActivityConstants.CHOOSE_PARENT_REQUEST);
+                chooseParentActivityIntent, Constants.CHOOSE_PARENT_REQUEST);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }
         });

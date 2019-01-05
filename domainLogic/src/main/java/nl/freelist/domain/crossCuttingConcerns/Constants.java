@@ -1,6 +1,6 @@
-package nl.freelist.presentationConstants;
+package nl.freelist.domain.crossCuttingConcerns;
 
-public class ActivityConstants {
+public class Constants {
 
   public static final String EXTRA_TITLE = "nl.freelist.EXTRA_TITLE";
 
@@ -30,10 +30,16 @@ public class ActivityConstants {
 
   // For rendering layout of different entry types
   public static final int UNKNOWN_ENTRY_VIEW_TYPE = 0;
-  public static final int SINGLE_ENTRY_UPSTREAM_VIEW_TYPE = 1;
-  public static final int SINGLE_ENTRY_DOWNSTREAM_VIEW_TYPE = 2;
-  public static final int STACK_ENTRY_VIEW_TYPE = 3;
-  public static final int SELECTED_ENTRY_VIEW_TYPE = 4;
+  public static final int CHILD_ENTRY_VIEW_TYPE = 5;
+  public static final int PARENT_ENTRY_VIEW_TYPE = 6;
+
+  public static final int SINGLE_ENTRY_VIEW_TYPE = 4;
+  public static final int STACK_ENTRY_VIEW_TYPE = 5;
+
+  public static final int UNKNOWN_CHILDRENCOUNT = 0;
+  public static final int UNKNOWN_CHILDRENDURATION = 0;
 
   public static final int VIEWMODEL_ENTRY_ID_NOT_SET = 0;
+
+
 }

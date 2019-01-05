@@ -1,4 +1,4 @@
-package nl.freelist.data;
+package nl.freelist.data.dto;
 
 import android.arch.persistence.room.Ignore;
 

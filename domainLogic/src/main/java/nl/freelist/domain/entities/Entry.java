@@ -25,7 +25,6 @@ public class Entry {
     this.id = id;
     this.parentId = parentId;
     this.title = title;
-
     this.description = description;
     this.duration = duration;
     this.childrenCount = childrenCount;

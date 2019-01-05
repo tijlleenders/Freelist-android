@@ -3,6 +3,10 @@ package nl.freelist.data;
 import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
+import nl.freelist.data.dto.DataEntry;
+import nl.freelist.data.dto.DataEntryExtra;
+import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.ResultObject;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.interfaces.Specifiable;
@@ -26,25 +30,6 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
     return dataEntry;
   }
 
-  private List<Entry> getEntryListFromDataEntryList(List<DataEntry> dataEntryList) {
-    List<Entry> tempEntryList = new ArrayList<>();
-    Entry entry;
-    for (DataEntry dataEntry : dataEntryList) {
-      entry = getEntryFromDataEntry(dataEntry);
-      tempEntryList.add(entry);
-    }
-    return tempEntryList;
-  }
-
-  private Entry getEntryFromDataEntry(DataEntry dataEntry) {
-    int id = dataEntry.getId();
-    int parentId = dataEntry.getParentId();
-    String title = dataEntry.getTitle();
-    String description = dataEntry.getDescription();
-    int duration = dataEntry.getDuration();
-    Entry entry = new Entry(id, parentId, title, description, duration);
-    return entry;
-  }
 
   private Entry getEntryFromDataEntryExtra(DataEntryExtra dataEntryExtra) {
     int id = dataEntryExtra.getId();
@@ -64,6 +49,34 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
             childrenCount,
             childrenDuration);
     return entry;
+  }
+
+  private ViewModelEntry getViewModelEntryFromDataEntryExtra(DataEntryExtra dataEntryExtra,
+      int type) {
+    int id = dataEntryExtra.getId();
+    int parentId = dataEntryExtra.getParentId();
+    String title = dataEntryExtra.getTitle();
+    String description = dataEntryExtra.getDescription();
+    int duration = dataEntryExtra.getDuration();
+    int childrenCount = dataEntryExtra.getChildrenCount();
+    int childrenDuration = dataEntryExtra.getChildrenDuration();
+    if (childrenCount > 0) {
+      type = Constants.STACK_ENTRY_VIEW_TYPE;
+    } else {
+      type = Constants.SINGLE_ENTRY_VIEW_TYPE;
+    }
+
+    ViewModelEntry viewModelEntry =
+        new ViewModelEntry(
+            id,
+            parentId,
+            title,
+            description,
+            duration,
+            type,
+            childrenCount,
+            childrenDuration);
+    return viewModelEntry;
   }
 
   @Override
@@ -100,18 +113,41 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
     return getEntryFromDataEntryExtra(entryDao.getDataEntryExtra(id));
   }
 
-  @Override
-  public List<Entry> getAllEntries() {
-    return getEntryListFromDataEntryList(entryDao.getAllEntries());
+  public ViewModelEntry getViewModelEntryById(int id) {
+    return getViewModelEntryFromDataEntryExtra(entryDao.getDataEntryExtra(id),
+        Constants.UNKNOWN_ENTRY_VIEW_TYPE);
   }
 
-  @Override
-  public List<Entry> getAllEntriesForParent(int id) {
-    List<Integer> idList = entryDao.getAllAncestorAndDirectChildrenIdsForParent(id);
-    List<Entry> entryList = new ArrayList<>();
-    for (int idToFetch : idList) { // Todo: Fix n+1 query if possible/needed performance wise
-      entryList.add(getEntryFromDataEntryExtra(entryDao.getDataEntryExtra(idToFetch)));
+  public List<ViewModelEntry> getBreadcrumbViewModelEntries(int parentId) {
+    List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
+    if (parentId != 0) {
+      ViewModelEntry parentViewModelEntry =
+          getViewModelEntryFromDataEntryExtra(
+              entryDao.getDataEntryExtra(parentId), Constants.PARENT_ENTRY_VIEW_TYPE);
+      allViewModelEntries.add(parentViewModelEntry);
+
+      if (parentViewModelEntry.getParentId() != 0) {
+        ViewModelEntry parentOfParentViewModelEntry =
+            getViewModelEntryFromDataEntryExtra(
+                entryDao.getDataEntryExtra(parentViewModelEntry.getParentId()),
+                Constants.PARENT_ENTRY_VIEW_TYPE);
+        allViewModelEntries.add(0, parentOfParentViewModelEntry);
+      }
     }
-    return entryList;
+    return allViewModelEntries;
   }
+
+  public List<ViewModelEntry> getAllViewModelEntriesForParent(int parentId) {
+    List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
+
+    List<Integer> childrenIds = entryDao
+        .getAllDirectChildrenIdsForParent(parentId);//get children id list
+    for (int childId : childrenIds) {
+      allViewModelEntries
+          .add(getViewModelEntryFromDataEntryExtra(entryDao.getDataEntryExtra(childId),
+              Constants.CHILD_ENTRY_VIEW_TYPE));
+    }
+    return allViewModelEntries;
+  }
+
 }

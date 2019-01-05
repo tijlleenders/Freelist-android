@@ -1,4 +1,4 @@
-package nl.freelist.data;
+package nl.freelist.data.dto;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
@@ -82,24 +82,4 @@ public class DataEntry {
     return duration;
   }
 
-  public String getFormattedDuration() {
-    if (duration > 0) {
-      int hours = (duration / 3600);
-      int minutes = (duration % 3600) / 60;
-      int seconds = duration % 60;
-      StringBuilder formattedDuration = new StringBuilder();
-      if (hours > 0) {
-        formattedDuration.append(Integer.toString(hours)).append("h");
-      }
-      if (minutes > 0) {
-        formattedDuration.append(Integer.toString(minutes)).append("m");
-      }
-      if (seconds > 0) {
-        formattedDuration.append(Integer.toString(seconds)).append("s");
-      }
-      return formattedDuration.toString();
-    } else {
-      return "...";
-    }
-  }
 }

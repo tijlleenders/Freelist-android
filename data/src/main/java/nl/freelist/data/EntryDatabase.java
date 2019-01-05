@@ -7,6 +7,7 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import nl.freelist.data.dto.DataEntry;
 
 @Database(entities = {DataEntry.class}, version = 1)
 public abstract class EntryDatabase extends RoomDatabase {

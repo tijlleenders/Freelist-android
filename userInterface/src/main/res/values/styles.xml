@@ -34,7 +34,6 @@
   </style>
 
   <style name="selected_title_textview" parent="base_item_textview">
-    <item name="android:textColor">@color/colorAccent</item>
   </style>
 
 </resources>

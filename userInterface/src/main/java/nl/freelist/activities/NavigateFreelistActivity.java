@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,8 +17,10 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import io.reactivex.schedulers.Schedulers;
+import java.util.List;
+import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.freelist.R;
-import nl.freelist.presentationConstants.ActivityConstants;
 import nl.freelist.recyclerviewHelpers.FreelistEntryAdapter;
 import nl.freelist.recyclerviewHelpers.ItemClickListener;
 import nl.freelist.viewModelPerActivity.NavigateEntriesViewModel;
@@ -31,6 +32,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   private NavigateEntriesViewModel navigateEntriesViewModel;
   private FreelistEntryAdapter adapter;
   private RecyclerView recyclerView;
+  private TextView breadcrumb0;
+  private TextView breadcrumb1;
+  private TextView breadcrumb2;
+  private TextView breadcrumbDivider_0_1;
+  private TextView breadcrumbDivider_1_2;
 
   public NavigateFreelistActivity() {
   }
@@ -39,7 +45,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   protected void onResume() {
     Log.d(TAG, "onResume called.");
     super.onResume();
-    updateRecyclerView();
+    updateView();
   }
 
   @Override
@@ -62,6 +68,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   private void initializeViews() {
     Log.d(TAG, "initializeViews called.");
+    breadcrumb0 = findViewById(R.id.breadcrumb_level_0_text);
+    breadcrumb1 = findViewById(R.id.breadcrumb_level_1_text);
+    breadcrumb2 = findViewById(R.id.breadcrumb_level_2_text);
+    breadcrumbDivider_0_1 = findViewById(R.id.breadcrumb_divider_0_1);
+    breadcrumbDivider_1_2 = findViewById(R.id.breadcrumb_divider_1_2);
     recyclerView = findViewById(R.id.recycler_view);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
     recyclerView.setHasFixedSize(true);
@@ -105,10 +116,10 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
           public void onClick(View v) {
             Intent intent = new Intent(NavigateFreelistActivity.this, AddEditEntryActivity.class);
             intent.putExtra(
-                ActivityConstants.EXTRA_REQUEST_TYPE_ADD, ActivityConstants.ADD_ENTRY_REQUEST);
+                Constants.EXTRA_REQUEST_TYPE_ADD, Constants.ADD_ENTRY_REQUEST);
             intent.putExtra(
-                ActivityConstants.EXTRA_ENTRY_PARENT_ID, navigateEntriesViewModel.getParentId());
-            startActivityForResult(intent, ActivityConstants.ADD_ENTRY_REQUEST);
+                Constants.EXTRA_ENTRY_PARENT_ID, navigateEntriesViewModel.getParentId());
+            startActivityForResult(intent, Constants.ADD_ENTRY_REQUEST);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }
         });
@@ -116,31 +127,20 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   private void setupActionBar() {
     Log.d(TAG, "setupActionBar called.");
-    ActionBar actionbar = getSupportActionBar();
+    getSupportActionBar()
+        .setHomeAsUpIndicator(R.drawable.ic_close);
+    setTitle("My Freelists");
+  }
 
-// Applies the custom action bar style
-    getSupportActionBar().setDisplayOptions
-        (actionbar.DISPLAY_SHOW_CUSTOM);
-    getSupportActionBar().setCustomView(R.layout.action_bar);
-
-    TextView actionBarTitle = getSupportActionBar().getCustomView()
-        .findViewById(R.id.action_bar_title);
-    actionBarTitle.setText(R.string.freelists_action_bar_title);
-
-    getSupportActionBar().getCustomView().setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        navigateEntriesViewModel.updateParentId(0);
-        adapter.setCurrentId(0);
-        updateRecyclerView();
-      }
-    });
+  private void updateView() {
+    updateRecyclerView();
+    updateBreadcrumb();
   }
 
   private void updateRecyclerView() {
     Log.d(TAG, "updateRecyclerView called.");
     navigateEntriesViewModel
-        .getAllEntries()
+        .getAllChildrenEntries()
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .subscribe(
@@ -153,7 +153,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
                       adapter.setEntries(entries);
                       Toast.makeText(
                           NavigateFreelistActivity.this,
-                          "navigateEntriesViewModel refreshed!",
+                          "navigateEntriesViewModel recyclerView refreshed!",
                           Toast.LENGTH_SHORT)
                           .show();
                     }
@@ -161,35 +161,99 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
             });
   }
 
+  private void updateBreadcrumb() {
+    Log.d(TAG, "updateBreadcrumb called.");
+    navigateEntriesViewModel
+        .getBreadcrumbEntries()
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .subscribe(
+            entries -> {
+              // update RecyclerView
+              runOnUiThread(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      initializeBreadcrumb(entries);
+                      Toast.makeText(
+                          NavigateFreelistActivity.this,
+                          "navigateEntriesViewModel breadcrumb refreshed!",
+                          Toast.LENGTH_SHORT)
+                          .show();
+                    }
+                  });
+            });
+  }
+
+  private void initializeBreadcrumb(List<ViewModelEntry> entries) {
+    switch (entries.size()) {
+      case 1:
+        breadcrumb0.setText("Home");
+        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentId(0));
+        breadcrumbDivider_0_1.setText(">");
+        breadcrumb1.setText(entries.get(0).getTitle());
+        breadcrumb1
+            .setOnClickListener(view -> updateRecyclerViewWithParentId(entries.get(0).getId()));
+        breadcrumbDivider_1_2.setText("");
+        breadcrumb2.setText("");
+        break;
+      case 2:
+        if (entries.get(0).getParentId() == 0) {
+          breadcrumb0.setText("Home");
+        } else {
+          breadcrumb0.setText("...");
+        }
+        breadcrumb0.setOnClickListener(
+            view -> updateRecyclerViewWithParentId(entries.get(0).getParentId()));
+        breadcrumbDivider_0_1.setText(">");
+        breadcrumb1.setText(entries.get(0).getTitle());
+        breadcrumb1
+            .setOnClickListener(view -> updateRecyclerViewWithParentId(entries.get(0).getId()));
+        breadcrumbDivider_1_2.setText(">");
+        breadcrumb2.setText(entries.get(1).getTitle());
+        breadcrumb2
+            .setOnClickListener(view -> updateRecyclerViewWithParentId(entries.get(1).getId()));
+        break;
+      default:
+        breadcrumb0.setText("Home");
+        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentId(0));
+        breadcrumbDivider_0_1.setText("");
+        breadcrumb1.setText("");
+        breadcrumbDivider_1_2.setText("");
+        breadcrumb2.setText("");
+        break;
+    }
+  }
+
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult called.");
     super.onActivityResult(requestCode, resultCode, data);
 
-    if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
+    if (requestCode == Constants.ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
       Toast.makeText(
           this,
-          "DataEntry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " saved!",
+          "DataEntry " + data.getStringExtra(Constants.EXTRA_TITLE) + " saved!",
           Toast.LENGTH_SHORT)
           .show();
-      updateRecyclerView();
-    } else if (requestCode == ActivityConstants.ADD_ENTRY_REQUEST && resultCode != RESULT_OK) {
+      updateView();
+    } else if (requestCode == Constants.ADD_ENTRY_REQUEST && resultCode != RESULT_OK) {
       Toast.makeText(this, "DataEntry not saved.", Toast.LENGTH_SHORT).show();
-    } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode == RESULT_OK) {
+    } else if (requestCode == Constants.EDIT_ENTRY_REQUEST && resultCode == RESULT_OK) {
       Toast.makeText(
           this,
-          "DataEntry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " edited!",
+          "DataEntry " + data.getStringExtra(Constants.EXTRA_TITLE) + " edited!",
           Toast.LENGTH_SHORT)
           .show();
-      updateRecyclerView();
-    } else if (requestCode == ActivityConstants.EDIT_ENTRY_REQUEST && resultCode != RESULT_OK) {
+      updateView();
+    } else if (requestCode == Constants.EDIT_ENTRY_REQUEST && resultCode != RESULT_OK) {
       Toast.makeText(
           this,
-          "DataEntry " + data.getStringExtra(ActivityConstants.EXTRA_TITLE) + " not edited!",
+          "DataEntry " + data.getStringExtra(Constants.EXTRA_TITLE) + " not edited!",
           Toast.LENGTH_SHORT)
           .show();
     }
-    updateRecyclerView();
+    updateView();
   }
 
   @Override
@@ -221,13 +285,19 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     }
   }
 
+  public void updateRecyclerViewWithParentId(int parentToSet) {
+    navigateEntriesViewModel.updateParentId(parentToSet);
+    updateView();
+    adapter.setCurrentId(parentToSet);
+  }
+
   @Override
   public void onItemClick(View view, int position) {
     Log.d(TAG, "onItemClick called.");
     int viewType = adapter.getItemViewType(position);
     int parentToSet = adapter.getEntryAt(position).getId();
     navigateEntriesViewModel.updateParentId(parentToSet);
-    updateRecyclerView();
+    updateView();
     adapter.setCurrentId(parentToSet);
   }
 

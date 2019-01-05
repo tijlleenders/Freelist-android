@@ -14,8 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 import io.reactivex.schedulers.Schedulers;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.freelist.R;
-import nl.freelist.presentationConstants.ActivityConstants;
 import nl.freelist.recyclerviewHelpers.ChooseEntryAdapter;
 import nl.freelist.recyclerviewHelpers.ItemClickListener;
 import nl.freelist.viewModelPerActivity.NavigateEntriesViewModel;
@@ -52,7 +52,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
 
     Bundle bundle = getIntent().getExtras();
     if (bundle != null) {
-      idToExclude = Integer.valueOf(bundle.getString(ActivityConstants.EXTRA_ENTRY_ID));
+      idToExclude = Integer.valueOf(bundle.getString(Constants.EXTRA_ENTRY_ID));
     }
     recyclerView = findViewById(R.id.recycler_view);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -71,7 +71,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
   private void updateRecyclerView() {
     Log.d(TAG, "updateRecyclerView called.");
     navigateEntriesViewModel
-        .getAllEntries()
+        .getAllChildrenEntries()
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .subscribe(
@@ -111,7 +111,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
         Intent data = new Intent();
         int selectedParent = 0;
         selectedParent = adapter.getCurrentId();
-        data.putExtra(ActivityConstants.EXTRA_ENTRY_ID, Integer.toString(selectedParent));
+        data.putExtra(Constants.EXTRA_ENTRY_ID, Integer.toString(selectedParent));
         setResult(RESULT_OK, data);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();

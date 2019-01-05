@@ -13,9 +13,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.activities.AddEditEntryActivity;
+import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.freelist.R;
-import nl.freelist.presentationConstants.ActivityConstants;
-import nl.freelist.viewModelPerEntity.ViewModelEntry;
 
 public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.EntryHolder> {
 
@@ -41,22 +41,14 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
   public EntryHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     Log.d(TAG, "onCreateViewHolder called.");
     View itemView;
-    if (viewType == ActivityConstants.STACK_ENTRY_VIEW_TYPE) {
+    if (viewType == Constants.STACK_ENTRY_VIEW_TYPE) {
       itemView =
           LayoutInflater.from(parent.getContext())
               .inflate(R.layout.choose_entry_stack, parent, false);
-    } else if (viewType == ActivityConstants.SELECTED_ENTRY_VIEW_TYPE) {
-      itemView =
-          LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.choose_entry_selected, parent, false);
-    } else if (viewType == ActivityConstants.SINGLE_ENTRY_UPSTREAM_VIEW_TYPE) {
-      itemView =
-          LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.choose_entry_single_upstream, parent, false);
     } else {
       itemView =
           LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.choose_entry_single_downstream, parent, false);
+              .inflate(R.layout.choose_entry_single, parent, false);
     }
     return new EntryHolder(itemView);
   }
@@ -66,9 +58,6 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
     Log.d(TAG, "getItemViewType called.");
     ViewModelEntry entry = getEntryAt(position);
     int type = entry.getType();
-    if (currentId == entry.getId()) {
-      type = ActivityConstants.SELECTED_ENTRY_VIEW_TYPE;
-    }
     return type;
   }
 
@@ -121,16 +110,16 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
             public boolean onLongClick(View v) {
               Intent intent = new Intent(v.getContext(), AddEditEntryActivity.class);
               intent.putExtra(
-                  ActivityConstants.EXTRA_REQUEST_TYPE_EDIT, ActivityConstants.EDIT_ENTRY_REQUEST);
+                  Constants.EXTRA_REQUEST_TYPE_EDIT, Constants.EDIT_ENTRY_REQUEST);
               int position = getAdapterPosition();
               ViewModelEntry entry =
                   getEntryAt(
                       position); // Not_to_do: make DataEntry parcelable (not serializable as this is heavy
               // on system) and pass whole entry to edit Activity.
               // Actually, decided only to pass the ID and then construct a ViewModel in the other activity based on this ID
-              intent.putExtra(ActivityConstants.EXTRA_ENTRY_ID, Integer.toString(entry.getId()));
+              intent.putExtra(Constants.EXTRA_ENTRY_ID, Integer.toString(entry.getId()));
               ((Activity) v.getContext())
-                  .startActivityForResult(intent, ActivityConstants.EDIT_ENTRY_REQUEST);
+                  .startActivityForResult(intent, Constants.EDIT_ENTRY_REQUEST);
               ((Activity) v.getContext())
                   .overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
               return false;

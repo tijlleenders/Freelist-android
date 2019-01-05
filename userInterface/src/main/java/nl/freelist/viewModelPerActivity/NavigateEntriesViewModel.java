@@ -7,8 +7,7 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
 import nl.freelist.data.EntryRepository;
-import nl.freelist.domain.entities.Entry;
-import nl.freelist.viewModelPerEntity.ViewModelEntry;
+import nl.freelist.data.dto.ViewModelEntry;
 
 
 public class NavigateEntriesViewModel extends AndroidViewModel {
@@ -31,12 +30,17 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
     super.onCleared();
   }
 
-  public Observable<List<ViewModelEntry>> getAllEntries() {
-    Observable<List<Entry>> entryList = Observable
-        .fromCallable(() -> entryRepository.getAllEntriesForParent(parentId))
+  public Observable<List<ViewModelEntry>> getAllChildrenEntries() {
+    Observable<List<ViewModelEntry>> viewModelEntryList = Observable
+        .fromCallable(() -> entryRepository.getAllViewModelEntriesForParent(parentId))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
-    Observable<List<ViewModelEntry>> viewModelEntryList = entryList
-        .map(entries -> ViewModelEntry.createViewModelEntryListFromEntryList(entries, parentId));
+    return viewModelEntryList;
+  }
+
+  public Observable<List<ViewModelEntry>> getBreadcrumbEntries() {
+    Observable<List<ViewModelEntry>> viewModelEntryList = Observable
+        .fromCallable(() -> entryRepository.getBreadcrumbViewModelEntries(parentId))
+        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return viewModelEntryList;
   }
 

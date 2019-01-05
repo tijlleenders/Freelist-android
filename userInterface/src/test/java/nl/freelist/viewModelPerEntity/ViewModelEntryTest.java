@@ -4,8 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.entities.Entry;
-import nl.freelist.presentationConstants.ActivityConstants;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,19 +30,19 @@ public class ViewModelEntryTest {
     List<ViewModelEntry> viewModelEntryList = new ArrayList<>();
     viewModelEntryList = ViewModelEntry.createViewModelEntryListFromEntryList(entryList, 1);
 
-    assertEquals(ActivityConstants.SINGLE_ENTRY_UPSTREAM_VIEW_TYPE,
+    assertEquals(Constants.SINGLE_ENTRY_UPSTREAM_VIEW_TYPE,
         viewModelEntryList.get(0).getType());
-    assertEquals(ActivityConstants.SINGLE_ENTRY_DOWNSTREAM_VIEW_TYPE,
+    assertEquals(Constants.SINGLE_ENTRY_VIEW_TYPE,
         viewModelEntryList.get(1).getType());
-    assertEquals(ActivityConstants.SINGLE_ENTRY_DOWNSTREAM_VIEW_TYPE,
+    assertEquals(Constants.SINGLE_ENTRY_VIEW_TYPE,
         viewModelEntryList.get(2).getType());
-    assertEquals(ActivityConstants.SINGLE_ENTRY_UPSTREAM_VIEW_TYPE,
+    assertEquals(Constants.SINGLE_ENTRY_UPSTREAM_VIEW_TYPE,
         viewModelEntryList.get(3).getType());
-    assertEquals(ActivityConstants.SINGLE_ENTRY_DOWNSTREAM_VIEW_TYPE,
+    assertEquals(Constants.SINGLE_ENTRY_VIEW_TYPE,
         viewModelEntryList.get(4).getType());
-    assertEquals(ActivityConstants.SINGLE_ENTRY_DOWNSTREAM_VIEW_TYPE,
+    assertEquals(Constants.SINGLE_ENTRY_VIEW_TYPE,
         viewModelEntryList.get(5).getType());
-    assertEquals(ActivityConstants.SINGLE_ENTRY_DOWNSTREAM_VIEW_TYPE,
+    assertEquals(Constants.SINGLE_ENTRY_VIEW_TYPE,
         viewModelEntryList.get(6).getType());
 
   }

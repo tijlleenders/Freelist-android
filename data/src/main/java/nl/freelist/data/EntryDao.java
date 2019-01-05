@@ -7,6 +7,8 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 import java.util.List;
+import nl.freelist.data.dto.DataEntry;
+import nl.freelist.data.dto.DataEntryExtra;
 
 @Dao
 public interface EntryDao {
@@ -28,20 +30,9 @@ public interface EntryDao {
 
   @Query(
       "SELECT id FROM DataEntry\n"
-          + "WHERE DataEntry.id IN \n"
-          + "(\n"
-          + "WITH RECURSIVE parents(x) AS (\n"
-          + "            SELECT :id\n"
-          + "                UNION ALL\n"
-          + "            SELECT DataEntry.parentId \n"
-          + "            FROM DataEntry, parents \n"
-          + "            WHERE DataEntry.id=parents.x LIMIT 10000\n"
-          + "        )\n"
-          + "        SELECT * FROM parents\n"
-          + ")\n"
-          + "OR DataEntry.parentId = :id;\n"
+          + "WHERE DataEntry.parentId = :id;\n"
   )
-  List<Integer> getAllAncestorAndDirectChildrenIdsForParent(int id);
+  List<Integer> getAllDirectChildrenIdsForParent(int id);
 
   @Query(
       "WITH RECURSIVE ChildrenCTE(x) AS (\n"
