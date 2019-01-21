@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
+import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.freelist.R;
@@ -28,6 +29,7 @@ import nl.freelist.viewModelPerActivity.NavigateEntriesViewModel;
 public class NavigateFreelistActivity extends AppCompatActivity implements ItemClickListener {
 
   private static final String TAG = "NavigateFreelistActivity";
+  private String myUuid;
 
   private NavigateEntriesViewModel navigateEntriesViewModel;
   private FreelistEntryAdapter adapter;
@@ -52,10 +54,14 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   protected void onCreate(Bundle savedInstanceState) {
     Log.d(TAG, "onCreate called.");
     super.onCreate(savedInstanceState);
+
+    initializeSharedPreferences();
+
     setContentView(R.layout.activity_navigate_freelist);
 
     navigateEntriesViewModel = ViewModelProviders.of(this)
         .get(NavigateEntriesViewModel.class);
+    navigateEntriesViewModel.setParentUuid(myUuid);
 
     initializeViews();
 
@@ -64,6 +70,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     setupFloatingActionButton();
 
     setupSwipeActions();
+  }
+
+  private void initializeSharedPreferences() {
+    MySettings mySettings = new MySettings(this);
+    myUuid = mySettings.getUuid();
   }
 
   private void initializeViews() {
@@ -118,7 +129,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
             intent.putExtra(
                 Constants.EXTRA_REQUEST_TYPE_ADD, Constants.ADD_ENTRY_REQUEST);
             intent.putExtra(
-                Constants.EXTRA_ENTRY_PARENT_ID, navigateEntriesViewModel.getParentId());
+                Constants.EXTRA_ENTRY_PARENT_ID, navigateEntriesViewModel.getParentUuid());
             startActivityForResult(intent, Constants.ADD_ENTRY_REQUEST);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }
@@ -189,34 +200,34 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     switch (entries.size()) {
       case 1:
         breadcrumb0.setText("Home");
-        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentId(0));
+        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(myUuid));
         breadcrumbDivider_0_1.setText(">");
         breadcrumb1.setText(entries.get(0).getTitle());
         breadcrumb1
-            .setOnClickListener(view -> updateRecyclerViewWithParentId(entries.get(0).getId()));
+            .setOnClickListener(view -> updateRecyclerViewWithParentUuid(entries.get(0).getUuid()));
         breadcrumbDivider_1_2.setText("");
         breadcrumb2.setText("");
         break;
       case 2:
-        if (entries.get(0).getParentId() == 0) {
+        if (entries.get(0).getParentUuid().equals(myUuid)) {
           breadcrumb0.setText("Home");
         } else {
           breadcrumb0.setText("...");
         }
         breadcrumb0.setOnClickListener(
-            view -> updateRecyclerViewWithParentId(entries.get(0).getParentId()));
+            view -> updateRecyclerViewWithParentUuid(entries.get(0).getParentUuid()));
         breadcrumbDivider_0_1.setText(">");
         breadcrumb1.setText(entries.get(0).getTitle());
         breadcrumb1
-            .setOnClickListener(view -> updateRecyclerViewWithParentId(entries.get(0).getId()));
+            .setOnClickListener(view -> updateRecyclerViewWithParentUuid(entries.get(0).getUuid()));
         breadcrumbDivider_1_2.setText(">");
         breadcrumb2.setText(entries.get(1).getTitle());
         breadcrumb2
-            .setOnClickListener(view -> updateRecyclerViewWithParentId(entries.get(1).getId()));
+            .setOnClickListener(view -> updateRecyclerViewWithParentUuid(entries.get(1).getUuid()));
         break;
       default:
         breadcrumb0.setText("Home");
-        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentId(0));
+        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(myUuid));
         breadcrumbDivider_0_1.setText("");
         breadcrumb1.setText("");
         breadcrumbDivider_1_2.setText("");
@@ -285,8 +296,8 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     }
   }
 
-  public void updateRecyclerViewWithParentId(int parentToSet) {
-    navigateEntriesViewModel.updateParentId(parentToSet);
+  public void updateRecyclerViewWithParentUuid(String parentToSet) {
+    navigateEntriesViewModel.updateParentUuid(parentToSet);
     updateView();
     adapter.setCurrentId(parentToSet);
   }
@@ -295,8 +306,8 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   public void onItemClick(View view, int position) {
     Log.d(TAG, "onItemClick called.");
     int viewType = adapter.getItemViewType(position);
-    int parentToSet = adapter.getEntryAt(position).getId();
-    navigateEntriesViewModel.updateParentId(parentToSet);
+    String parentToSet = adapter.getEntryAt(position).getUuid();
+    navigateEntriesViewModel.updateParentUuid(parentToSet);
     updateView();
     adapter.setCurrentId(parentToSet);
   }

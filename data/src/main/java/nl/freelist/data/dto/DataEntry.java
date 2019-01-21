@@ -1,16 +1,40 @@
 package nl.freelist.data.dto;
 
+import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverters;
+import android.support.annotation.NonNull;
+import java.util.UUID;
 
 @Entity(tableName = "DataEntry")
 public class DataEntry {
 
-  @PrimaryKey(autoGenerate = true)
-  private int id;
-  static final int DEFAULT_PARENT = 0;
-  static final String DEFAULT_TYPE = "";
+  @ColumnInfo(name = "ownerUuid", typeAffinity = ColumnInfo.BLOB)
+  @TypeConverters(UuidConverter.class)
+  private UUID ownerUuid;
+
+  public void setOwnerUuid(UUID ownerUuid) {
+    this.ownerUuid = ownerUuid;
+  }
+
+  public void setParentUuid(UUID parentUuid) {
+    this.parentUuid = parentUuid;
+  }
+
+  @ColumnInfo(name = "parentUuid", typeAffinity = ColumnInfo.BLOB)
+  @TypeConverters(UuidConverter.class)
+  private UUID parentUuid;
+
+  @NonNull
+  @PrimaryKey
+  @ColumnInfo(name = "uuid", typeAffinity = ColumnInfo.BLOB)
+  @TypeConverters(UuidConverter.class)
+  private UUID uuid;
+  private String title;
+  private String description;
+  private int duration;
 
   public void setTitle(String title) {
     this.title = title;
@@ -24,50 +48,39 @@ public class DataEntry {
     this.duration = duration;
   }
 
-  private String title;
-  private String description;
-  private int duration;
-  private int parentId;
-
-  @Ignore
-  public DataEntry(String title, String description, int duration) {
-    this(title, description, duration, DEFAULT_PARENT);
-  }
-
   @Ignore
   public DataEntry() throws Exception {
     throw new Exception("Default constructor for DataEntry not allowed.");
   }
 
-  @Ignore
-  public DataEntry(int id, String title, String description, int duration,
-      int parentId) {
-    this(title, description, duration, parentId);
-    this.setId(id);
-  }
-
-  public DataEntry(String title, String description, int duration,
-      int parentId) {
-    this.parentId = parentId;
+  public DataEntry(
+      UUID ownerUuid, UUID parentUuid, UUID uuid, String title, String description, int duration) {
+    this.ownerUuid = ownerUuid;
+    this.parentUuid = parentUuid;
+    this.uuid = uuid;
     this.title = title;
     this.description = description;
     this.duration = duration;
   }
 
-  public void setId(int id) {
-    this.id = id;
+  public void setUuid(UUID uuid) {
+    this.uuid = uuid;
   }
 
-  public void setParentId(int parent) {
-    this.parentId = parent;
+  public void setParentUuid(int parent) {
+    this.parentUuid = parentUuid;
   }
 
-  public int getParentId() {
-    return parentId;
+  public UUID getParentUuid() {
+    return parentUuid;
   }
 
-  public int getId() {
-    return id;
+  public UUID getOwnerUuid() {
+    return ownerUuid;
+  }
+
+  public UUID getUuid() {
+    return uuid;
   }
 
   public String getTitle() {
@@ -81,5 +94,4 @@ public class DataEntry {
   public int getDuration() {
     return duration;
   }
-
 }

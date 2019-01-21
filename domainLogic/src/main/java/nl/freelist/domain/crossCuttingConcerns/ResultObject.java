@@ -17,14 +17,12 @@ public class ResultObject<T> {
     return isSuccess;
   }
 
-  ;
-
   public List<ValidationError> getErrors() {
     return validationErrorList;
   }
 
   public String getMessage() {
-    return "Message from resultObject."; //TODO: implement
+    return "Message from resultObject."; // TODO: implement
   }
 
   public String getParameters() {

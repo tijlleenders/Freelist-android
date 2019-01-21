@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import nl.freelist.activities.AddEditEntryActivity;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
@@ -24,11 +25,12 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
   private List<ViewModelEntry> entries = new ArrayList<>();
   private ItemClickListener onItemClickListener;
 
-  public int getCurrentId() {
-    return currentId;
+  public String getCurrentUuid() {
+    return currentUuid;
   }
 
-  private int currentId = 0;
+  private String currentUuid = UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes())
+      .toString();
 
   public ChooseEntryAdapter(ItemClickListener clickListener) {
     Log.d(TAG, "ChooseEntryAdapter called.");
@@ -80,10 +82,10 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
     notifyDataSetChanged(); // change later for onInsert onDelete (not efficient and no animations)
   }
 
-  public void setCurrentId(int id) {
+  public void setCurrentUuid(String uuid) {
 
     Log.d(TAG, "setCurrentId called.");
-    this.currentId = id;
+    this.currentUuid = uuid;
   }
 
   public ViewModelEntry getEntryAt(int position) {
@@ -117,7 +119,7 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
                       position); // Not_to_do: make DataEntry parcelable (not serializable as this is heavy
               // on system) and pass whole entry to edit Activity.
               // Actually, decided only to pass the ID and then construct a ViewModel in the other activity based on this ID
-              intent.putExtra(Constants.EXTRA_ENTRY_ID, Integer.toString(entry.getId()));
+              intent.putExtra(Constants.EXTRA_ENTRY_ID, entry.getUuid());
               ((Activity) v.getContext())
                   .startActivityForResult(intent, Constants.EDIT_ENTRY_REQUEST);
               ((Activity) v.getContext())

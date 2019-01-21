@@ -2,6 +2,8 @@ package nl.freelist.domain.crossCuttingConcerns;
 
 public class Constants {
 
+  public static final String SETTINGS_UUID = "nl.freelist.SETTINGS_UUID";
+
   public static final String EXTRA_TITLE = "nl.freelist.EXTRA_TITLE";
 
   public static final String EXTRA_ENTRY_ID = "nl.freelist.EXTRA_ENTRY_ID";
@@ -40,6 +42,5 @@ public class Constants {
   public static final int UNKNOWN_CHILDRENDURATION = 0;
 
   public static final int VIEWMODEL_ENTRY_ID_NOT_SET = 0;
-
 
 }

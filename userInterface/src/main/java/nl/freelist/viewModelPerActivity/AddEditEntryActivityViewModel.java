@@ -7,6 +7,7 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import java.util.UUID;
 import nl.freelist.data.EntryRepository;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.ResultObject;
@@ -22,9 +23,10 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
     entryRepository = new EntryRepository(getApplication().getApplicationContext());
   }
 
-  public Single<ViewModelEntry> getViewModelEntry(int id) {
+  public Single<ViewModelEntry> getViewModelEntry(String uuid) {
     Single<ViewModelEntry> result = Single.fromCallable(
-        () -> entryRepository.getViewModelEntryById(id)).observeOn(Schedulers.io())
+        () -> entryRepository.getViewModelEntryById(UUID.fromString(uuid)))
+        .observeOn(Schedulers.io())
         .subscribeOn(Schedulers.io());
     return result;
   }

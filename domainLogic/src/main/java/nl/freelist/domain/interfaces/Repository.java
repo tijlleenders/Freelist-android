@@ -1,6 +1,7 @@
 package nl.freelist.domain.interfaces;
 
 import java.util.List;
+import java.util.UUID;
 import nl.freelist.domain.crossCuttingConcerns.ResultObject;
 
 public interface Repository<T> {
@@ -17,6 +18,6 @@ public interface Repository<T> {
 
   List<T> query(Specifiable specification);
 
-  T getById(int id);
+  T getById(UUID uuid);
 
 }

@@ -13,8 +13,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker.Formatter;
+import android.widget.Switch;
 import android.widget.Toast;
 import io.reactivex.schedulers.Schedulers;
+import java.util.UUID;
+import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
@@ -26,12 +29,14 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
   private static final String TAG = "AddEditEntryActivity";
 
-  private int id;
-  private int parentId;
+  private String uuid;
+  private String parentUuid;
+  private String defaultUuid;
 
   private EditText editTextTitle;
   private EditText editTextDescription;
   private Button parentButton;
+  private Switch copyMoveSwitch;
 
   // Todo: move to fragment invoked by tapping the (readable) duration display button
   private NumberPickerDuration yearPicker;
@@ -57,6 +62,13 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
     Bundle bundle = getIntent().getExtras();
 
+    MySettings mySettings = new MySettings(this);
+    parentUuid = defaultUuid = mySettings.getUuid();
+
+    if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
+      parentUuid = bundle.getString(Constants.EXTRA_ENTRY_PARENT_ID);
+    }
+
     if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
       initializeForEditExisting(bundle);
     } else if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) { // do add setup
@@ -66,15 +78,16 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
   private void initializeForAddNew(Bundle bundle) {
     if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
-      initializeParentButtonWithId(bundle.getInt(Constants.EXTRA_ENTRY_PARENT_ID));
+      initializeParentButtonWithUuid(parentUuid);
+      uuid = UUID.randomUUID().toString();
     }
     setTitle("Add new");
   }
 
   private void initializeForEditExisting(Bundle bundle) {
-    id = Integer.valueOf(bundle.getString(Constants.EXTRA_ENTRY_ID));
+    uuid = bundle.getString(Constants.EXTRA_ENTRY_ID);
 
-    AddEditEntryActivityViewModel.getViewModelEntry(id)
+    AddEditEntryActivityViewModel.getViewModelEntry(uuid)
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .subscribe(
@@ -96,6 +109,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
     editTextTitle = findViewById(R.id.edit_text_title);
     editTextDescription = findViewById(R.id.edit_text_description);
     parentButton = findViewById(R.id.button_parent_change);
+    copyMoveSwitch = findViewById(R.id.copy_move_switch);
 
     initializeDurationPicker();
 
@@ -173,29 +187,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
       return;
     }
 
-    String title = editTextTitle.getText().toString();
-    String description = editTextDescription.getText().toString();
-    int years = yearPicker.getValue();
-    int weeks = weekPicker.getValue();
-    int days = dayPicker.getValue();
-    int hours = hourPicker.getValue();
-    int minutes = minutePicker.getValue();
-    int seconds = secondPicker.getValue();
-    int duration =
-        DurationHelper.getDurationIntFromInts(years, weeks, days, hours, minutes, seconds);
-    String durationString = DurationHelper.getDurationStringFromInt(duration);
-
-    ViewModelEntry viewModelEntryToSave =
-        new ViewModelEntry(
-            id,
-            parentId,
-            title,
-            description,
-            duration,
-            Constants.UNKNOWN_ENTRY_VIEW_TYPE,
-            Constants.UNKNOWN_CHILDRENCOUNT,
-            Constants.UNKNOWN_CHILDRENDURATION
-        );
+    ViewModelEntry viewModelEntryToSave = getViewModelFromScreen();
 
     AddEditEntryActivityViewModel.saveViewModelEntry(viewModelEntryToSave)
         .subscribe(
@@ -219,10 +211,42 @@ public class AddEditEntryActivity extends AppCompatActivity {
     }
 
     Intent data = new Intent();
-    data.putExtra(Constants.EXTRA_TITLE, title);
+    data.putExtra(Constants.EXTRA_TITLE, viewModelEntryToSave.getTitle());
     setResult(RESULT_OK, data);
     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     finish();
+  }
+
+  private ViewModelEntry getViewModelFromScreen() {
+    String ownerUuid = defaultUuid;
+    if (parentButton.getText().toString() == "") {
+      parentUuid = defaultUuid;
+    }
+    String title = editTextTitle.getText().toString();
+    String description = editTextDescription.getText().toString();
+    int years = yearPicker.getValue();
+    int weeks = weekPicker.getValue();
+    int days = dayPicker.getValue();
+    int hours = hourPicker.getValue();
+    int minutes = minutePicker.getValue();
+    int seconds = secondPicker.getValue();
+    int duration =
+        DurationHelper.getDurationIntFromInts(years, weeks, days, hours, minutes, seconds);
+    String durationString = DurationHelper.getDurationStringFromInt(duration);
+
+    ViewModelEntry viewModelEntryToSave =
+        new ViewModelEntry(
+            ownerUuid,
+            parentUuid,
+            uuid,
+            title,
+            description,
+            duration,
+            Constants.UNKNOWN_ENTRY_VIEW_TYPE,
+            Constants.UNKNOWN_CHILDRENCOUNT,
+            Constants.UNKNOWN_CHILDRENDURATION
+        );
+    return viewModelEntryToSave;
   }
 
   private boolean isValidInput() {
@@ -249,13 +273,17 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
     if (requestCode == Constants.CHOOSE_PARENT_REQUEST && resultCode == RESULT_OK) {
       Bundle bundle = data.getExtras();
-      parentId = Integer.valueOf(bundle.getString(Constants.EXTRA_ENTRY_ID));
+      if (!parentUuid.equals(bundle.getString(Constants.EXTRA_ENTRY_ID))) {
+        parentUuid = bundle.getString(Constants.EXTRA_ENTRY_ID);
+        copyMoveSwitch.setVisibility(View.VISIBLE);
+      }
 
-      if (parentId == 0) {
+      if (parentUuid
+          .equals(UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()).toString())) {
         parentButton.setText("");
       } else {
 
-        AddEditEntryActivityViewModel.getViewModelEntry(parentId)
+        AddEditEntryActivityViewModel.getViewModelEntry(parentUuid)
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .subscribe(
@@ -284,8 +312,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
     }
   }
 
-  private void initializeParentButtonWithId(int parentId) {
-    this.parentId = parentId;
+  private void initializeParentButtonWithUuid(String parentUuid) {
+    this.parentUuid = parentUuid;
     parentButton.setOnClickListener(
         new View.OnClickListener() {
           @Override
@@ -296,19 +324,20 @@ public class AddEditEntryActivity extends AppCompatActivity {
                 Constants.EXTRA_REQUEST_TYPE_CHOOSE_PARENT,
                 Constants.CHOOSE_PARENT_REQUEST);
             chooseParentActivityIntent.putExtra(
-                Constants.EXTRA_ENTRY_ID, Integer.toString(id));
+                Constants.EXTRA_ENTRY_ID, uuid);
             startActivityForResult(
                 chooseParentActivityIntent, Constants.CHOOSE_PARENT_REQUEST);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }
         });
 
-    if (parentId == 0) {
+    if (parentUuid
+        .equals(UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()).toString())) {
       parentButton.setText("");
       return;
     }
 
-    AddEditEntryActivityViewModel.getViewModelEntry(parentId)
+    AddEditEntryActivityViewModel.getViewModelEntry(parentUuid)
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .subscribe(
@@ -335,7 +364,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
     hourPicker.setValue(viewModelEntry.getHours());
     minutePicker.setValue(viewModelEntry.getMinutes());
     secondPicker.setValue(viewModelEntry.getSeconds());
-    initializeParentButtonWithId(viewModelEntry.getParentId());
+    initializeParentButtonWithUuid(viewModelEntry.getParentUuid());
     return;
   }
 }

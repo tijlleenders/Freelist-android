@@ -1,9 +1,12 @@
 package nl.freelist.domain.entities;
 
+import java.util.UUID;
+
 public class Entry {
 
-  private int id;
-  private int parentId;
+  private UUID ownerUuid;
+  private UUID uuid;
+  private UUID parentUuid;
   private String title;
   private String description;
   private int duration;
@@ -11,19 +14,21 @@ public class Entry {
   private int childrenDuration;
 
   public Entry(
-      int id, int parentId, String title, String description, int duration) {
-    this.id = id;
-    this.parentId = parentId;
+      UUID ownerUuid, UUID parentUuid, UUID uuid, String title, String description, int duration) {
+    this.ownerUuid = ownerUuid;
+    this.parentUuid = parentUuid;
+    this.uuid = uuid;
     this.title = title;
     this.description = description;
     this.duration = duration;
   }
 
   public Entry(
-      int id, int parentId, String title, String description, int duration,
+      UUID ownerUuid, UUID parentUuid, UUID uuid, String title, String description, int duration,
       int childrenCount, int childrenDuration) {
-    this.id = id;
-    this.parentId = parentId;
+    this.ownerUuid = ownerUuid;
+    this.parentUuid = parentUuid;
+    this.uuid = uuid;
     this.title = title;
     this.description = description;
     this.duration = duration;
@@ -47,45 +52,28 @@ public class Entry {
     this.childrenDuration = childrenDuration;
   }
 
-
-
-  public int getId() {
-    return id;
+  public UUID getUuid() {
+    return uuid;
   }
 
-  public void setId(int id) {
-    this.id = id;
+  public UUID getOwnerUuid() {
+    return ownerUuid;
   }
 
-  public int getParentId() {
-    return parentId;
-  }
-
-  public void setParentId(int parentId) {
-    this.parentId = parentId;
+  public UUID getParentUuid() {
+    return parentUuid;
   }
 
   public String getTitle() {
     return title;
   }
 
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
   public String getDescription() {
     return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
   }
 
   public int getDuration() {
     return duration;
   }
 
-  public void setDuration(int duration) {
-    this.duration = duration;
-  }
 }

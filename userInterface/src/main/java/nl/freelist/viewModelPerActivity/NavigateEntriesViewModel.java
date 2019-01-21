@@ -6,13 +6,14 @@ import android.support.annotation.NonNull;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
+import java.util.UUID;
 import nl.freelist.data.EntryRepository;
 import nl.freelist.data.dto.ViewModelEntry;
 
 
 public class NavigateEntriesViewModel extends AndroidViewModel {
 
-  private int parentId;
+  private String parentUuid;
   private EntryRepository entryRepository;
 
   public NavigateEntriesViewModel(@NonNull Application application) {
@@ -20,8 +21,12 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
     entryRepository = new EntryRepository(getApplication().getApplicationContext());
   }
 
-  public int getParentId() {
-    return parentId;
+  public void setParentUuid(String parentUuid) {
+    this.parentUuid = parentUuid;
+  }
+
+  public String getParentUuid() {
+    return parentUuid;
   }
 
   @Override
@@ -32,20 +37,22 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
 
   public Observable<List<ViewModelEntry>> getAllChildrenEntries() {
     Observable<List<ViewModelEntry>> viewModelEntryList = Observable
-        .fromCallable(() -> entryRepository.getAllViewModelEntriesForParent(parentId))
+        .fromCallable(
+            () -> entryRepository.getAllViewModelEntriesForParent(UUID.fromString(parentUuid)))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return viewModelEntryList;
   }
 
   public Observable<List<ViewModelEntry>> getBreadcrumbEntries() {
     Observable<List<ViewModelEntry>> viewModelEntryList = Observable
-        .fromCallable(() -> entryRepository.getBreadcrumbViewModelEntries(parentId))
+        .fromCallable(
+            () -> entryRepository.getBreadcrumbViewModelEntries(UUID.fromString(parentUuid)))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return viewModelEntryList;
   }
 
-  public void updateParentId(int parentId) {
-    this.parentId = parentId;
+  public void updateParentUuid(String parentUuid) {
+    this.parentUuid = parentUuid;
   }
 
   public void deleteAllEntries() {

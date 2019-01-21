@@ -1,6 +1,7 @@
 package nl.freelist.data.dto;
 
 import android.util.Log;
+import java.util.UUID;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
 import nl.freelist.domain.entities.Entry;
 
@@ -9,32 +10,10 @@ public class ViewModelEntry {
 
   private static final String TAG = "ViewModelEntry";
 
-  public int getDuration() {
-    return duration;
-  }
+  private String uuid;
 
-  public int getYears() {
-    return years;
-  }
-
-  public int getWeeks() {
-    return weeks;
-  }
-
-  public int getDays() {
-    return days;
-  }
-
-  public int getHours() {
-    return hours;
-  }
-
-  public int getSeconds() {
-    return seconds;
-  }
-
-  private int id;
-  private int parentId;
+  private String parentUuid;
+  private String ownerUuid;
   private String title;
   private String description;
   private String durationString;
@@ -48,25 +27,26 @@ public class ViewModelEntry {
   private int type;
   private int childrenCount;
   private int childrenDuration;
-
   public int getChildrenCount() {
     return childrenCount;
   }
-
   public int getChildrenDuration() {
     return childrenDuration;
   }
+
   public ViewModelEntry(
-      int id,
-      int parentId,
+      String ownerUuid,
+      String parentUuid,
+      String uuid,
       String title,
       String description,
       int duration,
       int type,
       int childrenCount,
       int childrenDuration) {
-    this.id = id;
-    this.parentId = parentId;
+    this.ownerUuid = ownerUuid;
+    this.parentUuid = parentUuid;
+    this.uuid = uuid;
     this.title = title;
     this.description = description;
     this.duration = duration;
@@ -82,16 +62,29 @@ public class ViewModelEntry {
     this.durationString = DurationHelper.getDurationStringFromInt(duration);
 
     Log.d(TAG,
-        "ViewModelEntry " + title + " (id:" + Integer.toString(id) + ")" + " parentId:" + parentId);
+        "ViewModelEntry " + title + " (uuid:" + uuid + ")" + " parentUuid:" + parentUuid);
+  }
+
+  public String getUuid() {
+    return uuid;
+  }
+
+  public String getParentUuid() {
+    return parentUuid;
+  }
+
+  public String getOwnerUuid() {
+    return ownerUuid;
   }
 
   public static Entry getEntryFromViewModelEntry(ViewModelEntry viewModelEntry) {
-    int id = viewModelEntry.id;
-    int parentId = viewModelEntry.parentId;
+    UUID ownerUuid = UUID.fromString(viewModelEntry.getOwnerUuid());
+    UUID parentUuid = UUID.fromString(viewModelEntry.getParentUuid());
+    UUID uuid = UUID.fromString(viewModelEntry.getUuid());
     String title = viewModelEntry.title;
     String description = viewModelEntry.description;
     int duration = viewModelEntry.duration;
-    return new Entry(id, parentId, title, description, duration);
+    return new Entry(ownerUuid, parentUuid, uuid, title, description, duration);
   }
 
   public int getType() {
@@ -102,20 +95,8 @@ public class ViewModelEntry {
     this.type = type;
   }
 
-  public int getId() {
-    return id;
-  }
-
   public void setId(int id) {
-    this.id = id;
-  }
-
-  public int getParentId() {
-    return parentId;
-  }
-
-  public void setParentId(int parentId) {
-    this.parentId = parentId;
+    this.uuid = uuid;
   }
 
   public String getTitle() {
@@ -140,6 +121,30 @@ public class ViewModelEntry {
 
   public int getMinutes() {
     return minutes;
+  }
+
+  public int getDuration() {
+    return duration;
+  }
+
+  public int getYears() {
+    return years;
+  }
+
+  public int getWeeks() {
+    return weeks;
+  }
+
+  public int getDays() {
+    return days;
+  }
+
+  public int getHours() {
+    return hours;
+  }
+
+  public int getSeconds() {
+    return seconds;
   }
 
 }

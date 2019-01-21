@@ -3,6 +3,7 @@ package nl.freelist.data;
 import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import nl.freelist.data.dto.DataEntry;
 import nl.freelist.data.dto.DataEntryExtra;
 import nl.freelist.data.dto.ViewModelEntry;
@@ -21,19 +22,21 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
   }
 
   private DataEntry getDataEntryFromEntry(Entry entry) {
-    int id = entry.getId();
+    UUID ownerUuid = entry.getOwnerUuid();
+    UUID parentUuid = entry.getParentUuid();
+    UUID uuid = entry.getUuid();
     String title = entry.getTitle();
     String description = entry.getDescription();
     int duration = entry.getDuration();
-    int parentId = entry.getParentId();
-    DataEntry dataEntry = new DataEntry(id, title, description, duration, parentId);
+    DataEntry dataEntry = new DataEntry(ownerUuid, parentUuid, uuid, title, description, duration);
     return dataEntry;
   }
 
 
   private Entry getEntryFromDataEntryExtra(DataEntryExtra dataEntryExtra) {
-    int id = dataEntryExtra.getId();
-    int parentId = dataEntryExtra.getParentId();
+    UUID ownerUuid = dataEntryExtra.getOwnerUuid();
+    UUID uuid = dataEntryExtra.getUuid();
+    UUID parentUuid = dataEntryExtra.getParentUuid();
     String title = dataEntryExtra.getTitle();
     String description = dataEntryExtra.getDescription();
     int duration = dataEntryExtra.getDuration();
@@ -41,8 +44,9 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
     int childrenDuration = dataEntryExtra.getChildrenDuration();
     Entry entry =
         new Entry(
-            id,
-            parentId,
+            ownerUuid,
+            parentUuid,
+            uuid,
             title,
             description,
             duration,
@@ -52,9 +56,10 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
   }
 
   private ViewModelEntry getViewModelEntryFromDataEntryExtra(DataEntryExtra dataEntryExtra,
-      int type) {
-    int id = dataEntryExtra.getId();
-    int parentId = dataEntryExtra.getParentId();
+      int type) { ////Todo: refactor to method in DataEntryExtra so it doesn't have to expose internals
+    String ownerUuid = dataEntryExtra.getOwnerUuid().toString();
+    String parentUuid = dataEntryExtra.getParentUuid().toString();
+    String uuid = dataEntryExtra.getUuid().toString();
     String title = dataEntryExtra.getTitle();
     String description = dataEntryExtra.getDescription();
     int duration = dataEntryExtra.getDuration();
@@ -68,8 +73,9 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
 
     ViewModelEntry viewModelEntry =
         new ViewModelEntry(
-            id,
-            parentId,
+            ownerUuid,
+            parentUuid,
+            uuid,
             title,
             description,
             duration,
@@ -109,27 +115,28 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
   }
 
   @Override
-  public Entry getById(int id) {
-    return getEntryFromDataEntryExtra(entryDao.getDataEntryExtra(id));
+  public Entry getById(UUID uuid) {
+    return getEntryFromDataEntryExtra(entryDao.getDataEntryExtra(uuid));
   }
 
-  public ViewModelEntry getViewModelEntryById(int id) {
-    return getViewModelEntryFromDataEntryExtra(entryDao.getDataEntryExtra(id),
+  public ViewModelEntry getViewModelEntryById(UUID uuid) {
+    return getViewModelEntryFromDataEntryExtra(entryDao.getDataEntryExtra(uuid),
         Constants.UNKNOWN_ENTRY_VIEW_TYPE);
   }
 
-  public List<ViewModelEntry> getBreadcrumbViewModelEntries(int parentId) {
+  public List<ViewModelEntry> getBreadcrumbViewModelEntries(UUID parentUuid) {
     List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
-    if (parentId != 0) {
+    if (!parentUuid.equals(UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()))) {
       ViewModelEntry parentViewModelEntry =
           getViewModelEntryFromDataEntryExtra(
-              entryDao.getDataEntryExtra(parentId), Constants.PARENT_ENTRY_VIEW_TYPE);
+              entryDao.getDataEntryExtra(parentUuid), Constants.PARENT_ENTRY_VIEW_TYPE);
       allViewModelEntries.add(parentViewModelEntry);
 
-      if (parentViewModelEntry.getParentId() != 0) {
+      if (!UUID.fromString(parentViewModelEntry.getParentUuid())
+          .equals(UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()))) {
         ViewModelEntry parentOfParentViewModelEntry =
             getViewModelEntryFromDataEntryExtra(
-                entryDao.getDataEntryExtra(parentViewModelEntry.getParentId()),
+                entryDao.getDataEntryExtra(UUID.fromString(parentViewModelEntry.getParentUuid())),
                 Constants.PARENT_ENTRY_VIEW_TYPE);
         allViewModelEntries.add(0, parentOfParentViewModelEntry);
       }
@@ -137,14 +144,14 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
     return allViewModelEntries;
   }
 
-  public List<ViewModelEntry> getAllViewModelEntriesForParent(int parentId) {
+  public List<ViewModelEntry> getAllViewModelEntriesForParent(UUID parentUuid) {
     List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
 
-    List<Integer> childrenIds = entryDao
-        .getAllDirectChildrenIdsForParent(parentId);//get children id list
-    for (int childId : childrenIds) {
+    List<UUID> childrenUuids = entryDao
+        .getAllDirectChildrenIdsForParent(parentUuid);//get children id list
+    for (UUID childUuid : childrenUuids) {
       allViewModelEntries
-          .add(getViewModelEntryFromDataEntryExtra(entryDao.getDataEntryExtra(childId),
+          .add(getViewModelEntryFromDataEntryExtra(entryDao.getDataEntryExtra(childUuid),
               Constants.CHILD_ENTRY_VIEW_TYPE));
     }
     return allViewModelEntries;

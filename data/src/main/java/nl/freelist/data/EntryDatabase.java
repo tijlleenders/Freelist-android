@@ -7,6 +7,7 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import java.util.UUID;
 import nl.freelist.data.dto.DataEntry;
 
 @Database(entities = {DataEntry.class}, version = 1)
@@ -45,13 +46,21 @@ public abstract class EntryDatabase extends RoomDatabase {
 
     @Override
     protected Void doInBackground(Void... voids) {
-      entryDao.insert(new DataEntry("Title 1", "Description 1", 300, 0));
-      entryDao.insert(new DataEntry("Title 2", "Description 2", 300, 0));
-      entryDao.insert(new DataEntry("Title 3", "Description 3", 300, 0));
-      entryDao.insert(new DataEntry("Sub 1 A", "Description 1A", 300, 1));
-      entryDao.insert(new DataEntry("Sub 1 B", "Description 1B", 300, 1));
-      entryDao.insert(new DataEntry("Sub 1 C", "Description 1C", 300, 1));
-      entryDao.insert(new DataEntry("Sub 1A A", "Description 1A A", 300, 4));
+      entryDao.insert(new DataEntry(
+          UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()),
+          UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()),
+          UUID.nameUUIDFromBytes(
+              (UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()).toString() + "Shopping")
+                  .getBytes()),
+          "Shopping",
+          "Description shopping",
+          300));
+//      entryDao.insert(new DataEntry("Work", "Description work", 300, 0));
+//      entryDao.insert(new DataEntry("Private", "Description private", 300, 0));
+//      entryDao.insert(new DataEntry("Sub 1 A", "Description 1A", 300, 1));
+//      entryDao.insert(new DataEntry("Sub 1 B", "Description 1B", 300, 1));
+//      entryDao.insert(new DataEntry("Sub 1 C", "Description 1C", 300, 1));
+//      entryDao.insert(new DataEntry("Sub 1A A", "Description 1A A", 300, 4));
       return null;
     }
   }
