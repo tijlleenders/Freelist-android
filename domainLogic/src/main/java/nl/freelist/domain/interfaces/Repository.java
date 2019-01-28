@@ -1,8 +1,8 @@
 package nl.freelist.domain.interfaces;
 
 import java.util.List;
-import java.util.UUID;
 import nl.freelist.domain.crossCuttingConcerns.ResultObject;
+import nl.freelist.domain.events.Event;
 
 public interface Repository<T> {
 
@@ -18,6 +18,7 @@ public interface Repository<T> {
 
   List<T> query(Specifiable specification);
 
-  T getById(UUID uuid);
+  T getById(String uuid);
 
+  List<Event> getSavedEventsFor(String uuid);
 }

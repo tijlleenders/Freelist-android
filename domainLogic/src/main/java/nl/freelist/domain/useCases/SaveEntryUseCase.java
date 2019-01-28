@@ -6,11 +6,11 @@ import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.interfaces.Repository;
 import nl.freelist.domain.useCaseTypes.UseCaseWithParameter;
 
-public class SaveEntry implements UseCaseWithParameter<Entry, ResultObject<Entry>> {
+public class SaveEntryUseCase implements UseCaseWithParameter<Entry, ResultObject<Entry>> {
 
   private Repository<Entry> entryRepository;
 
-  public SaveEntry(Repository<Entry> entryRepository) {
+  public SaveEntryUseCase(Repository<Entry> entryRepository) {
     this.entryRepository = entryRepository;
   }
 

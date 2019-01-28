@@ -2,16 +2,15 @@ package nl.freelist.data.dto;
 
 import android.util.Log;
 import java.util.UUID;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
 import nl.freelist.domain.entities.Entry;
-
 
 public class ViewModelEntry {
 
   private static final String TAG = "ViewModelEntry";
 
   private String uuid;
-
   private String parentUuid;
   private String ownerUuid;
   private String title;
@@ -24,15 +23,16 @@ public class ViewModelEntry {
   private int hours;
   private int minutes;
   private int seconds;
-  private int type;
   private int childrenCount;
   private int childrenDuration;
+  private int lastSavedEventSequenceNumber;
   public int getChildrenCount() {
     return childrenCount;
   }
   public int getChildrenDuration() {
     return childrenDuration;
   }
+
 
   public ViewModelEntry(
       String ownerUuid,
@@ -41,16 +41,15 @@ public class ViewModelEntry {
       String title,
       String description,
       int duration,
-      int type,
       int childrenCount,
-      int childrenDuration) {
+      int childrenDuration,
+      int lastSavedEventSequenceNumber) {
     this.ownerUuid = ownerUuid;
     this.parentUuid = parentUuid;
     this.uuid = uuid;
     this.title = title;
     this.description = description;
     this.duration = duration;
-    this.type = type;
     this.childrenCount = childrenCount;
     this.childrenDuration = childrenDuration;
     this.years = DurationHelper.getYearsIntFrom(duration);
@@ -60,6 +59,7 @@ public class ViewModelEntry {
     this.minutes = DurationHelper.getMinutesIntFrom(duration);
     this.seconds = DurationHelper.getSecondsIntFrom(duration);
     this.durationString = DurationHelper.getDurationStringFromInt(duration);
+    this.lastSavedEventSequenceNumber = lastSavedEventSequenceNumber;
 
     Log.d(TAG,
         "ViewModelEntry " + title + " (uuid:" + uuid + ")" + " parentUuid:" + parentUuid);
@@ -88,15 +88,11 @@ public class ViewModelEntry {
   }
 
   public int getType() {
-    return type;
-  }
-
-  public void setType(int type) {
-    this.type = type;
-  }
-
-  public void setId(int id) {
-    this.uuid = uuid;
+    if (childrenCount > 0) {
+      return Constants.STACK_ENTRY_VIEW_TYPE;
+    } else {
+      return Constants.SINGLE_ENTRY_VIEW_TYPE;
+    }
   }
 
   public String getTitle() {
@@ -145,6 +141,10 @@ public class ViewModelEntry {
 
   public int getSeconds() {
     return seconds;
+  }
+
+  public int getLastSavedEventSequenceNumber() {
+    return lastSavedEventSequenceNumber;
   }
 
 }

@@ -1,6 +1,11 @@
 package nl.freelist.domain.entities;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import nl.freelist.domain.events.EntryCreatedEvent;
+import nl.freelist.domain.events.EntryTitleChangedEvent;
+import nl.freelist.domain.events.Event;
 
 public class Entry {
 
@@ -10,8 +15,8 @@ public class Entry {
   private String title;
   private String description;
   private int duration;
-  private int childrenCount;
-  private int childrenDuration;
+  private int lastAppliedEventSequenceNumber;
+  private List<Event> eventList = new ArrayList<>();
 
   public Entry(
       UUID ownerUuid, UUID parentUuid, UUID uuid, String title, String description, int duration) {
@@ -21,35 +26,47 @@ public class Entry {
     this.title = title;
     this.description = description;
     this.duration = duration;
+    lastAppliedEventSequenceNumber = -1;
   }
 
-  public Entry(
-      UUID ownerUuid, UUID parentUuid, UUID uuid, String title, String description, int duration,
-      int childrenCount, int childrenDuration) {
-    this.ownerUuid = ownerUuid;
-    this.parentUuid = parentUuid;
-    this.uuid = uuid;
-    this.title = title;
-    this.description = description;
-    this.duration = duration;
-    this.childrenCount = childrenCount;
-    this.childrenDuration = childrenDuration;
+  public void applyEvent(Event event) {
+    // Todo: ...
+    String eventClass = event.getClass().getSimpleName();
+    switch (eventClass) {
+      case "EntryCreatedEvent":
+        EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
+        this.uuid = UUID.fromString(entryCreatedEvent.getEntryId());
+        this.ownerUuid = UUID.fromString(entryCreatedEvent.getOwnerUuid());
+        this.parentUuid = UUID.fromString(entryCreatedEvent.getParentUuid());
+        break;
+      case "EntryTitleChangedEvent":
+        EntryTitleChangedEvent entryTitleChangedEvent = (EntryTitleChangedEvent) event;
+        this.title = entryTitleChangedEvent.getTitleAfter();
+        break;
+      default:
+        //Todo: Log or throw?
+        break;
+    }
+    eventList.add(event);
+    lastAppliedEventSequenceNumber += 1;
   }
 
-  public int getChildrenCount() {
-    return childrenCount;
+  public List<Event> getEventList(int fromEventSequenceNumber) {
+    if (eventList.size() > fromEventSequenceNumber) {
+      return eventList.subList(fromEventSequenceNumber, eventList.size());
+    } else {
+      return eventList;
+    }
   }
 
-  public void setChildrenCount(int childrenCount) {
-    this.childrenCount = childrenCount;
+  public void applyEvents(List<Event> eventList) {
+    for (Event event : eventList) {
+      applyEvent(event);
+    }
   }
 
-  public int getChildrenDuration() {
-    return childrenDuration;
-  }
-
-  public void setChildrenDuration(int childrenDuration) {
-    this.childrenDuration = childrenDuration;
+  public int getLastAppliedEventSequenceNumber() {
+    return lastAppliedEventSequenceNumber;
   }
 
   public UUID getUuid() {
@@ -75,5 +92,6 @@ public class Entry {
   public int getDuration() {
     return duration;
   }
+
 
 }

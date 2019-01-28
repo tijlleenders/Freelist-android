@@ -109,7 +109,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
             // viewHolder.getAdapterPosition() //where did we swipe?
             navigateEntriesViewModel.delete(
                 adapter.getEntryAt(viewHolder.getAdapterPosition()));
-            Toast.makeText(NavigateFreelistActivity.this, "DataEntry deleted", Toast.LENGTH_SHORT)
+            Toast.makeText(NavigateFreelistActivity.this, "Entry deleted", Toast.LENGTH_SHORT)
                 .show();
           }
 
@@ -244,23 +244,23 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     if (requestCode == Constants.ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
       Toast.makeText(
           this,
-          "DataEntry " + data.getStringExtra(Constants.EXTRA_TITLE) + " saved!",
+          "Entry " + data.getStringExtra(Constants.EXTRA_TITLE) + " saved!",
           Toast.LENGTH_SHORT)
           .show();
       updateView();
     } else if (requestCode == Constants.ADD_ENTRY_REQUEST && resultCode != RESULT_OK) {
-      Toast.makeText(this, "DataEntry not saved.", Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, "Entry not saved.", Toast.LENGTH_SHORT).show();
     } else if (requestCode == Constants.EDIT_ENTRY_REQUEST && resultCode == RESULT_OK) {
       Toast.makeText(
           this,
-          "DataEntry " + data.getStringExtra(Constants.EXTRA_TITLE) + " edited!",
+          "Entry " + data.getStringExtra(Constants.EXTRA_TITLE) + " edited!",
           Toast.LENGTH_SHORT)
           .show();
       updateView();
     } else if (requestCode == Constants.EDIT_ENTRY_REQUEST && resultCode != RESULT_OK) {
       Toast.makeText(
           this,
-          "DataEntry " + data.getStringExtra(Constants.EXTRA_TITLE) + " not edited!",
+          "Entry " + data.getStringExtra(Constants.EXTRA_TITLE) + " not edited!",
           Toast.LENGTH_SHORT)
           .show();
     }

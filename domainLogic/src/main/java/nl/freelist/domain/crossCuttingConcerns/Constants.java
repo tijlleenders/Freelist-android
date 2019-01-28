@@ -10,15 +10,6 @@ public class Constants {
 
   public static final String EXTRA_ENTRY_PARENT_ID = "nl.freelist.EXTRA_ENTRY_PARENT_ID";
 
-  public static final String EXTRA_ENTRY_TITLE = "nl.freelist.EXTRA_ENTRY_TITLE";
-
-  public static final String EXTRA_ENTRY_DESCRIPTION = "nl.freelist.EXTRA_ENTRY_DESCRIPTION";
-
-  public static final String EXTRA_ENTRY_FORMATTED_DURATION =
-      "nl.freelist.EXTRA_ENTRY_FORMATTED_DURATION";
-
-  public static final String EXTRA_ENTRY_FORMATTED_DATE = "nl.freelist.EXTRA_ENTRY_FORMATTED_DATE";
-
   public static final int ADD_ENTRY_REQUEST =
       1; // todo: Can't I just use string instead of magic numbers? Alle intent Action codes are
   // constant strings right? StartActivityForResult requires an int requestCode....
@@ -31,16 +22,7 @@ public class Constants {
   public static final String EXTRA_REQUEST_TYPE_CHOOSE_PARENT = "nl.freelist.REQUEST_TYPE_CHOOSE_PARENT";
 
   // For rendering layout of different entry types
-  public static final int UNKNOWN_ENTRY_VIEW_TYPE = 0;
-  public static final int CHILD_ENTRY_VIEW_TYPE = 5;
-  public static final int PARENT_ENTRY_VIEW_TYPE = 6;
-
   public static final int SINGLE_ENTRY_VIEW_TYPE = 4;
   public static final int STACK_ENTRY_VIEW_TYPE = 5;
-
-  public static final int UNKNOWN_CHILDRENCOUNT = 0;
-  public static final int UNKNOWN_CHILDRENDURATION = 0;
-
-  public static final int VIEWMODEL_ENTRY_ID_NOT_SET = 0;
 
 }

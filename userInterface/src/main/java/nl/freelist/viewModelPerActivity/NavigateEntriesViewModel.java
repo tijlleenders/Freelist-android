@@ -10,6 +10,7 @@ import java.util.UUID;
 import nl.freelist.data.EntryRepository;
 import nl.freelist.data.dto.ViewModelEntry;
 
+// Todo: rename (parent)Uuid to (parent)entryId
 
 public class NavigateEntriesViewModel extends AndroidViewModel {
 

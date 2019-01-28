@@ -6,21 +6,22 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker.Formatter;
 import android.widget.Switch;
-import android.widget.Toast;
 import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
+import nl.freelist.data.EntryRepository;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.commands.ChangeEntryTitleCommand;
+import nl.freelist.domain.commands.CreateEntryCommand;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
+import nl.freelist.domain.entities.Entry;
+import nl.freelist.domain.interfaces.Repository;
 import nl.freelist.freelist.R;
 import nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel;
 import nl.freelist.views.NumberPickerDuration;
@@ -29,9 +30,12 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
   private static final String TAG = "AddEditEntryActivity";
 
-  private String uuid;
+  private String uuid; //Todo: why ever store a UUID as a string, if not in data persistence layer?
   private String parentUuid;
   private String defaultUuid;
+  private int lastSavedEventSequenceNumber = -1;
+
+  private Repository<Entry> entryRepository;
 
   private EditText editTextTitle;
   private EditText editTextDescription;
@@ -49,13 +53,14 @@ public class AddEditEntryActivity extends AppCompatActivity {
   private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel
       AddEditEntryActivityViewModel;
 
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_add_edit_entry);
 
     initializeViews();
+
+    entryRepository = new EntryRepository(this.getApplicationContext());
 
     AddEditEntryActivityViewModel =
         ViewModelProviders.of(this).get(AddEditEntryActivityViewModel.class);
@@ -73,7 +78,17 @@ public class AddEditEntryActivity extends AppCompatActivity {
       initializeForEditExisting(bundle);
     } else if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) { // do add setup
       initializeForAddNew(bundle);
+
+      CreateEntryCommand createEntryCommand =
+          new CreateEntryCommand(defaultUuid, parentUuid, uuid, entryRepository);
+      lastSavedEventSequenceNumber += 1;
+      AddEditEntryActivityViewModel.handle(createEntryCommand)
+          .subscribeOn(Schedulers.io())
+          .observeOn(Schedulers.io())
+          .subscribe();
     }
+
+    attachViewListeners();
   }
 
   private void initializeForAddNew(Bundle bundle) {
@@ -107,14 +122,48 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
   private void initializeViews() {
     editTextTitle = findViewById(R.id.edit_text_title);
+
     editTextDescription = findViewById(R.id.edit_text_description);
     parentButton = findViewById(R.id.button_parent_change);
     copyMoveSwitch = findViewById(R.id.copy_move_switch);
 
     initializeDurationPicker();
 
-    getSupportActionBar()
-        .setHomeAsUpIndicator(R.drawable.ic_close);
+  }
+
+  private void attachViewListeners() {
+    OnFocusChangeListener editTextTitleOnFocusChangeListener =
+        new OnFocusChangeListener() {
+          private String textOnFocusGained = "";
+
+          @Override
+          public void onFocusChange(View v, boolean hasFocus) {
+            if (hasFocus) {
+              textOnFocusGained = editTextTitle.getText().toString();
+            } else {
+              if (!textOnFocusGained.equals(editTextTitle.getText().toString())) {
+                Log.d(
+                    TAG,
+                    "Title changed from "
+                        + textOnFocusGained
+                        + " to "
+                        + editTextTitle.getText().toString()
+                        + " with eventSequenceNumber "
+                        + lastSavedEventSequenceNumber);
+                ChangeEntryTitleCommand changeEntryTitleCommand =
+                    new ChangeEntryTitleCommand(uuid, textOnFocusGained,
+                        editTextTitle.getText().toString(), lastSavedEventSequenceNumber,
+                        entryRepository);
+                lastSavedEventSequenceNumber += 1;
+                AddEditEntryActivityViewModel.handle(changeEntryTitleCommand)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .subscribe();
+              }
+            }
+          }
+        };
+    editTextTitle.setOnFocusChangeListener(editTextTitleOnFocusChangeListener);
   }
 
   private void initializeDurationPicker() {
@@ -181,90 +230,6 @@ public class AddEditEntryActivity extends AppCompatActivity {
         });
   }
 
-  private void saveEntry() {
-    Log.d(TAG, "saveEntry called");
-    if (!isValidInput()) {
-      return;
-    }
-
-    ViewModelEntry viewModelEntryToSave = getViewModelFromScreen();
-
-    AddEditEntryActivityViewModel.saveViewModelEntry(viewModelEntryToSave)
-        .subscribe(
-            (resultObject -> {
-              // update View
-              runOnUiThread(
-                  new Runnable() {
-                    @Override
-                    public void run() {
-                      // Do stufff
-                    }
-                  });
-            }));
-
-    Bundle bundle = getIntent().getExtras();
-
-    if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_EDIT)) {
-      Toast.makeText(this, "Existing entry updated!", Toast.LENGTH_LONG).show();
-    } else if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) {
-      Toast.makeText(this, "New entry saved!", Toast.LENGTH_LONG).show();
-    }
-
-    Intent data = new Intent();
-    data.putExtra(Constants.EXTRA_TITLE, viewModelEntryToSave.getTitle());
-    setResult(RESULT_OK, data);
-    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-    finish();
-  }
-
-  private ViewModelEntry getViewModelFromScreen() {
-    String ownerUuid = defaultUuid;
-    if (parentButton.getText().toString() == "") {
-      parentUuid = defaultUuid;
-    }
-    String title = editTextTitle.getText().toString();
-    String description = editTextDescription.getText().toString();
-    int years = yearPicker.getValue();
-    int weeks = weekPicker.getValue();
-    int days = dayPicker.getValue();
-    int hours = hourPicker.getValue();
-    int minutes = minutePicker.getValue();
-    int seconds = secondPicker.getValue();
-    int duration =
-        DurationHelper.getDurationIntFromInts(years, weeks, days, hours, minutes, seconds);
-    String durationString = DurationHelper.getDurationStringFromInt(duration);
-
-    ViewModelEntry viewModelEntryToSave =
-        new ViewModelEntry(
-            ownerUuid,
-            parentUuid,
-            uuid,
-            title,
-            description,
-            duration,
-            Constants.UNKNOWN_ENTRY_VIEW_TYPE,
-            Constants.UNKNOWN_CHILDRENCOUNT,
-            Constants.UNKNOWN_CHILDRENDURATION
-        );
-    return viewModelEntryToSave;
-  }
-
-  private boolean isValidInput() {
-    String title = editTextTitle.getText().toString();
-    String description = editTextDescription.getText().toString();
-    if (title.trim().isEmpty()) {
-      Toast.makeText(this, "Please insert a title", Toast.LENGTH_SHORT).show();
-      return false;
-    }
-    return true;
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater menuInflater = getMenuInflater();
-    menuInflater.inflate(R.menu.add_entry_menu, menu);
-    return true;
-  }
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -278,8 +243,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
         copyMoveSwitch.setVisibility(View.VISIBLE);
       }
 
-      if (parentUuid
-          .equals(UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()).toString())) {
+      if (parentUuid.equals(
+          UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()).toString())) {
         parentButton.setText("");
       } else {
 
@@ -301,16 +266,6 @@ public class AddEditEntryActivity extends AppCompatActivity {
     }
   }
 
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-      case R.id.save_entry:
-        saveEntry();
-        return true;
-      default:
-        return super.onOptionsItemSelected(item);
-    }
-  }
 
   private void initializeParentButtonWithUuid(String parentUuid) {
     this.parentUuid = parentUuid;
@@ -321,18 +276,15 @@ public class AddEditEntryActivity extends AppCompatActivity {
             Intent chooseParentActivityIntent =
                 new Intent(AddEditEntryActivity.this, ChooseEntryActivity.class);
             chooseParentActivityIntent.putExtra(
-                Constants.EXTRA_REQUEST_TYPE_CHOOSE_PARENT,
-                Constants.CHOOSE_PARENT_REQUEST);
-            chooseParentActivityIntent.putExtra(
-                Constants.EXTRA_ENTRY_ID, uuid);
-            startActivityForResult(
-                chooseParentActivityIntent, Constants.CHOOSE_PARENT_REQUEST);
+                Constants.EXTRA_REQUEST_TYPE_CHOOSE_PARENT, Constants.CHOOSE_PARENT_REQUEST);
+            chooseParentActivityIntent.putExtra(Constants.EXTRA_ENTRY_ID, uuid);
+            startActivityForResult(chooseParentActivityIntent, Constants.CHOOSE_PARENT_REQUEST);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }
         });
 
-    if (parentUuid
-        .equals(UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()).toString())) {
+    if (parentUuid.equals(
+        UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()).toString())) {
       parentButton.setText("");
       return;
     }
@@ -365,6 +317,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
     minutePicker.setValue(viewModelEntry.getMinutes());
     secondPicker.setValue(viewModelEntry.getSeconds());
     initializeParentButtonWithUuid(viewModelEntry.getParentUuid());
+    lastSavedEventSequenceNumber = viewModelEntry.getLastSavedEventSequenceNumber();
     return;
   }
 }

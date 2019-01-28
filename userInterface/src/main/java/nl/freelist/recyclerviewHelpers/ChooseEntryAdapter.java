@@ -116,9 +116,7 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
               int position = getAdapterPosition();
               ViewModelEntry entry =
                   getEntryAt(
-                      position); // Not_to_do: make DataEntry parcelable (not serializable as this is heavy
-              // on system) and pass whole entry to edit Activity.
-              // Actually, decided only to pass the ID and then construct a ViewModel in the other activity based on this ID
+                      position);
               intent.putExtra(Constants.EXTRA_ENTRY_ID, entry.getUuid());
               ((Activity) v.getContext())
                   .startActivityForResult(intent, Constants.EDIT_ENTRY_REQUEST);
