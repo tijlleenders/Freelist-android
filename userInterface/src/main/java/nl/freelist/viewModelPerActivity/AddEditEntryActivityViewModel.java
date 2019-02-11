@@ -10,13 +10,12 @@ import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
 import nl.freelist.data.EntryRepository;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.commands.ChangeEntryDescriptionCommand;
+import nl.freelist.domain.commands.ChangeEntryDurationCommand;
 import nl.freelist.domain.commands.ChangeEntryTitleCommand;
 import nl.freelist.domain.commands.CreateEntryCommand;
 import nl.freelist.domain.crossCuttingConcerns.Result;
-import nl.freelist.domain.crossCuttingConcerns.ResultObject;
-import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.useCases.CommandHandler;
-import nl.freelist.domain.useCases.SaveEntryUseCase;
 
 public class AddEditEntryActivityViewModel extends AndroidViewModel {
 
@@ -37,14 +36,6 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
     return result;
   }
 
-  public Single<ResultObject<Entry>> saveViewModelEntry(ViewModelEntry viewModel) {
-    Entry entryToSave = ViewModelEntry.getEntryFromViewModelEntry(viewModel);
-    Single<ResultObject<Entry>> resultObject = Single.fromCallable(
-        () -> new SaveEntryUseCase(entryRepository)
-            .execute(entryToSave))
-        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
-    return resultObject;
-  }
 
   public Single<Result> handle(CreateEntryCommand createEntryCommand) {
     Single<Result> result = Single.fromCallable(
@@ -58,6 +49,22 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
     Single<Result> result = Single.fromCallable(
         () -> new CommandHandler()
             .execute(changeEntryTitleCommand))
+        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
+    return result;
+  }
+
+  public Single<Result> handle(ChangeEntryDescriptionCommand changeEntryDescriptionCommand) {
+    Single<Result> result = Single.fromCallable(
+        () -> new CommandHandler()
+            .execute(changeEntryDescriptionCommand))
+        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
+    return result;
+  }
+
+  public Single<Result> handle(ChangeEntryDurationCommand changeEntryDurationCommand) {
+    Single<Result> result = Single.fromCallable(
+        () -> new CommandHandler()
+            .execute(changeEntryDurationCommand))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return result;
   }

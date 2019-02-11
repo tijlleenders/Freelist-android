@@ -10,13 +10,17 @@ import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.NumberPicker.Formatter;
+import android.widget.NumberPicker.OnValueChangeListener;
 import android.widget.Switch;
 import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.data.EntryRepository;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.commands.ChangeEntryDescriptionCommand;
+import nl.freelist.domain.commands.ChangeEntryDurationCommand;
 import nl.freelist.domain.commands.ChangeEntryTitleCommand;
 import nl.freelist.domain.commands.CreateEntryCommand;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
@@ -52,6 +56,19 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
   private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel
       AddEditEntryActivityViewModel;
+
+
+  @Override
+  protected void onPause() {
+    Log.d(TAG, "onPause exited without saving!");
+    if (editTextTitle.hasFocus()) {
+      editTextDescription.requestFocus();
+    }
+    if (editTextDescription.hasFocus()) {
+      editTextTitle.requestFocus();
+    }
+    super.onPause();
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -164,6 +181,195 @@ public class AddEditEntryActivity extends AppCompatActivity {
           }
         };
     editTextTitle.setOnFocusChangeListener(editTextTitleOnFocusChangeListener);
+
+    OnFocusChangeListener editTextDescriptionOnFocusChangeListener =
+        new OnFocusChangeListener() {
+          private String textOnFocusGained = "";
+
+          @Override
+          public void onFocusChange(View v, boolean hasFocus) {
+            if (hasFocus) {
+              textOnFocusGained = editTextDescription.getText().toString();
+            } else {
+              if (!textOnFocusGained.equals(editTextDescription.getText().toString())) {
+                Log.d(
+                    TAG,
+                    "Description changed from "
+                        + textOnFocusGained
+                        + " to "
+                        + editTextTitle.getText().toString()
+                        + " with eventSequenceNumber "
+                        + lastSavedEventSequenceNumber);
+                ChangeEntryDescriptionCommand changeEntryDescriptionCommand =
+                    new ChangeEntryDescriptionCommand(uuid, textOnFocusGained,
+                        editTextDescription.getText().toString(), lastSavedEventSequenceNumber,
+                        entryRepository);
+                lastSavedEventSequenceNumber += 1;
+                AddEditEntryActivityViewModel.handle(changeEntryDescriptionCommand)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .subscribe();
+              }
+            }
+          }
+        };
+    editTextDescription.setOnFocusChangeListener(editTextDescriptionOnFocusChangeListener);
+
+    OnValueChangeListener secondPickerOnValueChangeListener =
+        new OnValueChangeListener() {
+          @Override
+          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+            Log.d(
+                TAG,
+                "Seconds changed from "
+                    + oldVal
+                    + " to "
+                    + newVal
+                    + " with eventSequenceNumber "
+                    + lastSavedEventSequenceNumber);
+            ChangeEntryDurationCommand changeEntryDurationCommand =
+                new ChangeEntryDurationCommand(uuid, oldVal,
+                    newVal, "seconds", lastSavedEventSequenceNumber,
+                    entryRepository);
+            lastSavedEventSequenceNumber += 1;
+            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe();
+          }
+        };
+    secondPicker.setOnValueChangedListener(secondPickerOnValueChangeListener);
+
+    OnValueChangeListener minutePickerOnValueChangeListener =
+        new OnValueChangeListener() {
+          @Override
+          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+            Log.d(
+                TAG,
+                "Minutes changed from "
+                    + oldVal
+                    + " to "
+                    + newVal
+                    + " with eventSequenceNumber "
+                    + lastSavedEventSequenceNumber);
+            ChangeEntryDurationCommand changeEntryDurationCommand =
+                new ChangeEntryDurationCommand(uuid, oldVal,
+                    newVal, "minutes", lastSavedEventSequenceNumber,
+                    entryRepository);
+            lastSavedEventSequenceNumber += 1;
+            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe();
+          }
+        };
+    minutePicker.setOnValueChangedListener(minutePickerOnValueChangeListener);
+
+    OnValueChangeListener hourPickerOnValueChangeListener =
+        new OnValueChangeListener() {
+          @Override
+          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+            Log.d(
+                TAG,
+                "Hours changed from "
+                    + oldVal
+                    + " to "
+                    + newVal
+                    + " with eventSequenceNumber "
+                    + lastSavedEventSequenceNumber);
+            ChangeEntryDurationCommand changeEntryDurationCommand =
+                new ChangeEntryDurationCommand(uuid, oldVal,
+                    newVal, "hours", lastSavedEventSequenceNumber,
+                    entryRepository);
+            lastSavedEventSequenceNumber += 1;
+            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe();
+          }
+        };
+    hourPicker.setOnValueChangedListener(hourPickerOnValueChangeListener);
+
+    OnValueChangeListener dayPickerOnValueChangeListener =
+        new OnValueChangeListener() {
+          @Override
+          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+            Log.d(
+                TAG,
+                "Days changed from "
+                    + oldVal
+                    + " to "
+                    + newVal
+                    + " with eventSequenceNumber "
+                    + lastSavedEventSequenceNumber);
+            ChangeEntryDurationCommand changeEntryDurationCommand =
+                new ChangeEntryDurationCommand(uuid, oldVal,
+                    newVal, "days", lastSavedEventSequenceNumber,
+                    entryRepository);
+            lastSavedEventSequenceNumber += 1;
+            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe();
+          }
+        };
+    dayPicker.setOnValueChangedListener(dayPickerOnValueChangeListener);
+
+    OnValueChangeListener weekPickerOnValueChangeListener =
+        new OnValueChangeListener() {
+          @Override
+          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+            Log.d(
+                TAG,
+                "Weeks changed from "
+                    + oldVal
+                    + " to "
+                    + newVal
+                    + " with eventSequenceNumber "
+                    + lastSavedEventSequenceNumber);
+            ChangeEntryDurationCommand changeEntryDurationCommand =
+                new ChangeEntryDurationCommand(uuid, oldVal,
+                    newVal, "weeks", lastSavedEventSequenceNumber,
+                    entryRepository);
+            lastSavedEventSequenceNumber += 1;
+            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe();
+          }
+        };
+    weekPicker.setOnValueChangedListener(weekPickerOnValueChangeListener);
+
+    OnValueChangeListener yearPickerOnValueChangeListener =
+        new OnValueChangeListener() {
+          @Override
+          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+            Log.d(
+                TAG,
+                "Years changed from "
+                    + oldVal
+                    + " to "
+                    + newVal
+                    + " with eventSequenceNumber "
+                    + lastSavedEventSequenceNumber);
+            ChangeEntryDurationCommand changeEntryDurationCommand =
+                new ChangeEntryDurationCommand(uuid, oldVal,
+                    newVal, "years", lastSavedEventSequenceNumber,
+                    entryRepository);
+            lastSavedEventSequenceNumber += 1;
+            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe();
+          }
+        };
+    yearPicker.setOnValueChangedListener(yearPickerOnValueChangeListener);
+
+  }
+
+
+  private void changeEntryDuration() {
+
   }
 
   private void initializeDurationPicker() {

@@ -12,6 +12,8 @@ import java.util.List;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.events.EntryCreatedEvent;
+import nl.freelist.domain.events.EntryDescriptionChangedEvent;
+import nl.freelist.domain.events.EntryDurationChangedEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.valueObjects.DateTime;
@@ -101,14 +103,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     eventContentValues.put("aggregateId", event.getEntryId());
     eventContentValues.put("type", event.getClass().getSimpleName());
     String eventData = jsonOf(event);
-    if (event.getClass() == EntryCreatedEvent.class) {
-      EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
-      eventData = jsonOf(entryCreatedEvent);
-    }
-    if (event.getClass() == EntryTitleChangedEvent.class) {
-      EntryTitleChangedEvent entryTitleChangedEvent = (EntryTitleChangedEvent) event;
-      eventData = jsonOf(entryTitleChangedEvent);
-    }
     eventContentValues.put("data", eventData);
     eventContentValues.put("eventSequenceNumber", lastSavedEventSequenceNumber + 1);
 
@@ -141,15 +135,19 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
 
 
   private String jsonOf(Event event) {
-    if (event.getClass() == EntryCreatedEvent.class) {
-      Gson gson = new Gson();
-      return gson.toJson(event, EntryCreatedEvent.class);
+    Gson gson = new Gson();
+    switch (event.getClass().getSimpleName()) {
+      case "EntryCreatedEvent":
+        return gson.toJson(event, EntryCreatedEvent.class);
+      case "EntryTitleChangedEvent":
+        return gson.toJson(event, EntryTitleChangedEvent.class);
+      case "EntryDescriptionChangedEvent":
+        return gson.toJson(event, EntryDescriptionChangedEvent.class);
+      case "EntryDurationChangedEvent":
+        return gson.toJson(event, EntryDurationChangedEvent.class);
+      default:
+        return "Event class not found.";
     }
-    if (event.getClass() == EntryTitleChangedEvent.class) {
-      Gson gson = new Gson();
-      return gson.toJson(event, EntryTitleChangedEvent.class);
-    }
-    return "Event class not found.";
   }
 
 
@@ -286,11 +284,21 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
           String type = cursor.getString(cursor.getColumnIndex("type"));
           String dataJson = cursor.getString(cursor.getColumnIndex("data"));
           Gson gson = new Gson();
-          if (type == "EntryCreatedEvent") {
-            eventList.add(gson.fromJson(dataJson, EntryCreatedEvent.class));
-          }
-          if (type == "EntryTitleChangedEvent") {
-            eventList.add(gson.fromJson(dataJson, EntryTitleChangedEvent.class));
+          switch (type) {
+            case "EntryCreatedEvent":
+              eventList.add(gson.fromJson(dataJson, EntryCreatedEvent.class));
+              break;
+            case "EntryTitleChangedEvent":
+              eventList.add(gson.fromJson(dataJson, EntryTitleChangedEvent.class));
+              break;
+            case "EntryDescriptionChangedEvent":
+              eventList.add(gson.fromJson(dataJson, EntryDescriptionChangedEvent.class));
+              break;
+            case "EntryDurationChangedEvent":
+              eventList.add(gson.fromJson(dataJson, EntryDurationChangedEvent.class));
+              break;
+            default:
+              break;
           }
         } while (cursor.moveToNext());
       }

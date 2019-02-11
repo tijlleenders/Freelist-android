@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import nl.freelist.domain.events.EntryCreatedEvent;
+import nl.freelist.domain.events.EntryDescriptionChangedEvent;
+import nl.freelist.domain.events.EntryDurationChangedEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
 
@@ -42,6 +44,46 @@ public class Entry {
       case "EntryTitleChangedEvent":
         EntryTitleChangedEvent entryTitleChangedEvent = (EntryTitleChangedEvent) event;
         this.title = entryTitleChangedEvent.getTitleAfter();
+        break;
+      case "EntryDescriptionChangedEvent":
+        EntryDescriptionChangedEvent entryDescriptionChangedEvent = (EntryDescriptionChangedEvent) event;
+        this.description = entryDescriptionChangedEvent.getDescriptionAfter();
+        break;
+      case "EntryDurationChangedEvent":
+        EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
+        switch (entryDurationChangedEvent.getUnitOfMeasure()) {
+          case "seconds":
+            this.duration += (entryDurationChangedEvent.getDurationAfter()
+                - entryDurationChangedEvent.getDurationBefore());
+            break;
+          case "minutes":
+            this.duration +=
+                (entryDurationChangedEvent.getDurationAfter() - entryDurationChangedEvent
+                    .getDurationBefore()) * 60;
+            break;
+          case "hours":
+            this.duration +=
+                (entryDurationChangedEvent.getDurationAfter() - entryDurationChangedEvent
+                    .getDurationBefore()) * 3600;
+            break;
+          case "days":
+            this.duration +=
+                (entryDurationChangedEvent.getDurationAfter() - entryDurationChangedEvent
+                    .getDurationBefore()) * 3600 * 24;
+            break;
+          case "weeks":
+            this.duration +=
+                (entryDurationChangedEvent.getDurationAfter() - entryDurationChangedEvent
+                    .getDurationBefore()) * 3600 * 24 * 7;
+            break;
+          case "years":
+            this.duration +=
+                (entryDurationChangedEvent.getDurationAfter() - entryDurationChangedEvent
+                    .getDurationBefore()) * 3600 * 24 * 265.25;
+            break;
+          default:
+            break;
+        }
         break;
       default:
         //Todo: Log or throw?
