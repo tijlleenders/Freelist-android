@@ -7,7 +7,7 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
 import java.util.UUID;
-import nl.freelist.data.EntryRepository;
+import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
 
 // Todo: rename (parent)Uuid to (parent)entryId
@@ -15,11 +15,11 @@ import nl.freelist.data.dto.ViewModelEntry;
 public class NavigateEntriesViewModel extends AndroidViewModel {
 
   private String parentUuid;
-  private EntryRepository entryRepository;
+  private Repository repository;
 
   public NavigateEntriesViewModel(@NonNull Application application) {
     super(application);
-    entryRepository = new EntryRepository(getApplication().getApplicationContext());
+    repository = new Repository(getApplication().getApplicationContext());
   }
 
   public void setParentUuid(String parentUuid) {
@@ -39,7 +39,7 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
   public Observable<List<ViewModelEntry>> getAllChildrenEntries() {
     Observable<List<ViewModelEntry>> viewModelEntryList = Observable
         .fromCallable(
-            () -> entryRepository.getAllViewModelEntriesForParent(UUID.fromString(parentUuid)))
+            () -> repository.getAllViewModelEntriesForParent(UUID.fromString(parentUuid)))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return viewModelEntryList;
   }
@@ -47,7 +47,7 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
   public Observable<List<ViewModelEntry>> getBreadcrumbEntries() {
     Observable<List<ViewModelEntry>> viewModelEntryList = Observable
         .fromCallable(
-            () -> entryRepository.getBreadcrumbViewModelEntries(UUID.fromString(parentUuid)))
+            () -> repository.getBreadcrumbViewModelEntries(UUID.fromString(parentUuid)))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return viewModelEntryList;
   }

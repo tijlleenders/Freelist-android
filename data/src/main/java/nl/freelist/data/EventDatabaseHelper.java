@@ -10,7 +10,6 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.data.dto.ViewModelEntry;
-import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.EntryDescriptionChangedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
@@ -81,10 +80,12 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
   }
 
-  public void addEvent(
-      String aggregateIdType, int expectedLastSavedEventSequenceNumber, Event event, Entry entry)
+  public List<InsertQuery> getQueriesForEvent(
+      String aggregateIdType, int expectedLastSavedEventSequenceNumber, Event event)
       throws Exception {
-    Log.d(TAG, "addEvent called.");
+    Log.d(TAG, "getQueriesForEvent called.");
+
+    List<InsertQuery> insertQueryList = new ArrayList<>();
 
     int lastSavedEventSequenceNumber = selectLastSavedEventSequenceNumber(event.getEntryId());
     Log.d(TAG, "lastSavedEventSequenceNumber = " + lastSavedEventSequenceNumber);
@@ -98,6 +99,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     aggregateContentValues.put("type", aggregateIdType);
     aggregateContentValues.put("lastSavedEventSequenceNumber", lastSavedEventSequenceNumber + 1);
 
+    insertQueryList.add(new InsertQuery("aggregates", aggregateContentValues));
+
     ContentValues eventContentValues = new ContentValues();
     eventContentValues.put("occurredDateTime", event.getOccurredDateTime().toString());
     eventContentValues.put("aggregateId", event.getEntryId());
@@ -106,25 +109,24 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     eventContentValues.put("data", eventData);
     eventContentValues.put("eventSequenceNumber", lastSavedEventSequenceNumber + 1);
 
-    ContentValues viewModelEntryContentValues = new ContentValues();
-    viewModelEntryContentValues.put("uuid", entry.getUuid().toString());
-    viewModelEntryContentValues.put("parentUuid", entry.getParentUuid().toString());
-    viewModelEntryContentValues.put("ownerUuid", entry.getOwnerUuid().toString());
-    viewModelEntryContentValues.put("title", entry.getTitle());
-    viewModelEntryContentValues.put("description", entry.getDescription());
-    viewModelEntryContentValues.put("duration", entry.getDuration());
-    //Don't insert childrenCount and childrenDuration as they only get updated when ...
-    viewModelEntryContentValues.put(
-        "lastSavedEventSequenceNumber", lastSavedEventSequenceNumber + 1);
+    insertQueryList.add(new InsertQuery("events", eventContentValues));
 
+    return insertQueryList;
 
+  }
+
+  public void executeInsertQueries(List<InsertQuery> insertQueryList) {
     db.beginTransaction();
+
     try {
-      db.insertWithOnConflict(
-          "aggregates", null, aggregateContentValues, SQLiteDatabase.CONFLICT_REPLACE);
-      db.insertOrThrow("events", null, eventContentValues);
-      db.insertWithOnConflict(
-          "viewModelEntry", null, viewModelEntryContentValues, SQLiteDatabase.CONFLICT_REPLACE);
+      for (InsertQuery insertQuery : insertQueryList) {
+        if (insertQuery.getTable().equals("events")) {
+          db.insertOrThrow("events", null, insertQuery.getContentValues());
+        } else {
+          db.insertWithOnConflict(insertQuery.getTable(), null, insertQuery.getContentValues(),
+              SQLiteDatabase.CONFLICT_REPLACE);
+        }
+      }
       db.setTransactionSuccessful();
     } catch (Exception e) {
       Log.d(TAG, "Error while executing insert SQL");

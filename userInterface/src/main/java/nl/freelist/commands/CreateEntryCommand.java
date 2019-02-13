@@ -1,11 +1,11 @@
 package nl.freelist.commands;
 
 import java.util.UUID;
+import nl.freelist.data.Repository;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.events.EntryCreatedEvent;
-import nl.freelist.domain.interfaces.Repository;
 import nl.freelist.domain.valueObjects.DateTime;
 
 public class CreateEntryCommand extends Command {
@@ -13,14 +13,14 @@ public class CreateEntryCommand extends Command {
   UUID uuid;
   UUID parentUuid;
   UUID ownerUuid;
-  Repository<Entry> entryRepository;
+  Repository repository;
 
   public CreateEntryCommand(
-      String ownerUuid, String parentUuid, String uuid, Repository<Entry> entryRepository) {
+      String ownerUuid, String parentUuid, String uuid, Repository repository) {
     this.ownerUuid = UUID.fromString(ownerUuid);
     this.parentUuid = UUID.fromString(parentUuid);
     this.uuid = UUID.fromString(uuid);
-    this.entryRepository = entryRepository;
+    this.repository = repository;
   }
 
   @Override
@@ -40,7 +40,7 @@ public class CreateEntryCommand extends Command {
     // The entry itself does not save
     // and does not know what is saved or not
     // it just keeps track of the lastAppliedEventSequenceNumber for itself
-    entryRepository.insert(entry);
+    repository.insert(entry);
     return new Result(true);
   }
 }

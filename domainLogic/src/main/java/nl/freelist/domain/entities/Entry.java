@@ -6,6 +6,7 @@ import java.util.UUID;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.EntryDescriptionChangedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
+import nl.freelist.domain.events.EntryParentChangedEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
 
@@ -32,7 +33,7 @@ public class Entry {
   }
 
   public void applyEvent(Event event) {
-    // Todo: ...
+    // Todo: maybe move every applyEvent to it's own function with subclass parameter?
     String eventClass = event.getClass().getSimpleName();
     switch (eventClass) {
       case "EntryCreatedEvent":
@@ -48,6 +49,10 @@ public class Entry {
       case "EntryDescriptionChangedEvent":
         EntryDescriptionChangedEvent entryDescriptionChangedEvent = (EntryDescriptionChangedEvent) event;
         this.description = entryDescriptionChangedEvent.getDescriptionAfter();
+        break;
+      case "EntryParentChangedEvent":
+        EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
+        this.parentUuid = UUID.fromString(entryParentChangedEvent.getParentAfter());
         break;
       case "EntryDurationChangedEvent":
         EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;

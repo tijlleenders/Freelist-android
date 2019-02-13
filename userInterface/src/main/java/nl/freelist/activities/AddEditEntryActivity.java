@@ -21,11 +21,9 @@ import nl.freelist.commands.ChangeEntryDescriptionCommand;
 import nl.freelist.commands.ChangeEntryDurationCommand;
 import nl.freelist.commands.ChangeEntryTitleCommand;
 import nl.freelist.commands.CreateEntryCommand;
-import nl.freelist.data.EntryRepository;
+import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.interfaces.Repository;
 import nl.freelist.freelist.R;
 import nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel;
 import nl.freelist.views.NumberPickerDuration;
@@ -39,7 +37,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
   private String defaultUuid;
   private int lastSavedEventSequenceNumber = -1;
 
-  private Repository<Entry> entryRepository;
+  private Repository repository;
 
   private EditText editTextTitle;
   private EditText editTextDescription;
@@ -77,7 +75,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
     initializeViews();
 
-    entryRepository = new EntryRepository(this.getApplicationContext());
+    repository = new Repository(this.getApplicationContext());
 
     AddEditEntryActivityViewModel =
         ViewModelProviders.of(this).get(AddEditEntryActivityViewModel.class);
@@ -97,7 +95,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
       initializeForAddNew(bundle);
 
       CreateEntryCommand createEntryCommand =
-          new CreateEntryCommand(defaultUuid, parentUuid, uuid, entryRepository);
+          new CreateEntryCommand(defaultUuid, parentUuid, uuid, repository);
       lastSavedEventSequenceNumber += 1;
       AddEditEntryActivityViewModel.handle(createEntryCommand)
           .subscribeOn(Schedulers.io())
@@ -170,7 +168,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
                 ChangeEntryTitleCommand changeEntryTitleCommand =
                     new ChangeEntryTitleCommand(uuid, textOnFocusGained,
                         editTextTitle.getText().toString(), lastSavedEventSequenceNumber,
-                        entryRepository);
+                        repository);
                 lastSavedEventSequenceNumber += 1;
                 AddEditEntryActivityViewModel.handle(changeEntryTitleCommand)
                     .subscribeOn(Schedulers.io())
@@ -203,7 +201,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
                 ChangeEntryDescriptionCommand changeEntryDescriptionCommand =
                     new ChangeEntryDescriptionCommand(uuid, textOnFocusGained,
                         editTextDescription.getText().toString(), lastSavedEventSequenceNumber,
-                        entryRepository);
+                        repository);
                 lastSavedEventSequenceNumber += 1;
                 AddEditEntryActivityViewModel.handle(changeEntryDescriptionCommand)
                     .subscribeOn(Schedulers.io())
@@ -230,7 +228,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
             ChangeEntryDurationCommand changeEntryDurationCommand =
                 new ChangeEntryDurationCommand(uuid, oldVal,
                     newVal, "seconds", lastSavedEventSequenceNumber,
-                    entryRepository);
+                    repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -255,7 +253,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
             ChangeEntryDurationCommand changeEntryDurationCommand =
                 new ChangeEntryDurationCommand(uuid, oldVal,
                     newVal, "minutes", lastSavedEventSequenceNumber,
-                    entryRepository);
+                    repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -280,7 +278,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
             ChangeEntryDurationCommand changeEntryDurationCommand =
                 new ChangeEntryDurationCommand(uuid, oldVal,
                     newVal, "hours", lastSavedEventSequenceNumber,
-                    entryRepository);
+                    repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -305,7 +303,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
             ChangeEntryDurationCommand changeEntryDurationCommand =
                 new ChangeEntryDurationCommand(uuid, oldVal,
                     newVal, "days", lastSavedEventSequenceNumber,
-                    entryRepository);
+                    repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -330,7 +328,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
             ChangeEntryDurationCommand changeEntryDurationCommand =
                 new ChangeEntryDurationCommand(uuid, oldVal,
                     newVal, "weeks", lastSavedEventSequenceNumber,
-                    entryRepository);
+                    repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -355,7 +353,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
             ChangeEntryDurationCommand changeEntryDurationCommand =
                 new ChangeEntryDurationCommand(uuid, oldVal,
                     newVal, "years", lastSavedEventSequenceNumber,
-                    entryRepository);
+                    repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())

@@ -1,12 +1,12 @@
 package nl.freelist.commands;
 
 import java.util.List;
+import nl.freelist.data.Repository;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.interfaces.Repository;
 import nl.freelist.domain.valueObjects.DateTime;
 
 public class ChangeEntryDurationCommand extends Command {
@@ -16,17 +16,17 @@ public class ChangeEntryDurationCommand extends Command {
   int durationAfter;
   String unitOfMeasure;
   int lastSavedEventSequenceNumber;
-  Repository<Entry> entryRepository;
+  Repository repository;
 
   public ChangeEntryDurationCommand(String uuid, int durationBefore, int durationAfter,
       String unitOfMeasure,
-      int lastSavedEventSequenceNumber, Repository<Entry> entryRepository) {
+      int lastSavedEventSequenceNumber, Repository repository) {
     this.uuid = uuid;
     this.durationBefore = durationBefore;
     this.durationAfter = durationAfter;
     this.unitOfMeasure = unitOfMeasure;
     this.lastSavedEventSequenceNumber = lastSavedEventSequenceNumber;
-    this.entryRepository = entryRepository;
+    this.repository = repository;
   }
 
   @Override
@@ -34,11 +34,11 @@ public class ChangeEntryDurationCommand extends Command {
     EntryDurationChangedEvent entryDurationChangedEvent = EntryDurationChangedEvent
         .Create(DateTime.Create("now"), uuid, lastSavedEventSequenceNumber + 1, durationBefore,
             durationAfter, unitOfMeasure);
-    Entry entry = entryRepository.getById(uuid);
-    List<Event> eventList = entryRepository.getSavedEventsFor(uuid);
+    Entry entry = repository.getById(uuid);
+    List<Event> eventList = repository.getSavedEventsFor(uuid);
     eventList.add(entryDurationChangedEvent);
     entry.applyEvents(eventList);
-    entryRepository.insert(entry);
+    repository.insert(entry);
     return new Result(true);
   }
 }

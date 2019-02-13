@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
-import nl.freelist.data.EntryRepository;
+import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
@@ -17,17 +17,17 @@ import nl.freelist.domain.useCases.CommandHandler;
 public class AddEditEntryActivityViewModel extends AndroidViewModel {
 
 
-  private EntryRepository entryRepository;
+  private Repository repository;
 
   public AddEditEntryActivityViewModel(
       @NonNull Application application) { //Todo: Application can be removed from constructor if context is passed into commands
     super(application);
-    entryRepository = new EntryRepository(getApplication().getApplicationContext());
+    repository = new Repository(getApplication().getApplicationContext());
   }
 
   public Single<ViewModelEntry> getViewModelEntry(String uuid) { //Todo: replace by Command
     Single<ViewModelEntry> result = Single.fromCallable(
-        () -> entryRepository.getViewModelEntryById(UUID.fromString(uuid)))
+        () -> repository.getViewModelEntryById(UUID.fromString(uuid)))
         .observeOn(Schedulers.io())
         .subscribeOn(Schedulers.io());
     return result;
