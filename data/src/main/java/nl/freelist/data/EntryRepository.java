@@ -25,6 +25,8 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
   @Override
   public ResultObject<Entry> insert(Entry entry) {
 
+    List<Query> queryList = new ArrayList<>();
+
     int expectedEventSequenceNumberToSave =
         eventDatabaseHelper.selectLastSavedEventSequenceNumber(entry.getUuid().toString()) + 1;
 
@@ -37,8 +39,8 @@ public class EntryRepository implements nl.freelist.domain.interfaces.Repository
         Log.d(TAG, "Error while executing insert(Entry entry)");
       }
     }
-    //Todo: update viewModelEntry
-    return new ResultObject<>(true);
+
+    return new ResultObject<Entry>(true);
   }
 
   @Override

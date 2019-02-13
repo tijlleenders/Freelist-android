@@ -24,10 +24,10 @@ public class EntryDescriptionChangedEvent extends Event {
       int eventSequenceNumber,
       String descriptionBefore,
       String descriptionAfter) {
-    EntryDescriptionChangedEvent entryTitleChangedEvent =
+    EntryDescriptionChangedEvent entryDescriptionChangedEvent =
         new EntryDescriptionChangedEvent(
             occurredDateTime, entryId, eventSequenceNumber, descriptionBefore, descriptionAfter);
-    return entryTitleChangedEvent;
+    return entryDescriptionChangedEvent;
   }
 
   public String getDescriptionAfter() {

@@ -1,5 +1,6 @@
 package nl.freelist.domain.useCases;
 
+
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.crossCuttingConcerns.ThreadLogger;

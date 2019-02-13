@@ -1,38 +1,42 @@
-package nl.freelist.domain.commands;
+package nl.freelist.commands;
 
 import java.util.List;
+import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.events.EntryTitleChangedEvent;
+import nl.freelist.domain.events.EntryDurationChangedEvent;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.interfaces.Repository;
 import nl.freelist.domain.valueObjects.DateTime;
 
-public class ChangeEntryTitleCommand extends Command {
+public class ChangeEntryDurationCommand extends Command {
 
   String uuid;
-  String titleBefore;
-  String titleAfter;
+  int durationBefore;
+  int durationAfter;
+  String unitOfMeasure;
   int lastSavedEventSequenceNumber;
   Repository<Entry> entryRepository;
 
-  public ChangeEntryTitleCommand(String uuid, String titleBefore, String titleAfter,
+  public ChangeEntryDurationCommand(String uuid, int durationBefore, int durationAfter,
+      String unitOfMeasure,
       int lastSavedEventSequenceNumber, Repository<Entry> entryRepository) {
     this.uuid = uuid;
-    this.titleBefore = titleBefore;
-    this.titleAfter = titleAfter;
+    this.durationBefore = durationBefore;
+    this.durationAfter = durationAfter;
+    this.unitOfMeasure = unitOfMeasure;
     this.lastSavedEventSequenceNumber = lastSavedEventSequenceNumber;
     this.entryRepository = entryRepository;
   }
 
   @Override
   public Result execute() {
-    EntryTitleChangedEvent entryTitleChangedEvent = EntryTitleChangedEvent
-        .Create(DateTime.Create("now"), uuid, lastSavedEventSequenceNumber + 1, titleBefore,
-            titleAfter);
+    EntryDurationChangedEvent entryDurationChangedEvent = EntryDurationChangedEvent
+        .Create(DateTime.Create("now"), uuid, lastSavedEventSequenceNumber + 1, durationBefore,
+            durationAfter, unitOfMeasure);
     Entry entry = entryRepository.getById(uuid);
     List<Event> eventList = entryRepository.getSavedEventsFor(uuid);
-    eventList.add(entryTitleChangedEvent);
+    eventList.add(entryDurationChangedEvent);
     entry.applyEvents(eventList);
     entryRepository.insert(entry);
     return new Result(true);

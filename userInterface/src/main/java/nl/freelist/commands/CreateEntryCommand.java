@@ -1,6 +1,7 @@
-package nl.freelist.domain.commands;
+package nl.freelist.commands;
 
 import java.util.UUID;
+import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.events.EntryCreatedEvent;
