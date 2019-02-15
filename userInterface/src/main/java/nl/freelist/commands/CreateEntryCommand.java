@@ -1,7 +1,9 @@
 package nl.freelist.commands;
 
+import java.util.List;
 import java.util.UUID;
 import nl.freelist.data.Repository;
+import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
@@ -34,13 +36,8 @@ public class CreateEntryCommand extends Command {
             uuid.toString(),
             0);
     entry.applyEvent(entryCreatedEvent);
-    // When entry is persisted (by an external actor, ie this execute method of the command)
-    // the events with sequence number above the one seen in the database
-    // are fetched and persisted
-    // The entry itself does not save
-    // and does not know what is saved or not
-    // it just keeps track of the lastAppliedEventSequenceNumber for itself
-    repository.insert(entry);
+    List<sqlBundle> sqlBundleList = repository.insert(entry);
+    repository.executeSqlBundles(sqlBundleList);
     return new Result(true);
   }
 }

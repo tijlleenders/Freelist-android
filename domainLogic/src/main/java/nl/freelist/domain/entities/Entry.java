@@ -3,6 +3,8 @@ package nl.freelist.domain.entities;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.EntryDescriptionChangedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
@@ -11,6 +13,8 @@ import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
 
 public class Entry {
+
+  private static final Logger LOGGER = Logger.getLogger(Entry.class.getName());
 
   private UUID ownerUuid;
   private UUID uuid;
@@ -30,6 +34,9 @@ public class Entry {
     this.description = description;
     this.duration = duration;
     lastAppliedEventSequenceNumber = -1;
+    LOGGER.log(Level.INFO,
+        "Entry " + uuid.toString() + " created with lastAppliedEventSequenceNumber "
+            + lastAppliedEventSequenceNumber);
   }
 
   public void applyEvent(Event event) {
@@ -96,14 +103,13 @@ public class Entry {
     }
     eventList.add(event);
     lastAppliedEventSequenceNumber += 1;
+
   }
 
-  public List<Event> getEventList(int fromEventSequenceNumber) {
-    if (eventList.size() > fromEventSequenceNumber) {
-      return eventList.subList(fromEventSequenceNumber, eventList.size());
-    } else {
-      return eventList;
-    }
+  public List<Event> getListOfEventsWithSequenceHigherThan(int fromEventSequenceNumber) {
+    fromEventSequenceNumber += 1;
+    return eventList.subList(fromEventSequenceNumber, eventList.size());
+
   }
 
   public void applyEvents(List<Event> eventList) {

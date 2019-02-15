@@ -19,6 +19,7 @@ import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.commands.ChangeEntryDescriptionCommand;
 import nl.freelist.commands.ChangeEntryDurationCommand;
+import nl.freelist.commands.ChangeEntryParentCommand;
 import nl.freelist.commands.ChangeEntryTitleCommand;
 import nl.freelist.commands.CreateEntryCommand;
 import nl.freelist.data.Repository;
@@ -366,10 +367,6 @@ public class AddEditEntryActivity extends AppCompatActivity {
   }
 
 
-  private void changeEntryDuration() {
-
-  }
-
   private void initializeDurationPicker() {
     yearPicker = findViewById(R.id.year_picker);
     yearPicker.setMaxValue(99);
@@ -443,6 +440,15 @@ public class AddEditEntryActivity extends AppCompatActivity {
     if (requestCode == Constants.CHOOSE_PARENT_REQUEST && resultCode == RESULT_OK) {
       Bundle bundle = data.getExtras();
       if (!parentUuid.equals(bundle.getString(Constants.EXTRA_ENTRY_ID))) {
+        ChangeEntryParentCommand changeEntryParentCommand =
+            new ChangeEntryParentCommand(uuid, parentUuid,
+                bundle.getString(Constants.EXTRA_ENTRY_ID), lastSavedEventSequenceNumber,
+                repository);
+        lastSavedEventSequenceNumber += 1;
+        AddEditEntryActivityViewModel.handle(changeEntryParentCommand)
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe();
         parentUuid = bundle.getString(Constants.EXTRA_ENTRY_ID);
         copyMoveSwitch.setVisibility(View.VISIBLE);
       }

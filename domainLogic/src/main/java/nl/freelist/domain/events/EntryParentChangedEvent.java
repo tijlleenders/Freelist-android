@@ -30,6 +30,10 @@ public class EntryParentChangedEvent extends Event {
     return entryParentChangedEvent;
   }
 
+  public String getParentBefore() {
+    return parentBefore;
+  }
+
   public String getParentAfter() {
     return parentAfter;
   }

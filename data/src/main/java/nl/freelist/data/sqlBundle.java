@@ -2,12 +2,12 @@ package nl.freelist.data;
 
 import android.content.ContentValues;
 
-public class InsertQuery {
+public class sqlBundle {
 
   private String table;
   private ContentValues contentValues;
 
-  InsertQuery(String table, ContentValues contentValues) {
+  sqlBundle(String table, ContentValues contentValues) {
     this.table = table;
     this.contentValues = contentValues;
   }

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import nl.freelist.data.dto.ViewModelEntry;
-import nl.freelist.domain.crossCuttingConcerns.ResultObject;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.Event;
@@ -24,22 +23,27 @@ public class Repository {
   }
 
 
-  public ResultObject<Entry> insert(Entry entry) {
+  public List<sqlBundle> insert(Entry entry) {
+    Log.d(TAG, "Repository insert called with entry " + entry.getUuid());
 
-    List<InsertQuery> insertQueryList = new ArrayList<>();
+    List<sqlBundle> sqlBundleList = new ArrayList<>();
 
-    int expectedEventSequenceNumberToSave =
-        eventDatabaseHelper.selectLastSavedEventSequenceNumber(entry.getUuid().toString()) + 1;
+    int lastSavedEventSequenceNumber =
+        eventDatabaseHelper.selectLastSavedEventSequenceNumber(entry.getUuid().toString());
+    Log.d(TAG, "lastSavedEventSequenceNumber = " + lastSavedEventSequenceNumber);
 
-    List<Event> newEventsToSave = entry.getEventList(expectedEventSequenceNumberToSave);
+    List<Event> newEventsToSave = entry
+        .getListOfEventsWithSequenceHigherThan(lastSavedEventSequenceNumber);
+    Log.d(TAG, "newEventsToSave list with size " + newEventsToSave.size() + " retrieved.");
     for (Event event : newEventsToSave) {
       try {
-        insertQueryList.addAll(eventDatabaseHelper.getQueriesForEvent("entry",
-            expectedEventSequenceNumberToSave - 1 + newEventsToSave.indexOf(event), event));
+        sqlBundleList.addAll(eventDatabaseHelper.getQueriesForEvent("entry",
+            lastSavedEventSequenceNumber + newEventsToSave.indexOf(event), event));
       } catch (Exception e) {
-        Log.d(TAG, "Error while executing insert(Entry entry)");
+        Log.d(TAG, "Error while executing insert(Entry entry):" + e.toString());
       }
     }
+
     ContentValues viewModelEntryContentValues = new ContentValues();
     viewModelEntryContentValues.put("uuid", entry.getUuid().toString());
     viewModelEntryContentValues.put("parentUuid", entry.getParentUuid().toString());
@@ -47,15 +51,17 @@ public class Repository {
     viewModelEntryContentValues.put("title", entry.getTitle());
     viewModelEntryContentValues.put("description", entry.getDescription());
     viewModelEntryContentValues.put("duration", entry.getDuration());
-    //Don't insert childrenCount and childrenDuration as they only get updated when ...
     viewModelEntryContentValues.put(
         "lastSavedEventSequenceNumber",
-        expectedEventSequenceNumberToSave - 1 + newEventsToSave.size());
+        lastSavedEventSequenceNumber + newEventsToSave.size());
 
-    insertQueryList.add(new InsertQuery("viewModelEntry", viewModelEntryContentValues));
-    eventDatabaseHelper.executeInsertQueries(insertQueryList);
+    sqlBundleList.add(new sqlBundle("viewModelEntry", viewModelEntryContentValues));
 
-    return new ResultObject<Entry>(true);
+    return sqlBundleList;
+  }
+
+  public void executeSqlBundles(List<sqlBundle> sqlBundleList) {
+    eventDatabaseHelper.executeSqlBundles(sqlBundleList);
   }
 
 

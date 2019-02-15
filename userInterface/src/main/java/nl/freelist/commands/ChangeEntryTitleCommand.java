@@ -2,6 +2,7 @@ package nl.freelist.commands;
 
 import java.util.List;
 import nl.freelist.data.Repository;
+import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
@@ -35,7 +36,8 @@ public class ChangeEntryTitleCommand extends Command {
     List<Event> eventList = repository.getSavedEventsFor(uuid);
     eventList.add(entryTitleChangedEvent);
     entry.applyEvents(eventList);
-    repository.insert(entry);
+    List<sqlBundle> sqlBundleList = repository.insert(entry);
+    repository.executeSqlBundles(sqlBundleList);
     return new Result(true);
   }
 }

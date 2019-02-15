@@ -13,6 +13,7 @@ import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.EntryDescriptionChangedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
+import nl.freelist.domain.events.EntryParentChangedEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.valueObjects.DateTime;
@@ -63,14 +64,14 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       db.execSQL(
           "CREATE TABLE IF NOT EXISTS viewModelEntry (\n"
               + "   `uuid` TEXT NOT NULL\n"
-              + "   , `parentUuid` TEXT\n"
-              + "   , `ownerUuid` TEXT\n"
+              + "   , `parentUuid` TEXT NOT NULL\n"
+              + "   , `ownerUuid` TEXT NOT NULL\n"
               + "   , `title` TEXT\n"
               + "   , `description` TEXT\n"
               + "   , `duration` INTEGER NOT NULL DEFAULT 0\n"
               + "   , `childrenCount` INTEGER NOT NULL DEFAULT 0"
               + "   , `childrenDuration` INTEGER NOT NULL DEFAULT 0"
-              + "   , `lastSavedEventSequenceNumber` INTEGER NOT NULL DEFAULT 0"
+              + "   , `lastSavedEventSequenceNumber` INTEGER"
               + "   , PRIMARY KEY(`uuid`))");
       db.setTransactionSuccessful();
     } catch (Exception e) {
@@ -80,12 +81,12 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
   }
 
-  public List<InsertQuery> getQueriesForEvent(
+  public List<sqlBundle> getQueriesForEvent(
       String aggregateIdType, int expectedLastSavedEventSequenceNumber, Event event)
       throws Exception {
     Log.d(TAG, "getQueriesForEvent called.");
 
-    List<InsertQuery> insertQueryList = new ArrayList<>();
+    List<sqlBundle> sqlBundleList = new ArrayList<>();
 
     int lastSavedEventSequenceNumber = selectLastSavedEventSequenceNumber(event.getEntryId());
     Log.d(TAG, "lastSavedEventSequenceNumber = " + lastSavedEventSequenceNumber);
@@ -99,7 +100,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     aggregateContentValues.put("type", aggregateIdType);
     aggregateContentValues.put("lastSavedEventSequenceNumber", lastSavedEventSequenceNumber + 1);
 
-    insertQueryList.add(new InsertQuery("aggregates", aggregateContentValues));
+    sqlBundleList.add(new sqlBundle("aggregates", aggregateContentValues));
 
     ContentValues eventContentValues = new ContentValues();
     eventContentValues.put("occurredDateTime", event.getOccurredDateTime().toString());
@@ -109,27 +110,110 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     eventContentValues.put("data", eventData);
     eventContentValues.put("eventSequenceNumber", lastSavedEventSequenceNumber + 1);
 
-    insertQueryList.add(new InsertQuery("events", eventContentValues));
+    sqlBundleList.add(new sqlBundle("events", eventContentValues));
 
-    return insertQueryList;
+    if (event.getClass().getSimpleName().equals("EntryCreatedEvent")) {
+      EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
+      if (!entryCreatedEvent.getParentUuid().equals(entryCreatedEvent.getOwnerUuid())) {
+        ViewModelEntry newParentEntry =
+            viewModelEntryFor(entryCreatedEvent.getParentUuid());
+        ContentValues newParentEntryContentValues = new ContentValues();
+        newParentEntryContentValues.put("uuid", newParentEntry.getUuid());
+        newParentEntryContentValues
+            .put("lastSavedEventSequenceNumber", newParentEntry.getLastSavedEventSequenceNumber());
+        newParentEntryContentValues.put("childrenCount", newParentEntry.getChildrenCount() + 1);
+        sqlBundleList.add(new sqlBundle("viewModelEntry", newParentEntryContentValues));
+      }
+    }
+
+    if (event.getClass().getSimpleName().equals("EntryParentChangedEvent")) {
+      EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
+      boolean fromRoot = false;
+      boolean toRoot = false;
+      ViewModelEntry oldParentEntry = null;
+      ViewModelEntry newParentEntry = null;
+      ViewModelEntry childEntry = viewModelEntryFor(entryParentChangedEvent.getEntryId());
+      if (entryParentChangedEvent.getParentBefore().equals(childEntry.getOwnerUuid())) {
+        fromRoot = true;
+      } else {
+        oldParentEntry =
+            viewModelEntryFor(entryParentChangedEvent.getParentBefore());
+      }
+      if (entryParentChangedEvent.getParentAfter().equals(childEntry.getOwnerUuid())) {
+        toRoot = true;
+      } else {
+        newParentEntry =
+            viewModelEntryFor(entryParentChangedEvent.getParentAfter());
+      }
+
+      if (!fromRoot) {
+        ContentValues oldParentEntryContentValues = new ContentValues();
+        oldParentEntryContentValues.put("uuid", oldParentEntry.getUuid());
+        oldParentEntryContentValues
+            .put("lastSavedEventSequenceNumber", oldParentEntry.getLastSavedEventSequenceNumber());
+        oldParentEntryContentValues.put("childrenCount", oldParentEntry.getChildrenCount() - 1);
+        oldParentEntryContentValues.put(
+            "childrenDuration", oldParentEntry.getChildrenDuration() - childEntry.getDuration());
+        sqlBundleList.add(new sqlBundle("viewModelEntry", oldParentEntryContentValues));
+      }
+
+      if (!toRoot) {
+        ContentValues newParentEntryContentValues = new ContentValues();
+        newParentEntryContentValues.put("uuid", newParentEntry.getUuid());
+        newParentEntryContentValues
+            .put("lastSavedEventSequenceNumber", newParentEntry.getLastSavedEventSequenceNumber());
+        newParentEntryContentValues.put("childrenCount", newParentEntry.getChildrenCount() + 1);
+        newParentEntryContentValues.put(
+            "childrenDuration", newParentEntry.getChildrenDuration() + childEntry.getDuration());
+        sqlBundleList.add(new sqlBundle("viewModelEntry", newParentEntryContentValues));
+      }
+    }
+    return sqlBundleList;
 
   }
 
-  public void executeInsertQueries(List<InsertQuery> insertQueryList) {
+  public void executeSqlBundles(List<sqlBundle> sqlBundleList) {
+    Log.d(TAG, "executeSqlBundles called.");
     db.beginTransaction();
-
+    //Todo: use conflict rollback to rollback transaction on conflict?
     try {
-      for (InsertQuery insertQuery : insertQueryList) {
-        if (insertQuery.getTable().equals("events")) {
-          db.insertOrThrow("events", null, insertQuery.getContentValues());
-        } else {
-          db.insertWithOnConflict(insertQuery.getTable(), null, insertQuery.getContentValues(),
-              SQLiteDatabase.CONFLICT_REPLACE);
+      for (sqlBundle sqlBundle : sqlBundleList) {
+        Log.d(TAG, "executing sqlBundle " + sqlBundle.toString());
+        switch (sqlBundle.getTable()) {
+          case "events":
+            Log.d(TAG, "case events");
+            db.insertOrThrow("events", null, sqlBundle.getContentValues());
+            break;
+          case "aggregates":
+            Log.d(TAG, "case aggregates");
+            db.insertWithOnConflict(sqlBundle.getTable(), null, sqlBundle.getContentValues(),
+                SQLiteDatabase.CONFLICT_REPLACE);
+            break;
+          case "viewModelEntry":
+            Log.d(TAG, "case viewModelEntry");
+            if (sqlBundle.getContentValues().get("lastSavedEventSequenceNumber").toString()
+                .equals("0")) {
+              db.insertOrThrow(
+                  "viewModelEntry",
+                  null,
+                  sqlBundle.getContentValues());
+            } else {
+              db.updateWithOnConflict(
+                  "viewModelEntry",
+                  sqlBundle.getContentValues(),
+                  "uuid = ?",
+                  new String[]{sqlBundle.getContentValues().get("uuid").toString()},
+                  SQLiteDatabase.CONFLICT_REPLACE);
+            }
+            break;
+          default:
+            Log.d(TAG, "Error: sqlBundle not handled");
+            break;
         }
       }
       db.setTransactionSuccessful();
     } catch (Exception e) {
-      Log.d(TAG, "Error while executing insert SQL");
+      Log.d(TAG, "Error while executing insert SQL: " + e.toString());
     } finally {
       db.endTransaction();
     }
@@ -147,6 +231,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         return gson.toJson(event, EntryDescriptionChangedEvent.class);
       case "EntryDurationChangedEvent":
         return gson.toJson(event, EntryDurationChangedEvent.class);
+      case "EntryParentChangedEvent":
+        return gson.toJson(event, EntryParentChangedEvent.class);
       default:
         return "Event class not found.";
     }

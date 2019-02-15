@@ -1,7 +1,10 @@
 package nl.freelist.commands;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import nl.freelist.data.Repository;
+import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
@@ -10,6 +13,8 @@ import nl.freelist.domain.events.Event;
 import nl.freelist.domain.valueObjects.DateTime;
 
 public class ChangeEntryParentCommand extends Command {
+
+  private static final Logger LOGGER = Logger.getLogger(ChangeEntryParentCommand.class.getName());
 
   String uuid;
   String parentBefore;
@@ -28,6 +33,9 @@ public class ChangeEntryParentCommand extends Command {
 
   @Override
   public Result execute() {
+    LOGGER.log(Level.INFO,
+        "ChangeEntryParentCommand executed with parentBefore " + parentBefore + " and parentAfter "
+            + parentAfter);
     EntryParentChangedEvent entryParentChangedEvent = EntryParentChangedEvent
         .Create(DateTime.Create("now"), uuid, lastSavedEventSequenceNumber + 1, parentBefore,
             parentAfter);
@@ -36,8 +44,8 @@ public class ChangeEntryParentCommand extends Command {
     eventList.add(entryParentChangedEvent);
     entry.applyEvents(eventList);
 
-    repository.insert(entry);
-    //Todo: update readModel and persist entry in one transaction
+    List<sqlBundle> sqlBundleList = repository.insert(entry);
+    repository.executeSqlBundles(sqlBundleList);
 
     return new Result(true);
   }
