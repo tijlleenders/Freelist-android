@@ -1,10 +1,8 @@
 package nl.freelist.data.dto;
 
 import android.util.Log;
-import java.util.UUID;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
-import nl.freelist.domain.entities.Entry;
 
 public class ViewModelEntry {
 
@@ -75,16 +73,6 @@ public class ViewModelEntry {
 
   public String getOwnerUuid() {
     return ownerUuid;
-  }
-
-  public static Entry getEntryFromViewModelEntry(ViewModelEntry viewModelEntry) {
-    UUID ownerUuid = UUID.fromString(viewModelEntry.getOwnerUuid());
-    UUID parentUuid = UUID.fromString(viewModelEntry.getParentUuid());
-    UUID uuid = UUID.fromString(viewModelEntry.getUuid());
-    String title = viewModelEntry.title;
-    String description = viewModelEntry.description;
-    int duration = viewModelEntry.duration;
-    return new Entry(ownerUuid, parentUuid, uuid, title, description, duration);
   }
 
   public int getType() {

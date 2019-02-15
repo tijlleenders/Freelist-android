@@ -109,7 +109,6 @@ public class Entry {
   public List<Event> getListOfEventsWithSequenceHigherThan(int fromEventSequenceNumber) {
     fromEventSequenceNumber += 1;
     return eventList.subList(fromEventSequenceNumber, eventList.size());
-
   }
 
   public void applyEvents(List<Event> eventList) {

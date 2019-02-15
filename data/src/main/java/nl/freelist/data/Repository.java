@@ -10,7 +10,6 @@ import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.interfaces.Specifiable;
 
 public class Repository {
 
@@ -64,27 +63,6 @@ public class Repository {
     eventDatabaseHelper.executeSqlBundles(sqlBundleList);
   }
 
-
-  public void insert(Iterable<Entry> items) {
-  }
-
-
-  public void update(Entry item) {
-  }
-
-
-  public void delete(Entry item) {
-  }
-
-
-  public void delete(Specifiable specification) {
-  }
-
-
-  public List<Entry> query(Specifiable specification) {
-    List<Entry> allEntries = new ArrayList<>();
-    return allEntries;
-  }
 
 
   public Entry getById(String uuid) {

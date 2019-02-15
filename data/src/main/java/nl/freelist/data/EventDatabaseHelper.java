@@ -81,6 +81,28 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
   }
 
+  private List<sqlBundle> modifyChildrenCountAndDurationIncludingAncestorsFor(
+      String firstParent, int childDurationDelta, int childCountDelta, String root) {
+    List<sqlBundle> sqlBundleList = new ArrayList<>();
+    List<String> oldAncestorList =
+        getAncestorIdsExcludingRootForAndIncludingThisParent(firstParent, root);
+    for (String oldParent : oldAncestorList) {
+      ViewModelEntry oldParentEntry = viewModelEntryFor(oldParent);
+      ContentValues oldParentEntryContentValues = new ContentValues();
+      oldParentEntryContentValues.put("uuid", oldParentEntry.getUuid());
+      oldParentEntryContentValues.put(
+          "lastSavedEventSequenceNumber", oldParentEntry.getLastSavedEventSequenceNumber());
+      oldParentEntryContentValues.put(
+          "childrenCount", oldParentEntry.getChildrenCount() + childCountDelta);
+      oldParentEntryContentValues.put(
+          "childrenDuration", oldParentEntry.getChildrenDuration() + childDurationDelta);
+      sqlBundleList.add(new sqlBundle("viewModelEntry", oldParentEntryContentValues));
+    }
+
+    return sqlBundleList;
+  }
+
+
   public List<sqlBundle> getQueriesForEvent(
       String aggregateIdType, int expectedLastSavedEventSequenceNumber, Event event)
       throws Exception {
@@ -114,62 +136,26 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
 
     if (event.getClass().getSimpleName().equals("EntryCreatedEvent")) {
       EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
-      if (!entryCreatedEvent.getParentUuid().equals(entryCreatedEvent.getOwnerUuid())) {
-        ViewModelEntry newParentEntry =
-            viewModelEntryFor(entryCreatedEvent.getParentUuid());
-        ContentValues newParentEntryContentValues = new ContentValues();
-        newParentEntryContentValues.put("uuid", newParentEntry.getUuid());
-        newParentEntryContentValues
-            .put("lastSavedEventSequenceNumber", newParentEntry.getLastSavedEventSequenceNumber());
-        newParentEntryContentValues.put("childrenCount", newParentEntry.getChildrenCount() + 1);
-        sqlBundleList.add(new sqlBundle("viewModelEntry", newParentEntryContentValues));
-      }
+      sqlBundleList.addAll(
+          modifyChildrenCountAndDurationIncludingAncestorsFor(
+              entryCreatedEvent.getParentUuid(), 0, 1, entryCreatedEvent.getOwnerUuid()));
     }
 
     if (event.getClass().getSimpleName().equals("EntryParentChangedEvent")) {
       EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
-      boolean fromRoot = false;
-      boolean toRoot = false;
-      ViewModelEntry oldParentEntry = null;
-      ViewModelEntry newParentEntry = null;
       ViewModelEntry childEntry = viewModelEntryFor(entryParentChangedEvent.getEntryId());
-      if (entryParentChangedEvent.getParentBefore().equals(childEntry.getOwnerUuid())) {
-        fromRoot = true;
-      } else {
-        oldParentEntry =
-            viewModelEntryFor(entryParentChangedEvent.getParentBefore());
-      }
-      if (entryParentChangedEvent.getParentAfter().equals(childEntry.getOwnerUuid())) {
-        toRoot = true;
-      } else {
-        newParentEntry =
-            viewModelEntryFor(entryParentChangedEvent.getParentAfter());
-      }
-
-      if (!fromRoot) {
-        ContentValues oldParentEntryContentValues = new ContentValues();
-        oldParentEntryContentValues.put("uuid", oldParentEntry.getUuid());
-        oldParentEntryContentValues
-            .put("lastSavedEventSequenceNumber", oldParentEntry.getLastSavedEventSequenceNumber());
-        oldParentEntryContentValues.put("childrenCount", oldParentEntry.getChildrenCount() - 1);
-        oldParentEntryContentValues.put(
-            "childrenDuration", oldParentEntry.getChildrenDuration() - childEntry.getDuration());
-        sqlBundleList.add(new sqlBundle("viewModelEntry", oldParentEntryContentValues));
-      }
-
-      if (!toRoot) {
-        ContentValues newParentEntryContentValues = new ContentValues();
-        newParentEntryContentValues.put("uuid", newParentEntry.getUuid());
-        newParentEntryContentValues
-            .put("lastSavedEventSequenceNumber", newParentEntry.getLastSavedEventSequenceNumber());
-        newParentEntryContentValues.put("childrenCount", newParentEntry.getChildrenCount() + 1);
-        newParentEntryContentValues.put(
-            "childrenDuration", newParentEntry.getChildrenDuration() + childEntry.getDuration());
-        sqlBundleList.add(new sqlBundle("viewModelEntry", newParentEntryContentValues));
-      }
+      sqlBundleList.addAll(
+          modifyChildrenCountAndDurationIncludingAncestorsFor(
+              entryParentChangedEvent.getParentBefore(),
+              -childEntry.getChildrenDuration(),
+              -childEntry.getChildrenCount() - 1, childEntry.getOwnerUuid()));
+      sqlBundleList.addAll(
+          modifyChildrenCountAndDurationIncludingAncestorsFor(
+              entryParentChangedEvent.getParentAfter(),
+              childEntry.getChildrenDuration(),
+              childEntry.getChildrenCount() + 1, childEntry.getOwnerUuid()));
     }
     return sqlBundleList;
-
   }
 
   public void executeSqlBundles(List<sqlBundle> sqlBundleList) {
@@ -208,7 +194,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             break;
           default:
             Log.d(TAG, "Error: sqlBundle not handled");
-            break;
+            throw new Exception("Error in sqlBundle handling, table in sqlBundle not recognized.");
         }
       }
       db.setTransactionSuccessful();
@@ -335,6 +321,48 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       }
     }
     return childrenIdList;
+  }
+
+  public List<String> getAncestorIdsExcludingRootForAndIncludingThisParent(String parentId,
+      String root) {
+    String SELECT_ANCESTOR_IDS_QUERY =
+        "with recursive\n"
+            + "    childEntry(uuid) as (\n"
+            + "        values(?)\n"
+            + "        union\n"
+            + "        select parentUuid\n"
+            + "        from viewModelEntry, childEntry\n"
+            + "        where viewModelEntry.uuid = childEntry.uuid\n"
+            + "    )\n"
+            + "select parentUuid from viewModelEntry\n"
+            + "    where viewModelEntry.uuid in childEntry;";
+
+    Cursor cursor = db.rawQuery(SELECT_ANCESTOR_IDS_QUERY, new String[]{parentId});
+    List<String> ancestorIdList = new ArrayList<>();
+    try {
+      if (cursor.moveToFirst()) {
+        do {
+          String parentUuid = cursor.getString(cursor.getColumnIndex("parentUuid"));
+          ancestorIdList.add(parentUuid);
+        } while (cursor.moveToNext());
+      }
+    } catch (Exception e) {
+      Log.d(TAG, "Error while trying to get ancestor ids for uuid");
+    } finally {
+      if (cursor != null && !cursor.isClosed()) {
+        cursor.close();
+      }
+    }
+
+    if (ancestorIdList.size() > 0) {
+      ancestorIdList.remove(root);
+    }
+
+    if (!parentId.equals(root)) {
+      ancestorIdList.add(parentId);
+    }
+
+    return ancestorIdList;
   }
 
   public EntryCreatedEvent getEntryCreatedEvent(String uuid) {
