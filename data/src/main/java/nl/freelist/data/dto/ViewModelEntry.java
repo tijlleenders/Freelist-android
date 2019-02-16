@@ -14,6 +14,7 @@ public class ViewModelEntry {
   private String title;
   private String description;
   private String durationString;
+  private String childrenDurationString;
   private int duration;
   private int years;
   private int weeks;
@@ -24,14 +25,6 @@ public class ViewModelEntry {
   private int childrenCount;
   private int childrenDuration;
   private int lastSavedEventSequenceNumber;
-  public int getChildrenCount() {
-    return childrenCount;
-  }
-  public int getChildrenDuration() {
-    return childrenDuration;
-  }
-
-
   public ViewModelEntry(
       String ownerUuid,
       String parentUuid,
@@ -50,6 +43,7 @@ public class ViewModelEntry {
     this.duration = duration;
     this.childrenCount = childrenCount;
     this.childrenDuration = childrenDuration;
+    this.childrenDurationString = DurationHelper.getDurationStringFromInt(childrenDuration);
     this.years = DurationHelper.getYearsIntFrom(duration);
     this.weeks = DurationHelper.getWeeksIntFrom(duration);
     this.days = DurationHelper.getDaysIntFrom(duration);
@@ -129,6 +123,19 @@ public class ViewModelEntry {
 
   public int getSeconds() {
     return seconds;
+  }
+
+  public int getChildrenCount() {
+    return childrenCount;
+  }
+
+  public int getChildrenDuration() {
+    return childrenDuration;
+  }
+
+
+  public String getChildrenDurationString() {
+    return childrenDurationString;
   }
 
   public int getLastSavedEventSequenceNumber() {

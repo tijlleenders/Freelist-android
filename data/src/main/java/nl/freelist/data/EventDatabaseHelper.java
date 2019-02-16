@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.EntryDescriptionChangedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
@@ -102,7 +103,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return sqlBundleList;
   }
 
-
   public List<sqlBundle> getQueriesForEvent(
       String aggregateIdType, int expectedLastSavedEventSequenceNumber, Event event)
       throws Exception {
@@ -141,6 +141,18 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
               entryCreatedEvent.getParentUuid(), 0, 1, entryCreatedEvent.getOwnerUuid()));
     }
 
+    if (event.getClass().getSimpleName().equals("EntryDurationChangedEvent")) {
+      EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
+      ViewModelEntry changedEntry = viewModelEntryFor(entryDurationChangedEvent.getEntryId());
+      sqlBundleList.addAll(
+          modifyChildrenCountAndDurationIncludingAncestorsFor(
+              changedEntry.getParentUuid(),
+              DurationHelper
+                  .getDurationSecondsDeltaFromDurationChangedEvent(entryDurationChangedEvent),
+              0,
+              changedEntry.getOwnerUuid()));
+    }
+
     if (event.getClass().getSimpleName().equals("EntryParentChangedEvent")) {
       EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
       ViewModelEntry childEntry = viewModelEntryFor(entryParentChangedEvent.getEntryId());
@@ -148,12 +160,14 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
           modifyChildrenCountAndDurationIncludingAncestorsFor(
               entryParentChangedEvent.getParentBefore(),
               -childEntry.getChildrenDuration(),
-              -childEntry.getChildrenCount() - 1, childEntry.getOwnerUuid()));
+              -childEntry.getChildrenCount() - 1,
+              childEntry.getOwnerUuid()));
       sqlBundleList.addAll(
           modifyChildrenCountAndDurationIncludingAncestorsFor(
               entryParentChangedEvent.getParentAfter(),
               childEntry.getChildrenDuration(),
-              childEntry.getChildrenCount() + 1, childEntry.getOwnerUuid()));
+              childEntry.getChildrenCount() + 1,
+              childEntry.getOwnerUuid()));
     }
     return sqlBundleList;
   }
@@ -161,7 +175,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
   public void executeSqlBundles(List<sqlBundle> sqlBundleList) {
     Log.d(TAG, "executeSqlBundles called.");
     db.beginTransaction();
-    //Todo: use conflict rollback to rollback transaction on conflict?
+    // Todo: use conflict rollback to rollback transaction on conflict?
     try {
       for (sqlBundle sqlBundle : sqlBundleList) {
         Log.d(TAG, "executing sqlBundle " + sqlBundle.toString());
@@ -172,17 +186,20 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             break;
           case "aggregates":
             Log.d(TAG, "case aggregates");
-            db.insertWithOnConflict(sqlBundle.getTable(), null, sqlBundle.getContentValues(),
+            db.insertWithOnConflict(
+                sqlBundle.getTable(),
+                null,
+                sqlBundle.getContentValues(),
                 SQLiteDatabase.CONFLICT_REPLACE);
             break;
           case "viewModelEntry":
             Log.d(TAG, "case viewModelEntry");
-            if (sqlBundle.getContentValues().get("lastSavedEventSequenceNumber").toString()
+            if (sqlBundle
+                .getContentValues()
+                .get("lastSavedEventSequenceNumber")
+                .toString()
                 .equals("0")) {
-              db.insertOrThrow(
-                  "viewModelEntry",
-                  null,
-                  sqlBundle.getContentValues());
+              db.insertOrThrow("viewModelEntry", null, sqlBundle.getContentValues());
             } else {
               db.updateWithOnConflict(
                   "viewModelEntry",
@@ -205,7 +222,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
   }
 
-
   private String jsonOf(Event event) {
     Gson gson = new Gson();
     switch (event.getClass().getSimpleName()) {
@@ -224,14 +240,12 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
   }
 
-
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     // For initial development/testing, upgrade policy is
     // to simply to discard the data and start over
     db.execSQL("");
     onCreate(db);
   }
-
 
   public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     onUpgrade(db, oldVersion, newVersion);
@@ -323,8 +337,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return childrenIdList;
   }
 
-  public List<String> getAncestorIdsExcludingRootForAndIncludingThisParent(String parentId,
-      String root) {
+  public List<String> getAncestorIdsExcludingRootForAndIncludingThisParent(
+      String parentId, String root) {
     String SELECT_ANCESTOR_IDS_QUERY =
         "with recursive\n"
             + "    childEntry(uuid) as (\n"
