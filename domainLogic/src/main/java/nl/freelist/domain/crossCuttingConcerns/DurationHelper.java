@@ -1,5 +1,7 @@
 package nl.freelist.domain.crossCuttingConcerns;
 
+import nl.freelist.domain.events.EntryDurationChangedEvent;
+
 public class DurationHelper { //Todo: move to value object in domain model
 
   public static int getDurationIntFromInts(int years, int weeks, int days, int hours, int minutes,
@@ -12,6 +14,34 @@ public class DurationHelper { //Todo: move to value object in domain model
     result += minutes * 60;
     result += seconds;
     return result;
+  }
+
+  public static int getDurationSecondsDeltaFromDurationChangedEvent(
+      EntryDurationChangedEvent entryDurationChangedEvent) {
+    int multiplier = 0;
+    switch (entryDurationChangedEvent.getUnitOfMeasure()) {
+      case "seconds":
+        multiplier = 1;
+        break;
+      case "minutes":
+        multiplier = 60;
+        break;
+      case "hours":
+        multiplier = 3600;
+        break;
+      case "days":
+        multiplier = 3600 * 24;
+        break;
+      case "weeks":
+        multiplier = 3600 * 24 * 7;
+        break;
+      case "years":
+        multiplier = (int) (3600 * 24 * 7 * 365.25);
+      default:
+        break;
+    }
+    return multiplier * (entryDurationChangedEvent.getDurationAfter() - entryDurationChangedEvent
+        .getDurationBefore());
   }
 
   public static int getYearsIntFrom(int duration) {

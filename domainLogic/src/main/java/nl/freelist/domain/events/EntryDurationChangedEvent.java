@@ -46,4 +46,5 @@ public class EntryDurationChangedEvent extends Event {
   public String getUnitOfMeasure() {
     return unitOfMeasure;
   }
+
 }

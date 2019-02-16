@@ -67,7 +67,12 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
     Log.d(TAG, "onBindViewHolder called.");
     ViewModelEntry currentEntry = entries.get(position);
     entryHolder.textViewTitle.setText(currentEntry.getTitle());
-    entryHolder.textViewDuration.setText(currentEntry.getDurationString());
+    if (currentEntry.getChildrenDuration() > 0) {
+      entryHolder.textViewDuration.setText(
+          currentEntry.getChildrenDurationString() + " / " + currentEntry.getDurationString());
+    } else {
+      entryHolder.textViewDuration.setText(currentEntry.getDurationString());
+    }
     if (currentEntry.getType() == Constants.SINGLE_ENTRY_VIEW_TYPE
         || currentEntry.getType() == Constants.STACK_ENTRY_VIEW_TYPE) {
       entryHolder.textViewDescription.setText(currentEntry.getDescription());
