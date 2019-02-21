@@ -107,7 +107,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
   public boolean onCreateOptionsMenu(Menu menu) {
     Log.d(TAG, "onCreateOptionsMenu called.");
     MenuInflater menuInflater = getMenuInflater();
-    menuInflater.inflate(R.menu.add_entry_menu, menu);
+    menuInflater.inflate(R.menu.choose_entry_menu, menu);
     return true;
   }
 
