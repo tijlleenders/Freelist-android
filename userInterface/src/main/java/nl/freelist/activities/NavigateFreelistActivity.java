@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.bottomappbar.BottomAppBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -39,6 +40,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   private TextView breadcrumb2;
   private TextView breadcrumbDivider_0_1;
   private TextView breadcrumbDivider_1_2;
+  private BottomAppBar bottomAppBar;
 
   public NavigateFreelistActivity() {
   }
@@ -65,7 +67,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
     initializeViews();
 
-    setupActionBar();
+    setupActionBars();
 
     setupFloatingActionButton();
 
@@ -89,6 +91,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     recyclerView.setHasFixedSize(true);
     adapter = new FreelistEntryAdapter(this);
     recyclerView.setAdapter(adapter);
+    bottomAppBar = findViewById(R.id.bottom_app_bar);
   }
 
   private void setupSwipeActions() {
@@ -136,12 +139,14 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
         });
   }
 
-  private void setupActionBar() {
-    Log.d(TAG, "setupActionBar called.");
+  private void setupActionBars() {
+    Log.d(TAG, "setupActionBars called.");
     getSupportActionBar()
         .setHomeAsUpIndicator(R.drawable.ic_close);
     setTitle("My Freelists");
+    bottomAppBar.replaceMenu(R.menu.bottom_app_bar_menu);
   }
+
 
   private void updateView() {
     updateRecyclerView();

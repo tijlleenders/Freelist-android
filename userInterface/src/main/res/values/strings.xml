@@ -6,4 +6,8 @@
   <string name="action_bar_title"></string>
   <string name="freelists_action_bar_title">My Freelists</string>
   <string name="choose_parent_action_bar_title">Choose parent</string>
+  <string name="action_freelists">Freelists</string>
+  <string name="action_calendar">Calendar</string>
+  <string name="action_search">Search</string>
+  <string name="action_settings">Settings</string>
 </resources>
