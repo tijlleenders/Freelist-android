@@ -139,13 +139,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
         });
   }
 
-  private void setupActionBars() {
-    Log.d(TAG, "setupActionBars called.");
-    getSupportActionBar()
-        .setHomeAsUpIndicator(R.drawable.ic_close);
-    setTitle("My Freelists");
-    bottomAppBar.replaceMenu(R.menu.bottom_app_bar_menu);
-  }
+
 
 
   private void updateView() {
@@ -270,6 +264,47 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
           .show();
     }
     updateView();
+  }
+
+
+  private void setupActionBars() {
+    Log.d(TAG, "setupActionBars called.");
+
+    //TopAppBar
+    getSupportActionBar()
+        .setHomeAsUpIndicator(R.drawable.ic_close);
+    setTitle("My Freelists");
+    //override onCreateOptionsMenu and onOptionsItemSelected for TopAppBar
+
+    bottomAppBar.replaceMenu(R.menu.bottom_app_bar_menu);
+    bottomAppBar.setOnMenuItemClickListener(new BottomAppBar.OnMenuItemClickListener() {
+      @Override
+      public boolean onMenuItemClick(MenuItem menuItem) {
+        int id = menuItem.getItemId();
+        switch (id) {
+          case R.id.bottom_app_bar_freelists:
+            Toast.makeText(NavigateFreelistActivity.this, "Freelists already selected",
+                Toast.LENGTH_SHORT).show();
+            return true;
+          case R.id.bottom_app_bar_calendar:
+            Toast.makeText(NavigateFreelistActivity.this, "Calendar selected", Toast.LENGTH_SHORT)
+                .show();
+            Intent navigateFreelistIntent = new Intent(NavigateFreelistActivity.this,
+                CalendarActivity.class);
+            startActivity(navigateFreelistIntent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            return true;
+          case R.id.bottom_app_bar_search:
+            Toast.makeText(NavigateFreelistActivity.this, "Search selected", Toast.LENGTH_SHORT)
+                .show();
+            Intent searchIntent = new Intent(NavigateFreelistActivity.this, SearchActivity.class);
+            startActivity(searchIntent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            return true;
+        }
+        return false;
+      }
+    });
   }
 
   @Override

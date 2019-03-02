@@ -111,7 +111,8 @@
     app:fabCradleRoundedCornerRadius="4dp"
     app:fabCradleVerticalOffset="0dp"
     app:hideOnScroll="false"
-    app:navigationIcon="@drawable/ic_menu">
+    app:navigationIcon="@drawable/ic_menu"
+    app:menu="@menu/bottom_app_bar_menu">
   </android.support.design.bottomappbar.BottomAppBar>
 
 </android.support.design.widget.CoordinatorLayout>

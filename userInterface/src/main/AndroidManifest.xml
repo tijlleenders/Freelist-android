@@ -10,7 +10,9 @@
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
     android:theme="@style/AppTheme">
-    <activity android:name="nl.freelist.activities.NavigateFreelistActivity">
+    <activity
+      android:name="nl.freelist.activities.NavigateFreelistActivity"
+      android:launchMode="singleInstance">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
@@ -27,6 +29,14 @@
     <activity
       android:name="nl.freelist.activities.ChooseEntryActivity"
       android:parentActivityName="nl.freelist.activities.AddEditEntryActivity">
+    </activity>
+    <activity
+      android:name="nl.freelist.activities.CalendarActivity"
+      android:launchMode="singleInstance">
+    </activity>
+    <activity
+      android:name="nl.freelist.activities.SearchActivity"
+      android:launchMode="singleInstance">
     </activity>
   </application>
 
