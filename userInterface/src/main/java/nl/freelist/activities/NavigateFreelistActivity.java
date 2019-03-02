@@ -2,6 +2,8 @@ package nl.freelist.activities;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.bottomappbar.BottomAppBar;
@@ -277,6 +279,9 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     //override onCreateOptionsMenu and onOptionsItemSelected for TopAppBar
 
     bottomAppBar.replaceMenu(R.menu.bottom_app_bar_menu);
+    bottomAppBar.getMenu().findItem(R.id.bottom_app_bar_freelists).getIcon()
+        .setColorFilter(Color.BLACK,
+            PorterDuff.Mode.SRC_IN);
     bottomAppBar.setOnMenuItemClickListener(new BottomAppBar.OnMenuItemClickListener() {
       @Override
       public boolean onMenuItemClick(MenuItem menuItem) {

@@ -8,6 +8,7 @@
     android:id="@+id/bottom_app_bar_freelists"
     android:icon="@drawable/ic_freelist_logo2"
     android:title="@string/action_freelists"
+    android:checkable="true"
     app:showAsAction="ifRoom"/>
   <item
     android:id="@+id/bottom_app_bar_calendar"

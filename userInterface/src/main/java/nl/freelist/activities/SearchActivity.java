@@ -3,6 +3,8 @@ package nl.freelist.activities;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.design.bottomappbar.BottomAppBar;
 import android.support.v7.app.AppCompatActivity;
@@ -68,6 +70,9 @@ public class SearchActivity extends AppCompatActivity {
     //override onCreateOptionsMenu and onOptionsItemSelected for TopAppBar
 
     bottomAppBar.replaceMenu(R.menu.bottom_app_bar_menu);
+    bottomAppBar.getMenu().findItem(R.id.bottom_app_bar_search).getIcon().setColorFilter(
+        Color.BLACK,
+        PorterDuff.Mode.SRC_IN);
     bottomAppBar.setOnMenuItemClickListener(new BottomAppBar.OnMenuItemClickListener() {
       @Override
       public boolean onMenuItemClick(MenuItem menuItem) {
