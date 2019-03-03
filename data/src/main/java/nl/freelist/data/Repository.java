@@ -6,7 +6,9 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.Event;
@@ -21,7 +23,6 @@ public class Repository {
     eventDatabaseHelper = EventDatabaseHelper.getInstance(appContext);
   }
 
-
   public List<sqlBundle> insert(Entry entry) {
     Log.d(TAG, "Repository insert called with entry " + entry.getUuid());
 
@@ -31,13 +32,14 @@ public class Repository {
         eventDatabaseHelper.selectLastSavedEventSequenceNumber(entry.getUuid().toString());
     Log.d(TAG, "lastSavedEventSequenceNumber = " + lastSavedEventSequenceNumber);
 
-    List<Event> newEventsToSave = entry
-        .getListOfEventsWithSequenceHigherThan(lastSavedEventSequenceNumber);
+    List<Event> newEventsToSave =
+        entry.getListOfEventsWithSequenceHigherThan(lastSavedEventSequenceNumber);
     Log.d(TAG, "newEventsToSave list with size " + newEventsToSave.size() + " retrieved.");
     for (Event event : newEventsToSave) {
       try {
-        sqlBundleList.addAll(eventDatabaseHelper.getQueriesForEvent("entry",
-            lastSavedEventSequenceNumber + newEventsToSave.indexOf(event), event));
+        sqlBundleList.addAll(
+            eventDatabaseHelper.getQueriesForEvent(
+                "entry", lastSavedEventSequenceNumber + newEventsToSave.indexOf(event), event));
       } catch (Exception e) {
         Log.d(TAG, "Error while executing insert(Entry entry):" + e.toString());
       }
@@ -51,8 +53,7 @@ public class Repository {
     viewModelEntryContentValues.put("description", entry.getDescription());
     viewModelEntryContentValues.put("duration", entry.getDuration());
     viewModelEntryContentValues.put(
-        "lastSavedEventSequenceNumber",
-        lastSavedEventSequenceNumber + newEventsToSave.size());
+        "lastSavedEventSequenceNumber", lastSavedEventSequenceNumber + newEventsToSave.size());
 
     sqlBundleList.add(new sqlBundle("viewModelEntry", viewModelEntryContentValues));
 
@@ -63,16 +64,18 @@ public class Repository {
     eventDatabaseHelper.executeSqlBundles(sqlBundleList);
   }
 
-
-
   public Entry getById(String uuid) {
     EntryCreatedEvent entryCreatedEvent = eventDatabaseHelper.getEntryCreatedEvent(uuid);
-    Entry entry = new Entry(UUID.fromString(entryCreatedEvent.getOwnerUuid()),
-        UUID.fromString(entryCreatedEvent.getParentUuid()),
-        UUID.fromString(entryCreatedEvent.getEntryId()), "", "", 0);
+    Entry entry =
+        new Entry(
+            UUID.fromString(entryCreatedEvent.getOwnerUuid()),
+            UUID.fromString(entryCreatedEvent.getParentUuid()),
+            UUID.fromString(entryCreatedEvent.getEntryId()),
+            "",
+            "",
+            0);
     return entry;
   }
-
 
   public List<Event> getSavedEventsFor(String entryId) {
     List<Event> eventList = eventDatabaseHelper.getEventsFor(entryId);
@@ -87,8 +90,7 @@ public class Repository {
     List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
 
     if (!parentUuid.equals(UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()))) {
-      ViewModelEntry parentViewModelEntry =
-          getViewModelEntryById(parentUuid);
+      ViewModelEntry parentViewModelEntry = getViewModelEntryById(parentUuid);
       allViewModelEntries.add(parentViewModelEntry);
 
       if (!UUID.fromString(parentViewModelEntry.getParentUuid())
@@ -104,12 +106,23 @@ public class Repository {
   public List<ViewModelEntry> getAllViewModelEntriesForParent(UUID parentUuid) {
     List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
 
-    List<String> childrenUuids = eventDatabaseHelper
-        .getAllDirectChildrenIdsForParent(parentUuid.toString());
+    List<String> childrenUuids =
+        eventDatabaseHelper.getAllDirectChildrenIdsForParent(parentUuid.toString());
     for (String childUuid : childrenUuids) {
       allViewModelEntries.add(eventDatabaseHelper.viewModelEntryFor(childUuid));
     }
     return allViewModelEntries;
   }
 
+  public List<CalendarEntry> getAllCalendarEntriesForOwner(UUID fromString) {
+    List<CalendarEntry> calendarEntryList = new ArrayList<>();
+    calendarEntryList.add(
+        new CalendarEntry(
+            "Monday, april 1st 2018", Constants.CALENDAR_ENTRY_DATE_VIEW_TYPE, "", ""));
+    calendarEntryList.add(
+        new CalendarEntry("this", Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, "11:00", "4m99s"));
+    calendarEntryList.add(
+        new CalendarEntry("that", Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, "", "76m99s"));
+    return calendarEntryList;
+  }
 }

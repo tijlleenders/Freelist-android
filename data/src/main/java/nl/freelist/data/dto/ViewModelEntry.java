@@ -25,6 +25,7 @@ public class ViewModelEntry {
   private int childrenCount;
   private int childrenDuration;
   private int lastSavedEventSequenceNumber;
+
   public ViewModelEntry(
       String ownerUuid,
       String parentUuid,

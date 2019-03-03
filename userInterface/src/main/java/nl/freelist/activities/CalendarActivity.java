@@ -1,6 +1,5 @@
 package nl.freelist.activities;
 
-import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Color;
@@ -8,19 +7,28 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.design.bottomappbar.BottomAppBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
+import io.reactivex.schedulers.Schedulers;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.freelist.R;
-import nl.freelist.viewModelPerActivity.NavigateEntriesViewModel;
+import nl.freelist.recyclerviewHelpers.CalendarEntryAdapter;
+import nl.freelist.recyclerviewHelpers.ItemClickListener;
+import nl.freelist.viewModelPerActivity.CalendarViewModel;
 
-public class CalendarActivity extends AppCompatActivity {
+public class CalendarActivity extends AppCompatActivity implements ItemClickListener {
 
   private static final String TAG = "CalendarActivity";
-  private String myUuid;
+  private String resourceUuid;
 
-  private ViewModel calendarViewModel;
+  private CalendarEntryAdapter adapter;
+  private RecyclerView recyclerView;
+
+  private CalendarViewModel calendarViewModel;
   private BottomAppBar bottomAppBar;
 
   public CalendarActivity() {
@@ -39,8 +47,11 @@ public class CalendarActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_calendar);
 
+    initializeSharedPreferences();
+
     calendarViewModel = ViewModelProviders.of(this)
-        .get(NavigateEntriesViewModel.class);
+        .get(CalendarViewModel.class);
+    calendarViewModel.setOwnerUuid(resourceUuid);
 
     initializeViews();
 
@@ -50,16 +61,46 @@ public class CalendarActivity extends AppCompatActivity {
 
   private void initializeSharedPreferences() {
     MySettings mySettings = new MySettings(this);
-    myUuid = mySettings.getUuid();
+    resourceUuid = mySettings.getUuid();
   }
 
   private void initializeViews() {
     Log.d(TAG, "initializeViews called.");
+    recyclerView = findViewById(R.id.recycler_view);
+    recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    recyclerView.setHasFixedSize(true);
+    adapter = new CalendarEntryAdapter(this);
+    recyclerView.setAdapter(adapter);
     bottomAppBar = findViewById(R.id.bottom_app_bar);
   }
 
 
   private void updateView() {
+    updateRecyclerView();
+  }
+
+  private void updateRecyclerView() {
+    Log.d(TAG, "updateRecyclerView called.");
+    calendarViewModel
+        .getAllCalendarEntries()
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .subscribe(
+            calendarEntries -> {
+              // update RecyclerView
+              runOnUiThread(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      adapter.setEntries(calendarEntries);
+                      Toast.makeText(
+                          CalendarActivity.this,
+                          "calendarEntriesViewModel recyclerView refreshed!",
+                          Toast.LENGTH_SHORT)
+                          .show();
+                    }
+                  });
+            });
   }
 
   private void setupActionBars() {
@@ -102,4 +143,9 @@ public class CalendarActivity extends AppCompatActivity {
   }
 
 
+  @Override
+  public void onItemClick(View view, int position) {
+    Log.d(TAG, "onItemClick at position " + position + "called.");
+//    adapter.getEntryAt(position)
+  }
 }

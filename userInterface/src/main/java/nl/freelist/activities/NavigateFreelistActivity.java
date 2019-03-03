@@ -350,7 +350,6 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   @Override
   public void onItemClick(View view, int position) {
     Log.d(TAG, "onItemClick called.");
-    int viewType = adapter.getItemViewType(position);
     String parentToSet = adapter.getEntryAt(position).getUuid();
     navigateEntriesViewModel.updateParentUuid(parentToSet);
     updateView();
