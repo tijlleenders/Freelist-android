@@ -38,7 +38,15 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_below="@id/text_view_title"
-      android:text="Description"/>
+      android:text="x days left"/>
+
+    <TextView
+      android:id="@+id/text_view_time"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/text_view_duration"
+      android:layout_alignRight="@id/text_view_duration"
+      android:text="11:00"/>
 
 
   </RelativeLayout>

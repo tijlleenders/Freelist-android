@@ -118,11 +118,19 @@ public class Repository {
     List<CalendarEntry> calendarEntryList = new ArrayList<>();
     calendarEntryList.add(
         new CalendarEntry(
-            "Monday, april 1st 2018", Constants.CALENDAR_ENTRY_DATE_VIEW_TYPE, "", ""));
+            "Today, Monday, april 1st 2018", Constants.CALENDAR_ENTRY_DATE_VIEW_TYPE, "", ""));
     calendarEntryList.add(
         new CalendarEntry("this", Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, "11:00", "4m99s"));
     calendarEntryList.add(
         new CalendarEntry("that", Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, "", "76m99s"));
+    calendarEntryList.add(
+        new CalendarEntry(
+            "Next week, Monday, april 8th 2018", Constants.CALENDAR_ENTRY_DATE_VIEW_TYPE, "", ""));
+    calendarEntryList.add(
+        new CalendarEntry("the other thing", Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, "13:00",
+            "1h"));
+    calendarEntryList.add(
+        new CalendarEntry("the meeting", Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, "", "1h"));
     return calendarEntryList;
   }
 }

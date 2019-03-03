@@ -66,6 +66,7 @@ public class CalendarEntryAdapter extends RecyclerView.Adapter<CalendarEntryAdap
     entryHolder.textViewTitle.setText(currentEntry.getTitle());
     if (currentEntry.getType() == Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE) {
       entryHolder.textViewDuration.setText(currentEntry.getDurationString());
+      entryHolder.textViewTime.setText(currentEntry.getTime());
     }
   }
 
@@ -96,12 +97,14 @@ public class CalendarEntryAdapter extends RecyclerView.Adapter<CalendarEntryAdap
 
     private final TextView textViewTitle;
     private final TextView textViewDuration;
+    private final TextView textViewTime;
 
     EntryHolder(@NonNull View itemView) {
       super(itemView);
       Log.d(TAG, "EntryHolder called sets OnClick and OnLongClickListener.");
       textViewTitle = itemView.findViewById(R.id.text_view_title);
       textViewDuration = itemView.findViewById(R.id.text_view_duration);
+      textViewTime = itemView.findViewById(R.id.text_view_time);
 
       // Using lambda as below is more efficient than new inner class for every call
       itemView
