@@ -2,9 +2,7 @@ package nl.freelist.activities;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,7 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 import io.reactivex.schedulers.Schedulers;
-import java.util.UUID;
+import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.freelist.R;
 import nl.freelist.recyclerviewHelpers.ChooseEntryAdapter;
@@ -51,9 +49,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
     navigateEntriesViewModel = ViewModelProviders.of(this)
         .get(NavigateEntriesViewModel.class);
 
-    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    myUuid = sharedPreferences.getString(Constants.SETTINGS_UUID,
-        UUID.nameUUIDFromBytes("unknown@freelist.nl".getBytes()).toString());
+    initializeSharedPreferences();
 
     //always reset navigateEntriesViewModel at root to avoid choosing itself or descendants as a parent (infinite loop)
     navigateEntriesViewModel.updateParentUuid(myUuid);
@@ -71,9 +67,13 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
     recyclerView.setAdapter(adapter);
 
     ActionBar actionbar = getSupportActionBar();
-    actionbar
-        .setHomeAsUpIndicator(R.drawable.ic_close);
+//    actionbar.setDisplayHomeAsUpEnabled(true);
     actionbar.setTitle("Choose a parent (or none)");
+  }
+
+  private void initializeSharedPreferences() {
+    MySettings mySettings = new MySettings(this);
+    myUuid = mySettings.getUuid();
   }
 
   private void updateRecyclerView() {
@@ -90,7 +90,8 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
                     @Override
                     public void run() {
                       viewModelEntries
-                          .removeIf(viewModelEntry -> viewModelEntry.getUuid() == uuidToExclude);
+                          .removeIf(
+                              viewModelEntry -> viewModelEntry.getUuid().equals(uuidToExclude));
                       adapter.setEntries(viewModelEntries);
                       Toast.makeText(
                           ChooseEntryActivity.this,
@@ -118,13 +119,17 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
       case R.id.save_entry:
         Intent data = new Intent();
         String selectedParent = adapter.getCurrentUuid();
-        data.putExtra(Constants.EXTRA_ENTRY_ID, selectedParent);
+        if (selectedParent != null) {
+          data.putExtra(Constants.EXTRA_ENTRY_ID, selectedParent);
+        } else {
+          data.putExtra(Constants.EXTRA_ENTRY_ID, myUuid);
+        }
         setResult(RESULT_OK, data);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
         return true;
       default:
-        return super.onOptionsItemSelected(item);
+        return true;
     }
   }
 

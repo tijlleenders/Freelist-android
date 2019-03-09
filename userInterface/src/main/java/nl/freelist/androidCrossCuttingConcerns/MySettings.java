@@ -26,7 +26,8 @@ public class MySettings {
       editor = sharedPreferences.edit();
       Email email = new Email("tijl.leenders@gmail.com");
       editor.putString(
-          Constants.SETTINGS_UUID, UUID.nameUUIDFromBytes(email.getEmail().getBytes()).toString());
+          Constants.SETTINGS_RESOURCE_UUID,
+          UUID.nameUUIDFromBytes(email.getEmail().getBytes()).toString());
       editor.commit();
     }
   }

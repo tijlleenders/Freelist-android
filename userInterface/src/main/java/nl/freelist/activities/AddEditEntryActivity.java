@@ -13,7 +13,6 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.NumberPicker.Formatter;
 import android.widget.NumberPicker.OnValueChangeListener;
-import android.widget.Switch;
 import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
@@ -33,7 +32,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
   private static final String TAG = "AddEditEntryActivity";
 
-  private String uuid; //Todo: why ever store a UUID as a string, if not in data persistence layer?
+  private String uuid; // Todo: why ever store a UUID as a string, if not in data persistence layer?
   private String parentUuid;
   private String defaultUuid;
   private int lastSavedEventSequenceNumber = -1;
@@ -43,7 +42,7 @@ public class AddEditEntryActivity extends AppCompatActivity {
   private EditText editTextTitle;
   private EditText editTextDescription;
   private Button parentButton;
-  private Switch copyMoveSwitch;
+  private Button scheduleButton;
 
   // Todo: move to fragment invoked by tapping the (readable) duration display button
   private NumberPickerDuration yearPicker;
@@ -56,6 +55,12 @@ public class AddEditEntryActivity extends AppCompatActivity {
   private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel
       AddEditEntryActivityViewModel;
 
+  @Override
+  protected void onResume() {
+    Log.d(TAG, "onResume called.");
+
+    super.onResume();
+  }
 
   @Override
   protected void onPause() {
@@ -86,13 +91,14 @@ public class AddEditEntryActivity extends AppCompatActivity {
     MySettings mySettings = new MySettings(this);
     parentUuid = defaultUuid = mySettings.getUuid();
 
-    if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
+    if (bundle != null && bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
       parentUuid = bundle.getString(Constants.EXTRA_ENTRY_PARENT_ID);
     }
 
-    if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
+    if (bundle != null && bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
       initializeForEditExisting(bundle);
-    } else if (bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) { // do add setup
+    } else if (bundle != null && bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) { // do add
+      // setup
       initializeForAddNew(bundle);
 
       CreateEntryCommand createEntryCommand =
@@ -141,10 +147,9 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
     editTextDescription = findViewById(R.id.edit_text_description);
     parentButton = findViewById(R.id.button_parent_change);
-    copyMoveSwitch = findViewById(R.id.copy_move_switch);
+    scheduleButton = findViewById(R.id.schedule_button);
 
     initializeDurationPicker();
-
   }
 
   private void attachViewListeners() {
@@ -167,8 +172,11 @@ public class AddEditEntryActivity extends AppCompatActivity {
                         + " with eventSequenceNumber "
                         + lastSavedEventSequenceNumber);
                 ChangeEntryTitleCommand changeEntryTitleCommand =
-                    new ChangeEntryTitleCommand(uuid, textOnFocusGained,
-                        editTextTitle.getText().toString(), lastSavedEventSequenceNumber,
+                    new ChangeEntryTitleCommand(
+                        uuid,
+                        textOnFocusGained,
+                        editTextTitle.getText().toString(),
+                        lastSavedEventSequenceNumber,
                         repository);
                 lastSavedEventSequenceNumber += 1;
                 AddEditEntryActivityViewModel.handle(changeEntryTitleCommand)
@@ -200,8 +208,11 @@ public class AddEditEntryActivity extends AppCompatActivity {
                         + " with eventSequenceNumber "
                         + lastSavedEventSequenceNumber);
                 ChangeEntryDescriptionCommand changeEntryDescriptionCommand =
-                    new ChangeEntryDescriptionCommand(uuid, textOnFocusGained,
-                        editTextDescription.getText().toString(), lastSavedEventSequenceNumber,
+                    new ChangeEntryDescriptionCommand(
+                        uuid,
+                        textOnFocusGained,
+                        editTextDescription.getText().toString(),
+                        lastSavedEventSequenceNumber,
                         repository);
                 lastSavedEventSequenceNumber += 1;
                 AddEditEntryActivityViewModel.handle(changeEntryDescriptionCommand)
@@ -227,9 +238,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
                     + " with eventSequenceNumber "
                     + lastSavedEventSequenceNumber);
             ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(uuid, oldVal,
-                    newVal, "seconds", lastSavedEventSequenceNumber,
-                    repository);
+                new ChangeEntryDurationCommand(
+                    uuid, oldVal, newVal, "seconds", lastSavedEventSequenceNumber, repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -252,9 +262,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
                     + " with eventSequenceNumber "
                     + lastSavedEventSequenceNumber);
             ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(uuid, oldVal,
-                    newVal, "minutes", lastSavedEventSequenceNumber,
-                    repository);
+                new ChangeEntryDurationCommand(
+                    uuid, oldVal, newVal, "minutes", lastSavedEventSequenceNumber, repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -277,9 +286,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
                     + " with eventSequenceNumber "
                     + lastSavedEventSequenceNumber);
             ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(uuid, oldVal,
-                    newVal, "hours", lastSavedEventSequenceNumber,
-                    repository);
+                new ChangeEntryDurationCommand(
+                    uuid, oldVal, newVal, "hours", lastSavedEventSequenceNumber, repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -302,9 +310,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
                     + " with eventSequenceNumber "
                     + lastSavedEventSequenceNumber);
             ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(uuid, oldVal,
-                    newVal, "days", lastSavedEventSequenceNumber,
-                    repository);
+                new ChangeEntryDurationCommand(
+                    uuid, oldVal, newVal, "days", lastSavedEventSequenceNumber, repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -327,9 +334,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
                     + " with eventSequenceNumber "
                     + lastSavedEventSequenceNumber);
             ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(uuid, oldVal,
-                    newVal, "weeks", lastSavedEventSequenceNumber,
-                    repository);
+                new ChangeEntryDurationCommand(
+                    uuid, oldVal, newVal, "weeks", lastSavedEventSequenceNumber, repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -352,9 +358,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
                     + " with eventSequenceNumber "
                     + lastSavedEventSequenceNumber);
             ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(uuid, oldVal,
-                    newVal, "years", lastSavedEventSequenceNumber,
-                    repository);
+                new ChangeEntryDurationCommand(
+                    uuid, oldVal, newVal, "years", lastSavedEventSequenceNumber, repository);
             lastSavedEventSequenceNumber += 1;
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
@@ -364,8 +369,8 @@ public class AddEditEntryActivity extends AppCompatActivity {
         };
     yearPicker.setOnValueChangedListener(yearPickerOnValueChangeListener);
 
+    attachScheduleButtonListener();
   }
-
 
   private void initializeDurationPicker() {
     yearPicker = findViewById(R.id.year_picker);
@@ -431,7 +436,6 @@ public class AddEditEntryActivity extends AppCompatActivity {
         });
   }
 
-
   @Override
   protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
@@ -439,10 +443,13 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
     if (requestCode == Constants.CHOOSE_PARENT_REQUEST && resultCode == RESULT_OK) {
       Bundle bundle = data.getExtras();
-      if (!parentUuid.equals(bundle.getString(Constants.EXTRA_ENTRY_ID))) {
+      if (bundle != null && !parentUuid.equals(bundle.getString(Constants.EXTRA_ENTRY_ID))) {
         ChangeEntryParentCommand changeEntryParentCommand =
-            new ChangeEntryParentCommand(uuid, parentUuid,
-                bundle.getString(Constants.EXTRA_ENTRY_ID), lastSavedEventSequenceNumber,
+            new ChangeEntryParentCommand(
+                uuid,
+                parentUuid,
+                bundle.getString(Constants.EXTRA_ENTRY_ID),
+                lastSavedEventSequenceNumber,
                 repository);
         lastSavedEventSequenceNumber += 1;
         AddEditEntryActivityViewModel.handle(changeEntryParentCommand)
@@ -450,32 +457,32 @@ public class AddEditEntryActivity extends AppCompatActivity {
             .observeOn(Schedulers.io())
             .subscribe();
         parentUuid = bundle.getString(Constants.EXTRA_ENTRY_ID);
-        copyMoveSwitch.setVisibility(View.VISIBLE);
-      }
-
-      if (parentUuid.equals(
-          UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()).toString())) {
-        parentButton.setText("");
-      } else {
-
-        AddEditEntryActivityViewModel.getViewModelEntry(parentUuid)
-            .subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.io())
-            .subscribe(
-                (viewModelEntry -> {
-                  // update View
-                  runOnUiThread(
-                      new Runnable() {
-                        @Override
-                        public void run() {
-                          parentButton.setText(viewModelEntry.getTitle());
-                        }
-                      });
-                }));
+        setParentButtonText();
       }
     }
   }
 
+  private void setParentButtonText() {
+    if (parentUuid.equals(defaultUuid)) {
+      parentButton.setText("");
+      return;
+    } else {
+      AddEditEntryActivityViewModel.getViewModelEntry(parentUuid)
+          .subscribeOn(Schedulers.io())
+          .observeOn(Schedulers.io())
+          .subscribe(
+              (viewModelEntryParent -> {
+                // update View
+                runOnUiThread(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        parentButton.setText(viewModelEntryParent.getTitle());
+                      }
+                    });
+              }));
+    }
+  }
 
   private void initializeParentButtonWithUuid(String parentUuid) {
     this.parentUuid = parentUuid;
@@ -492,27 +499,36 @@ public class AddEditEntryActivity extends AppCompatActivity {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }
         });
+    setParentButtonText();
+  }
 
-    if (parentUuid.equals(
-        UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()).toString())) {
-      parentButton.setText("");
-      return;
-    }
+  private void attachScheduleButtonListener() {
+    scheduleButton.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            Log.d(TAG, "scheduleButton clicked for entry ..." + uuid);
+            scheduleButton.setEnabled(false);
+            scheduleButton.setText("scheduling...");
+          }
+        });
 
-    AddEditEntryActivityViewModel.getViewModelEntry(parentUuid)
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .subscribe(
-            (viewModelEntryParent -> {
-              // update View
-              runOnUiThread(
-                  new Runnable() {
-                    @Override
-                    public void run() {
-                      parentButton.setText(viewModelEntryParent.getTitle());
-                    }
-                  });
-            }));
+    //    AddEditEntryActivityViewModel.scheduleEntry(...)
+    //        .subscribeOn(Schedulers.io())
+    //        .observeOn(Schedulers.io())
+    //        .subscribe(
+    //            (result -> {
+    //              // update View
+    //              runOnUiThread(
+    //                  new Runnable() {
+    //                    @Override
+    //                    public void run() {
+    // Get result from Result
+    //                      //Confirm scheduled time or display failure message
+    scheduleButton.setEnabled(true);
+    //                    }
+    //                  });
+    //            }));
   }
 
   private void initializeEditActivityWith(ViewModelEntry viewModelEntry) {

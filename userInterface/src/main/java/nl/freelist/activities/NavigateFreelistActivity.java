@@ -241,30 +241,6 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult called.");
     super.onActivityResult(requestCode, resultCode, data);
-
-    if (requestCode == Constants.ADD_ENTRY_REQUEST && resultCode == RESULT_OK) {
-      Toast.makeText(
-          this,
-          "Entry " + data.getStringExtra(Constants.EXTRA_TITLE) + " saved!",
-          Toast.LENGTH_SHORT)
-          .show();
-      updateView();
-    } else if (requestCode == Constants.ADD_ENTRY_REQUEST && resultCode != RESULT_OK) {
-      Toast.makeText(this, "Entry not saved.", Toast.LENGTH_SHORT).show();
-    } else if (requestCode == Constants.EDIT_ENTRY_REQUEST && resultCode == RESULT_OK) {
-      Toast.makeText(
-          this,
-          "Entry " + data.getStringExtra(Constants.EXTRA_TITLE) + " edited!",
-          Toast.LENGTH_SHORT)
-          .show();
-      updateView();
-    } else if (requestCode == Constants.EDIT_ENTRY_REQUEST && resultCode != RESULT_OK) {
-      Toast.makeText(
-          this,
-          "Entry " + data.getStringExtra(Constants.EXTRA_TITLE) + " not edited!",
-          Toast.LENGTH_SHORT)
-          .show();
-    }
     updateView();
   }
 

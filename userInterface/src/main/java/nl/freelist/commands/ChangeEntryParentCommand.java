@@ -34,7 +34,9 @@ public class ChangeEntryParentCommand extends Command {
   @Override
   public Result execute() {
     LOGGER.log(Level.INFO,
-        "ChangeEntryParentCommand executed with parentBefore " + parentBefore + " and parentAfter "
+        "ChangeEntryParentCommand executed for " + uuid + " with parentBefore " + parentBefore +
+            " and "
+            + "parentAfter "
             + parentAfter);
     EntryParentChangedEvent entryParentChangedEvent = EntryParentChangedEvent
         .Create(DateTime.Create("now"), uuid, lastSavedEventSequenceNumber + 1, parentBefore,

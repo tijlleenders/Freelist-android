@@ -18,10 +18,16 @@ public class DateTime {
 
   public static DateTime Create(String parameter) {
     DateTime dateTime = new DateTime();
+    OffsetDateTime utc = null;
     switch (parameter) {
+      case "1 year":
+        utc = OffsetDateTime.now(ZoneOffset.UTC);
+        OffsetDateTime utcPlusAYear = utc.plusYears(1);
+        dateTime.dateTime = utc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        return dateTime;
       case "now":
       default:
-        OffsetDateTime utc = OffsetDateTime.now(ZoneOffset.UTC);
+        utc = OffsetDateTime.now(ZoneOffset.UTC);
         dateTime.dateTime = utc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         return dateTime;
     }

@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import nl.freelist.activities.AddEditEntryActivity;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
@@ -24,13 +23,11 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
 
   private List<ViewModelEntry> entries = new ArrayList<>();
   private ItemClickListener onItemClickListener;
+  private String currentUuid;
 
   public String getCurrentUuid() {
     return currentUuid;
   }
-
-  private String currentUuid = UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes())
-      .toString();
 
   public ChooseEntryAdapter(ItemClickListener clickListener) {
     Log.d(TAG, "ChooseEntryAdapter called.");

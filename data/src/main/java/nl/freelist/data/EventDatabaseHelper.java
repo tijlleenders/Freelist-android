@@ -84,6 +84,9 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
 
   private List<sqlBundle> modifyChildrenCountAndDurationIncludingAncestorsFor(
       String firstParent, int childDurationDelta, int childCountDelta, String root) {
+    Log.d(TAG,
+        "modifyChildrenCountAndDurationIncludingAncestorsFor called with firstParent " + firstParent
+            + " and root " + root);
     List<sqlBundle> sqlBundleList = new ArrayList<>();
     List<String> oldAncestorList =
         getAncestorIdsExcludingRootForAndIncludingThisParent(firstParent, root);
@@ -99,7 +102,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
           "childrenDuration", oldParentEntry.getChildrenDuration() + childDurationDelta);
       sqlBundleList.add(new sqlBundle("viewModelEntry", oldParentEntryContentValues));
     }
-
+    Log.d(TAG, sqlBundleList.toString());
     return sqlBundleList;
   }
 
@@ -135,6 +138,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     sqlBundleList.add(new sqlBundle("events", eventContentValues));
 
     if (event.getClass().getSimpleName().equals("EntryCreatedEvent")) {
+      Log.d(TAG, "creating viewModelEntry query for EntryCreatedEvent");
       EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
       sqlBundleList.addAll(
           modifyChildrenCountAndDurationIncludingAncestorsFor(
@@ -142,6 +146,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
 
     if (event.getClass().getSimpleName().equals("EntryDurationChangedEvent")) {
+      Log.d(TAG, "creating viewModelEntry query for EntryDurationChangedEvent");
       EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
       ViewModelEntry changedEntry = viewModelEntryFor(entryDurationChangedEvent.getEntryId());
       sqlBundleList.addAll(
@@ -154,18 +159,19 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
 
     if (event.getClass().getSimpleName().equals("EntryParentChangedEvent")) {
+      Log.d(TAG, "creating viewModelEntry query for EntryParentChangedEvent");
       EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
       ViewModelEntry childEntry = viewModelEntryFor(entryParentChangedEvent.getEntryId());
       sqlBundleList.addAll(
           modifyChildrenCountAndDurationIncludingAncestorsFor(
               entryParentChangedEvent.getParentBefore(),
-              -childEntry.getChildrenDuration(),
+              -childEntry.getChildrenDuration() - childEntry.getDuration(),
               -childEntry.getChildrenCount() - 1,
               childEntry.getOwnerUuid()));
       sqlBundleList.addAll(
           modifyChildrenCountAndDurationIncludingAncestorsFor(
               entryParentChangedEvent.getParentAfter(),
-              childEntry.getChildrenDuration(),
+              childEntry.getChildrenDuration() + childEntry.getDuration(),
               childEntry.getChildrenCount() + 1,
               childEntry.getOwnerUuid()));
     }
@@ -339,6 +345,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
 
   public List<String> getAncestorIdsExcludingRootForAndIncludingThisParent(
       String parentId, String root) {
+    Log.d(TAG, "getAncestorIdsExcludingRootForAndIncludingThisParent for parentId " + parentId +
+        " and root " + root);
     String SELECT_ANCESTOR_IDS_QUERY =
         "with recursive\n"
             + "    childEntry(uuid) as (\n"
@@ -358,6 +366,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         do {
           String parentUuid = cursor.getString(cursor.getColumnIndex("parentUuid"));
           ancestorIdList.add(parentUuid);
+
         } while (cursor.moveToNext());
       }
     } catch (Exception e) {
@@ -376,6 +385,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       ancestorIdList.add(parentId);
     }
 
+    Log.d(TAG, "ancestorIdList complete : " + ancestorIdList.toString());
     return ancestorIdList;
   }
 
@@ -400,6 +410,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
       }
     }
+
     return entryCreatedEvent;
   }
 
@@ -428,8 +439,11 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             case "EntryDurationChangedEvent":
               eventList.add(gson.fromJson(dataJson, EntryDurationChangedEvent.class));
               break;
-            default:
+            case "EntryParentChangedEvent":
+              eventList.add(gson.fromJson(dataJson, EntryParentChangedEvent.class));
               break;
+            default:
+              throw new Exception("ERROR: event gson not recognized!");
           }
         } while (cursor.moveToNext());
       }
