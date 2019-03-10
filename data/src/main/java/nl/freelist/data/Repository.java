@@ -4,8 +4,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import nl.freelist.data.comparators.CalendarEntryComparator;
 import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
@@ -21,6 +23,7 @@ public class Repository {
 
   public Repository(Context appContext) {
     eventDatabaseHelper = EventDatabaseHelper.getInstance(appContext);
+    eventDatabaseHelper.tempFillViewModelCalendar();
   }
 
   public List<sqlBundle> insert(Entry entry) {
@@ -115,22 +118,21 @@ public class Repository {
   }
 
   public List<CalendarEntry> getAllCalendarEntriesForOwner(UUID fromString) {
-    List<CalendarEntry> calendarEntryList = new ArrayList<>();
-    calendarEntryList.add(
-        new CalendarEntry(
-            "Today, Monday, april 1st 2018", Constants.CALENDAR_ENTRY_DATE_VIEW_TYPE, "", ""));
-    calendarEntryList.add(
-        new CalendarEntry("this", Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, "11:00", "4m99s"));
-    calendarEntryList.add(
-        new CalendarEntry("that", Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, "", "76m99s"));
-    calendarEntryList.add(
-        new CalendarEntry(
-            "Next week, Monday, april 8th 2018", Constants.CALENDAR_ENTRY_DATE_VIEW_TYPE, "", ""));
-    calendarEntryList.add(
-        new CalendarEntry("the other thing", Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, "13:00",
-            "1h"));
-    calendarEntryList.add(
-        new CalendarEntry("the meeting", Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, "", "1h"));
-    return calendarEntryList;
+    List<CalendarEntry> calendarEntryList = eventDatabaseHelper.getAllCalendarEntries();
+    Collections.sort(calendarEntryList, new CalendarEntryComparator());
+
+    List<CalendarEntry> calendarEntryListSorted = new ArrayList<>();
+    String date = "";
+    for (CalendarEntry calendarEntry : calendarEntryList) {
+      if (!calendarEntry.getDate().equals(date)) {
+        date = calendarEntry.getDate();
+        calendarEntryListSorted
+            .add(new CalendarEntry("", date, Constants.CALENDAR_ENTRY_DATE_VIEW_TYPE
+                , "", "", ""));
+      }
+      calendarEntryListSorted.add(calendarEntry);
+    }
+
+    return calendarEntryListSorted;
   }
 }

@@ -9,7 +9,10 @@ import android.util.Log;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.EntryDescriptionChangedEvent;
@@ -74,6 +77,16 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
               + "   , `childrenDuration` INTEGER NOT NULL DEFAULT 0"
               + "   , `lastSavedEventSequenceNumber` INTEGER"
               + "   , PRIMARY KEY(`uuid`))");
+      db.execSQL(
+          "CREATE TABLE IF NOT EXISTS viewModelCalendar (\n"
+              + "   `entryUuid` TEXT NOT NULL\n"
+              + "   , `title` TEXT\n"
+              + "   , `date` TEXT NOT NULL\n"
+              + "   , `time` TEXT\n"
+              + "   , `duration` INTEGER NOT NULL DEFAULT 0"
+              + "   , `isDone` INTEGER NOT NULL DEFAULT 0"
+              + "   , `lastSavedEventSequenceNumber` INTEGER)"
+      );
       db.setTransactionSuccessful();
     } catch (Exception e) {
       Log.d(TAG, "Error while executing onCreate");
@@ -105,6 +118,62 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     Log.d(TAG, sqlBundleList.toString());
     return sqlBundleList;
   }
+
+  public void tempFillViewModelCalendar() {
+    Log.d(TAG, "tempFillViewModelCalendar called.");
+    ContentValues aggregateContentValues = new ContentValues();
+    aggregateContentValues.put("aggregateId",
+        UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes()).toString());
+    aggregateContentValues.put("type", "resource");
+    aggregateContentValues.put("lastSavedEventSequenceNumber", 0);
+
+    List<sqlBundle> sqlBundleList = new ArrayList<>();
+    sqlBundleList.add(new sqlBundle("aggregates", aggregateContentValues));
+
+    ContentValues calendarContentValues = new ContentValues();
+    calendarContentValues.put("entryUuid", "6910aac6-e16c-4ba0-8282-4d48f1281e16");
+    calendarContentValues.put("title", "title1");
+    calendarContentValues.put("date", "2019-01-01");
+    calendarContentValues.put("time", "");
+    calendarContentValues.put("duration", 0);
+    calendarContentValues.put("isDone", 0);
+    calendarContentValues.put("lastSavedEventSequenceNumber", 0);
+
+    ContentValues calendarContentValues4 = new ContentValues();
+    calendarContentValues4.put("entryUuid", "6910aac6-e16c-4ba0-8282-4d48f1281e16");
+    calendarContentValues4.put("title", "title2");
+    calendarContentValues4.put("date", "2019-01-10");
+    calendarContentValues4.put("time", "12:00");
+    calendarContentValues4.put("duration", 0);
+    calendarContentValues4.put("isDone", 0);
+    calendarContentValues4.put("lastSavedEventSequenceNumber", 0);
+
+    ContentValues calendarContentValues2 = new ContentValues();
+    calendarContentValues2.put("entryUuid", "6910aac6-e16c-4ba0-8282-4d48f1281e16");
+    calendarContentValues2.put("title", "title2");
+    calendarContentValues2.put("date", "2019-01-10");
+    calendarContentValues2.put("time", "11:00");
+    calendarContentValues2.put("duration", 0);
+    calendarContentValues2.put("isDone", 0);
+    calendarContentValues2.put("lastSavedEventSequenceNumber", 0);
+
+    ContentValues calendarContentValues3 = new ContentValues();
+    calendarContentValues3.put("entryUuid", "6910aac6-e16c-4ba0-8282-4d48f1281e16");
+    calendarContentValues3.put("title", "title3");
+    calendarContentValues3.put("date", "2019-02-10");
+    calendarContentValues3.put("time", "");
+    calendarContentValues3.put("duration", 60);
+    calendarContentValues3.put("isDone", 0);
+    calendarContentValues3.put("lastSavedEventSequenceNumber", 0);
+
+    sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues));
+    sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues4));
+    sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues2));
+    sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues3));
+
+    executeSqlBundles(sqlBundleList);
+  }
+
 
   public List<sqlBundle> getQueriesForEvent(
       String aggregateIdType, int expectedLastSavedEventSequenceNumber, Event event)
@@ -180,9 +249,11 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
 
   public void executeSqlBundles(List<sqlBundle> sqlBundleList) {
     Log.d(TAG, "executeSqlBundles called.");
-    db.beginTransaction();
     // Todo: use conflict rollback to rollback transaction on conflict?
+
+    Log.d(TAG, "sqlBundle length : " + sqlBundleList.size());
     try {
+      db.beginTransaction();
       for (sqlBundle sqlBundle : sqlBundleList) {
         Log.d(TAG, "executing sqlBundle " + sqlBundle.toString());
         switch (sqlBundle.getTable()) {
@@ -192,6 +263,13 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             break;
           case "aggregates":
             Log.d(TAG, "case aggregates");
+            db.insertWithOnConflict(
+                sqlBundle.getTable(),
+                null,
+                sqlBundle.getContentValues(),
+                SQLiteDatabase.CONFLICT_REPLACE);
+            break;
+          case "viewModelCalendar":
             db.insertWithOnConflict(
                 sqlBundle.getTable(),
                 null,
@@ -221,10 +299,9 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         }
       }
       db.setTransactionSuccessful();
+      db.endTransaction();
     } catch (Exception e) {
       Log.d(TAG, "Error while executing insert SQL: " + e.toString());
-    } finally {
-      db.endTransaction();
     }
   }
 
@@ -277,6 +354,44 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       }
     }
     return lastSavedEventSequenceNumber;
+  }
+
+  public List<CalendarEntry> getAllCalendarEntries() {
+    List<CalendarEntry> calendarEntryList = new ArrayList<>();
+
+    String SELECT_CALENDAR_ENTRIES_QUERY =
+        "SELECT * FROM viewModelCalendar";
+
+    Cursor cursor = db.rawQuery(SELECT_CALENDAR_ENTRIES_QUERY, new String[]{});
+
+    try {
+      if (cursor.moveToFirst()) {
+        do {
+          String entryUuid = cursor.getString(cursor.getColumnIndex("entryUuid"));
+          String title = cursor.getString(cursor.getColumnIndex("title"));
+          String date = cursor.getString(cursor.getColumnIndex("date"));
+          String time = cursor.getString(cursor.getColumnIndex("time"));
+          int duration = cursor.getInt(cursor.getColumnIndex("duration"));
+          int isDone = cursor.getInt(cursor.getColumnIndex("isDone"));
+          int lastSavedEventSequenceNumber = cursor.getInt(cursor.getColumnIndex(
+              "lastSavedEventSequenceNumber"));
+
+          CalendarEntry calendarEntry =
+              new CalendarEntry(entryUuid, title, Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, date,
+                  time,
+                  DurationHelper.getDurationStringFromInt(duration));
+          calendarEntryList.add(calendarEntry);
+        } while (cursor.moveToNext());
+      }
+    } catch (Exception e) {
+      Log.d(TAG, "Error while trying to get ancestor ids for uuid");
+    } finally {
+      if (cursor != null && !cursor.isClosed()) {
+        cursor.close();
+      }
+    }
+
+    return calendarEntryList;
   }
 
   public ViewModelEntry viewModelEntryFor(String entryId) {

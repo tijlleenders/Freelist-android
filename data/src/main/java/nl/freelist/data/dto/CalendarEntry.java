@@ -6,14 +6,19 @@ public class CalendarEntry {
 
   private static final String TAG = "CalendarEntry";
 
+  private String entryUuid;
   private String title;
   private int type;
+  private String date;
   private String time;
   private String durationString;
 
-  public CalendarEntry(String title, int type, String time, String durationString) {
+  public CalendarEntry(String entryUuid, String title, int type, String date, String time,
+      String durationString) {
+    this.entryUuid = entryUuid;
     this.title = title;
     this.type = type;
+    this.date = date;
     this.time = time;
     this.durationString = durationString;
 
@@ -34,5 +39,13 @@ public class CalendarEntry {
 
   public String getDurationString() {
     return durationString;
+  }
+
+  public String getDate() {
+    return date;
+  }
+
+  public String getEntryUuid() {
+    return entryUuid;
   }
 }
