@@ -7,7 +7,7 @@ Freelist gives you the peace of mind to live in the now by making sure that:
 * your planning calendar is realistic
 * you won't forget anything important
 
-It is also a way to collaborate efficiently with other to achieve shared goals.
+It is also a way to collaborate efficiently with others to achieve shared goals.
 
 See https://github.com/tijlleenders/Freelist-android/wiki/Vision for more ideas
 
