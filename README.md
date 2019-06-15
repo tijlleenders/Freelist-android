@@ -1,10 +1,13 @@
 # freelist-android
 Native android todo app for freelist.
 
-## Freelist Goal
-Freelist helps you figure out what (not) to do, when, and why.
-So basically, it helps you align your life with your goals.
+## Freelist goal
+Freelist gives you the peace of mind to live in the now by making sure that:
+* your life is on track with your priorities/goals
+* your planning calendar is realistic
+* you won't forget anything important
 
+See https://github.com/tijlleenders/Freelist-android/wiki/Vision for more ideas
 
 ### Freelist design principles
 * (F) Free
