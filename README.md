@@ -1,4 +1,4 @@
-## Freelist: a platform for plannig your purpose(s).
+## Freelist: a platform for planning your purpose(s).
 * The first phase is in the form of a todo-app for a single individual.
 * The second phase will be collaborative.
 
