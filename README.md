@@ -10,7 +10,7 @@ Freelist gives you the peace of mind to live in the now by making sure that:
 
 It is also a way to collaborate efficiently with others to achieve shared goals.
 
-See https://github.com/tijlleenders/Freelist-android/wiki/Vision for more ideas
+See https://github.com/tijlleenders/Freelist-android/wiki/.Vision for more ideas
 
 ### Freelist design principles
 * (F) Free
