@@ -1,4 +1,4 @@
-## Freelist: plan and realize your purpose(s).
+## Freelist: plan your purpose(s).
 * The first phase is in the form of a todo-app for a single individual.
 * The second phase will be collaborative.
 
