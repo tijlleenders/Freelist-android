@@ -50,3 +50,5 @@ Freelist does not want or need to know who you are. You don't require a phone nu
 ## How to contribute?
 https://opensource.guide/how-to-contribute/
 ... and read code of conduct and FAQ's.
+
+## ...or sponsor me with coffee!
