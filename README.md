@@ -1,7 +1,14 @@
 # freelist-android
-Native android todo app for freelist.
+This repository is the for the Freelist native android app.
 
 ## Freelist goal
+Freelist envisions to be a platform for planning and realizing your purpose(s).
+
+The first phase is in the form of a todo-app for a single individual.
+
+The second phase will be collaborative.
+
+
 Freelist gives you the peace of mind to live in the now by making sure that:
 * your life is on track with your priorities/goals
 * your planning calendar is realistic
