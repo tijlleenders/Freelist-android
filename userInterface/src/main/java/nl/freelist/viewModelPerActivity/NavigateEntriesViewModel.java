@@ -56,8 +56,11 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
     this.parentUuid = parentUuid;
   }
 
-  public void deleteAllEntries() {
-    // Todo: implement with UseCase
+  public Observable<Boolean> deleteAllEntriesFromRepository() {
+    Observable<Boolean> resultObservable = Observable
+        .fromCallable(
+            () -> repository.deleteAllEntriesFromRepository().booleanValue());
+    return resultObservable;
   }
 
   public void delete(ViewModelEntry entryAt) {

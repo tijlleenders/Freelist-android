@@ -15,6 +15,6 @@
   <item
     android:id="@+id/delete_all_entries"
     android:title="@string/delete_all_entries"
-    app:showAsAction="never"/>
+    app:showAsAction="never" />
 
 </menu>

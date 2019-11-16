@@ -135,4 +135,10 @@ public class Repository {
 
     return calendarEntryListSorted;
   }
+
+  public Boolean deleteAllEntriesFromRepository() {
+    eventDatabaseHelper.deleteAllEntriesFromRepository();
+    Boolean result = new Boolean(true);
+    return result;
+  }
 }

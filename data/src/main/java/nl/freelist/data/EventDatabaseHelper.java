@@ -571,4 +571,22 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
     return eventList;
   }
+
+  public void deleteAllEntriesFromRepository() {
+    Log.d(TAG, "deleteAllEntriesFromRepository called.");
+    db.beginTransaction();
+    try {
+      db.execSQL(
+          "DELETE FROM events\n");
+      db.execSQL(
+          "DELETE FROM aggregates WHERE type = \"entry\"\n");
+      db.execSQL(
+          "DELETE FROM viewModelEntry \n");
+      db.setTransactionSuccessful();
+    } catch (Exception e) {
+      Log.d(TAG, "Error while executing deleteAllEntriesFromRepository");
+    } finally {
+      db.endTransaction();
+    }
+  }
 }

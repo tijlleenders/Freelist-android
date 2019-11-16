@@ -301,8 +301,35 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     Log.d(TAG, "onOptionsItemSelected called.");
     switch (item.getItemId()) {
       case R.id.delete_all_entries:
-        navigateEntriesViewModel.deleteAllEntries();
-        Toast.makeText(this, "All entries deleted", Toast.LENGTH_SHORT).show();
+        navigateEntriesViewModel
+            .deleteAllEntriesFromRepository()
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe(
+                result -> {
+                  // update user with result message
+                  runOnUiThread(
+                      new Runnable() {
+                        @Override
+                        public void run() {
+                          // do stuff
+                          if (result == true) {
+                            Toast.makeText(
+                                NavigateFreelistActivity.this,
+                                "repository entries destroyed!",
+                                Toast.LENGTH_SHORT)
+                                .show();
+                            updateView();
+                          } else {
+                            Toast.makeText(
+                                NavigateFreelistActivity.this,
+                                "repository entries NOT destroyed!",
+                                Toast.LENGTH_SHORT)
+                                .show();
+                          }
+                        }
+                      });
+                });
         return true;
       case R.id.settings:
         Toast.makeText(this, "Settings selected", Toast.LENGTH_SHORT).show();

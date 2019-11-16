@@ -1,7 +1,9 @@
 package nl.freelist.activities;
 
 
+import static androidx.test.InstrumentationRegistry.getInstrumentation;
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.longClick;
@@ -41,6 +43,20 @@ public class NavigateFreelistActivityCreateListWithTwoSublistsAndDurations {
       NavigateFreelistActivity.class);
 
   @Test
+  public void deleteAllEntriesFromRepository() {
+    openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
+
+    ViewInteraction appCompatTextView = onView(
+        allOf(withId(R.id.title), withText("Delete all entries"),
+            childAtPosition(
+                childAtPosition(
+                    withId(R.id.content),
+                    0),
+                0),
+            isDisplayed()));
+    appCompatTextView.perform(click());
+  }
+
   public void navigateFreelistActivityTest2() {
     ViewInteraction floatingActionButton = onView(
         allOf(withId(R.id.button_add_entry),
