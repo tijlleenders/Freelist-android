@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.NumberPicker.Formatter;
 import android.widget.NumberPicker.OnValueChangeListener;
+import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
@@ -510,25 +511,38 @@ public class AddEditEntryActivity extends AppCompatActivity {
             Log.d(TAG, "scheduleButton clicked for entry ..." + uuid);
             scheduleButton.setEnabled(false);
             scheduleButton.setText("scheduling...");
-          }
-        });
+            AddEditEntryActivityViewModel.scheduleEntry(uuid, defaultUuid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(new DisposableCompletableObserver() {
+                  @Override
+                  public void onComplete() {
+                    // update View
+                    runOnUiThread(
+                        new Runnable() {
+                          @Override
+                          public void run() {
+                            scheduleButton.setText("Scheduling completed!");
+                          }
+                        });
+                  }
 
-    //    AddEditEntryActivityViewModel.scheduleEntry(...)
-    //        .subscribeOn(Schedulers.io())
-    //        .observeOn(Schedulers.io())
-    //        .subscribe(
-    //            (result -> {
-    //              // update View
-    //              runOnUiThread(
-    //                  new Runnable() {
-    //                    @Override
-    //                    public void run() {
-    // Get result from Result
-    //                      //Confirm scheduled time or display failure message
+                  @Override
+                  public void onError(Throwable e) {
+                    // update View
+                    runOnUiThread(
+                        new Runnable() {
+                          @Override
+                          public void run() {
+                            scheduleButton.setText("Scheduling failed!");
+                          }
+                        });
+                  }
+                });
+          }
+        }
+    );
     scheduleButton.setEnabled(true);
-    //                    }
-    //                  });
-    //            }));
   }
 
   private void initializeEditActivityWith(ViewModelEntry viewModelEntry) {

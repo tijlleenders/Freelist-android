@@ -3,6 +3,7 @@ package nl.freelist.data;
 import android.content.ContentValues;
 import android.content.Context;
 import android.util.Log;
+import io.reactivex.Completable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -140,5 +141,10 @@ public class Repository {
     eventDatabaseHelper.deleteAllEntriesFromRepository();
     Boolean result = new Boolean(true);
     return result;
+  }
+
+  public Completable scheduleEntry(String uuid, String resource) {
+
+    return Completable.error(new Throwable());
   }
 }

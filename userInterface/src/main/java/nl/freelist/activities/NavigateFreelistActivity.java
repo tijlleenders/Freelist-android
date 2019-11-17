@@ -313,7 +313,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
                         @Override
                         public void run() {
                           // do stuff
-                          if (result == true) {
+                          if (result) {
                             Toast.makeText(
                                 NavigateFreelistActivity.this,
                                 "repository entries destroyed!",

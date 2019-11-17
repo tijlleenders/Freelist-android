@@ -59,7 +59,7 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
   public Observable<Boolean> deleteAllEntriesFromRepository() {
     Observable<Boolean> resultObservable = Observable
         .fromCallable(
-            () -> repository.deleteAllEntriesFromRepository().booleanValue());
+            () -> repository.deleteAllEntriesFromRepository());
     return resultObservable;
   }
 

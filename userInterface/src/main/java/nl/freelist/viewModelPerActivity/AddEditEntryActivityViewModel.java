@@ -5,6 +5,7 @@ package nl.freelist.viewModelPerActivity;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
@@ -42,4 +43,10 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
   }
 
 
+  public Completable scheduleEntry(String uuid, //Todo: replace by Command ??
+      String resource) { //Todo: why don't I use .fromCallable? Because repository didn't use rx before?
+    Completable resultCompletable;
+    resultCompletable = repository.scheduleEntry(uuid, resource);
+    return resultCompletable;
+  }
 }
