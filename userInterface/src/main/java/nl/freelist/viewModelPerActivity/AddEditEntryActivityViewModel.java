@@ -42,7 +42,6 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
     return result;
   }
 
-
   public Completable scheduleEntry(String uuid, //Todo: replace by Command ??
       String resource) { //Todo: why don't I use .fromCallable? Because repository didn't use rx before?
     Completable resultCompletable;
