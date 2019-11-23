@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelEntry;
-import nl.freelist.data.dto.ViewModelEvent;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
 import nl.freelist.domain.events.EntryCreatedEvent;
@@ -329,7 +328,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       case "EntryParentChangedEvent":
         return gson.toJson(event, EntryParentChangedEvent.class);
       default:
-        return "ViewModelEvent class not found.";
+        return "Event class not found.";
     }
   }
 
@@ -402,36 +401,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
 
     return calendarEntryList;
-  }
-
-  public List<ViewModelEvent> getAllEventsFor() {
-    List<ViewModelEvent> viewModelEventList = new ArrayList<>();
-
-    String SELECT_CALENDAR_ENTRIES_QUERY =
-        "SELECT * FROM events";
-
-    Cursor cursor = db.rawQuery(SELECT_CALENDAR_ENTRIES_QUERY, new String[]{});
-
-    try {
-      if (cursor.moveToFirst()) {
-        do {
-          String occurredDateTime = cursor.getString(cursor.getColumnIndex("occurredDateTime"));
-          String entryId = cursor.getString(cursor.getColumnIndex("type"));
-
-          ViewModelEvent viewModelEvent =
-              new ViewModelEvent(occurredDateTime, entryId);
-          viewModelEventList.add(viewModelEvent);
-        } while (cursor.moveToNext());
-      }
-    } catch (Exception e) {
-      Log.d(TAG, "Error while trying to get ancestor ids for uuid");
-    } finally {
-      if (cursor != null && !cursor.isClosed()) {
-        cursor.close();
-      }
-    }
-
-    return viewModelEventList;
   }
 
   public ViewModelEntry viewModelEntryFor(String entryId) {
