@@ -5,12 +5,14 @@ package nl.freelist.viewModelPerActivity;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
-import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import java.util.List;
 import java.util.UUID;
 import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.data.dto.ViewModelEvent;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.useCases.CommandHandler;
@@ -43,10 +45,12 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
     return result;
   }
 
-  public Completable scheduleEntry(String uuid, //Todo: replace by Command ??
-      String resource) { //Todo: why don't I use .fromCallable? Because repository didn't use rx before?
-    Completable resultCompletable;
-    resultCompletable = repository.scheduleEntry(uuid, resource);
-    return resultCompletable;
+  public Observable<List<ViewModelEvent>> getAllEventsFor(String uuid) {
+    Observable<List<ViewModelEvent>> calendarEntryList = Observable
+        .fromCallable(
+            () -> repository.getAllEventsForId(uuid))
+        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
+    return calendarEntryList;
   }
+
 }

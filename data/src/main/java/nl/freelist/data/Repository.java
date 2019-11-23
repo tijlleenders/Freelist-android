@@ -11,6 +11,7 @@ import java.util.UUID;
 import nl.freelist.data.comparators.CalendarEntryComparator;
 import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.data.dto.ViewModelEvent;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.entities.Resource;
@@ -156,5 +157,18 @@ public class Repository {
   public Completable scheduleEntry(String uuid, String resource) {
 
     return Completable.error(new Throwable());
+  }
+
+  public List<ViewModelEvent> getAllEventsForId(String uuid) {
+    List<Event> eventList = eventDatabaseHelper.getEventsFor(uuid);
+    //Todo: sort events by time
+    //Collections.sort(calendarEntryList, new CalendarEntryComparator());
+
+    List<ViewModelEvent> viewModelEventListSorted = new ArrayList<>();
+    for (Event event : eventList) {
+      //Todo: checkout sort loop in for calendarEntry
+      viewModelEventListSorted.add(new ViewModelEvent("testDateTime", "testId"));
+    }
+    return viewModelEventListSorted;
   }
 }

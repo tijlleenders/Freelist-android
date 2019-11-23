@@ -4,6 +4,7 @@ import nl.freelist.domain.valueObjects.DateTime;
 
 public abstract class Event {
 
+  //Todo: should events get a guid?
   private DateTime occurredDateTime;
   private String entryId; //Todo: replace with uuidString VO
   private int eventSequenceNumber;

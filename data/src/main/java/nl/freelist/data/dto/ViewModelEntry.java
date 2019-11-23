@@ -6,7 +6,7 @@ import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
 
 public class ViewModelEntry {
 
-  private static final String TAG = "ViewModelEntry";
+  private static final String TAG = "ViewModelEntry dto";
 
   private String uuid;
   private String parentUuid;

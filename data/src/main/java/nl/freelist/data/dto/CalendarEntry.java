@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class CalendarEntry {
 
-  private static final String TAG = "CalendarEntry";
+  private static final String TAG = "CalendarEntry dto";
 
   private String entryUuid;
   private String title;

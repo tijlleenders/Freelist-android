@@ -30,4 +30,6 @@ public class Constants {
   public static final int CALENDAR_ENTRY_DATE_VIEW_TYPE = 0;
   public static final int CALENDAR_ENTRY_TODO_VIEW_TYPE = 1;
 
+  public static final int EVENT_TYPE = 6;
+
 }

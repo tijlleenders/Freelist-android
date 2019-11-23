@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
@@ -13,6 +15,7 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.NumberPicker.Formatter;
 import android.widget.NumberPicker.OnValueChangeListener;
+import android.widget.Toast;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
@@ -28,10 +31,12 @@ import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.freelist.R;
+import nl.freelist.recyclerviewHelpers.EventAdapter;
+import nl.freelist.recyclerviewHelpers.ItemClickListener;
 import nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel;
 import nl.freelist.views.NumberPickerDuration;
 
-public class AddEditEntryActivity extends AppCompatActivity {
+public class AddEditEntryActivity extends AppCompatActivity implements ItemClickListener {
 
   private static final String TAG = "AddEditEntryActivity";
 
@@ -58,11 +63,15 @@ public class AddEditEntryActivity extends AppCompatActivity {
   private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel
       AddEditEntryActivityViewModel;
 
+  private EventAdapter adapter;
+  private RecyclerView recyclerView;
+
   @Override
   protected void onResume() {
     Log.d(TAG, "onResume called.");
 
     super.onResume();
+    updateRecyclerView();
   }
 
   @Override
@@ -116,6 +125,30 @@ public class AddEditEntryActivity extends AppCompatActivity {
     attachViewListeners();
   }
 
+  private void updateRecyclerView() {
+    Log.d(TAG, "updateRecyclerView called.");
+    AddEditEntryActivityViewModel
+        .getAllEventsFor(uuid)
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .subscribe(
+            events -> {
+              // update RecyclerView
+              runOnUiThread(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      adapter.setViewModelEvents(events);
+                      Toast.makeText(
+                          AddEditEntryActivity.this,
+                          "AddEditEntryActivity ViewModelEvent recyclerView refreshed!",
+                          Toast.LENGTH_SHORT)
+                          .show();
+                    }
+                  });
+            });
+  }
+
   private void initializeForAddNew(Bundle bundle) {
     if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
       initializeParentButtonWithUuid(parentUuid);
@@ -147,8 +180,14 @@ public class AddEditEntryActivity extends AppCompatActivity {
 
   private void initializeViews() {
     editTextTitle = findViewById(R.id.edit_text_title);
-
     editTextDescription = findViewById(R.id.edit_text_description);
+
+    recyclerView = findViewById(R.id.recycler_view);
+    recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    recyclerView.setHasFixedSize(true);
+    adapter = new EventAdapter(this);
+    recyclerView.setAdapter(adapter);
+
     parentButton = findViewById(R.id.button_parent_change);
     scheduleButton = findViewById(R.id.schedule_button);
 
@@ -567,5 +606,14 @@ public class AddEditEntryActivity extends AppCompatActivity {
     initializeParentButtonWithUuid(viewModelEntry.getParentUuid());
     lastSavedEventSequenceNumber = viewModelEntry.getLastSavedEventSequenceNumber();
     return;
+  }
+
+  @Override
+  public void onItemClick(View view, int position) {
+    Log.d(TAG, "onItemClick called.");
+    String parentToSet = adapter.getEventAt(position).getEntryId();
+//    navigateEntriesViewModel.updateParentUuid(parentToSet);
+//    updateView();
+    adapter.setCurrentId(parentToSet);
   }
 }
