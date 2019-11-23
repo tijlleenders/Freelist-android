@@ -25,7 +25,6 @@ public class Resource {
 
 
   private Resource(Email email, String name) {
-    //Todo: validation as static method?
     this.email = email;
     this.name = name;
     uuid = UUID.randomUUID().toString();
@@ -36,9 +35,13 @@ public class Resource {
             + lastAppliedEventSequenceNumber);
   }
 
-  public Resource Create(Email email, String name) {
+  public static Resource Create(Email email, String name) {
+    //Todo: validation as static method?
     return new Resource(email, name);
   }
 
 
+  public void schedule(Entry entry) {
+
+  }
 }

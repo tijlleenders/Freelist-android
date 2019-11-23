@@ -34,7 +34,8 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
     return result;
   }
 
-  public Single<Result> handle(Command command) {
+  public Single<Result> handle(
+      Command command) { //Todo: why use Single<Result> and not Completable?
     Single<Result> result = Single.fromCallable(
         () -> new CommandHandler()
             .execute(command))

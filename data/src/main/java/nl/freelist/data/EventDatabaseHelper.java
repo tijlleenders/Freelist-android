@@ -18,8 +18,10 @@ import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.EntryDescriptionChangedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
 import nl.freelist.domain.events.EntryParentChangedEvent;
+import nl.freelist.domain.events.EntryScheduledEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
+import nl.freelist.domain.events.ResourceCreatedEvent;
 import nl.freelist.domain.valueObjects.DateTime;
 
 public class EventDatabaseHelper extends SQLiteOpenHelper {
@@ -206,43 +208,50 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
 
     sqlBundleList.add(new sqlBundle("events", eventContentValues));
 
-    if (event.getClass().getSimpleName().equals("EntryCreatedEvent")) {
-      Log.d(TAG, "creating viewModelEntry query for EntryCreatedEvent");
-      EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
-      sqlBundleList.addAll(
-          modifyChildrenCountAndDurationIncludingAncestorsFor(
-              entryCreatedEvent.getParentUuid(), 0, 1, entryCreatedEvent.getOwnerUuid()));
-    }
+    switch (event.getClass().getSimpleName()) {
+      case "EntryCreatedEvent":
+        Log.d(TAG, "creating viewModelEntry query for EntryCreatedEvent");
+        EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
+        sqlBundleList.addAll(
+            modifyChildrenCountAndDurationIncludingAncestorsFor(
+                entryCreatedEvent.getParentUuid(), 0, 1, entryCreatedEvent.getOwnerUuid()));
+        break;
+      case "EntryDurationChangedEvent":
+        Log.d(TAG, "creating viewModelEntry query for EntryDurationChangedEvent");
+        EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
+        ViewModelEntry changedEntry = viewModelEntryFor(entryDurationChangedEvent.getEntryId());
+        sqlBundleList.addAll(
+            modifyChildrenCountAndDurationIncludingAncestorsFor(
+                changedEntry.getParentUuid(),
+                DurationHelper.getDurationSecondsDeltaFromDurationChangedEvent(
+                    entryDurationChangedEvent),
+                0,
+                changedEntry.getOwnerUuid()));
+        break;
+      case "EntryParentChangedEvent":
+        Log.d(TAG, "creating viewModelEntry query for EntryParentChangedEvent");
+        EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
+        ViewModelEntry childEntry = viewModelEntryFor(entryParentChangedEvent.getEntryId());
+        sqlBundleList.addAll(
+            modifyChildrenCountAndDurationIncludingAncestorsFor(
+                entryParentChangedEvent.getParentBefore(),
+                -childEntry.getChildrenDuration() - childEntry.getDuration(),
+                -childEntry.getChildrenCount() - 1,
+                childEntry.getOwnerUuid()));
+        sqlBundleList.addAll(
+            modifyChildrenCountAndDurationIncludingAncestorsFor(
+                entryParentChangedEvent.getParentAfter(),
+                childEntry.getChildrenDuration() + childEntry.getDuration(),
+                childEntry.getChildrenCount() + 1,
+                childEntry.getOwnerUuid()));
+        break;
+      case "EntryScheduledEvent":
+        Log.d(TAG, "creating viewModelEntry query for EntryScheduledEvent");
+        EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
 
-    if (event.getClass().getSimpleName().equals("EntryDurationChangedEvent")) {
-      Log.d(TAG, "creating viewModelEntry query for EntryDurationChangedEvent");
-      EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
-      ViewModelEntry changedEntry = viewModelEntryFor(entryDurationChangedEvent.getEntryId());
-      sqlBundleList.addAll(
-          modifyChildrenCountAndDurationIncludingAncestorsFor(
-              changedEntry.getParentUuid(),
-              DurationHelper.getDurationSecondsDeltaFromDurationChangedEvent(
-                  entryDurationChangedEvent),
-              0,
-              changedEntry.getOwnerUuid()));
-    }
-
-    if (event.getClass().getSimpleName().equals("EntryParentChangedEvent")) {
-      Log.d(TAG, "creating viewModelEntry query for EntryParentChangedEvent");
-      EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
-      ViewModelEntry childEntry = viewModelEntryFor(entryParentChangedEvent.getEntryId());
-      sqlBundleList.addAll(
-          modifyChildrenCountAndDurationIncludingAncestorsFor(
-              entryParentChangedEvent.getParentBefore(),
-              -childEntry.getChildrenDuration() - childEntry.getDuration(),
-              -childEntry.getChildrenCount() - 1,
-              childEntry.getOwnerUuid()));
-      sqlBundleList.addAll(
-          modifyChildrenCountAndDurationIncludingAncestorsFor(
-              entryParentChangedEvent.getParentAfter(),
-              childEntry.getChildrenDuration() + childEntry.getDuration(),
-              childEntry.getChildrenCount() + 1,
-              childEntry.getOwnerUuid()));
+        break;
+      default:
+        Log.d(TAG, "type of event not recognized!");
     }
     return sqlBundleList;
   }
@@ -527,6 +536,31 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
 
     return entryCreatedEvent;
+  }
+
+  public ResourceCreatedEvent getResourceCreatedEvent(String uuid) {
+
+    String SELECT_RESOURCECREATEDEVENT_QUERY =
+        "SELECT data FROM events WHERE aggregateId = ? AND eventSequenceNumber = 0";
+
+    Cursor cursor = db.rawQuery(SELECT_RESOURCECREATEDEVENT_QUERY, new String[]{uuid});
+    ResourceCreatedEvent resourceCreatedEvent =
+        ResourceCreatedEvent.Create(DateTime.Create("now"), "", "", -1);
+    try {
+      if (cursor.moveToFirst()) {
+        String dataJson = cursor.getString(cursor.getColumnIndex("data"));
+        Gson gson = new Gson();
+        resourceCreatedEvent = gson.fromJson(dataJson, ResourceCreatedEvent.class);
+      }
+    } catch (Exception e) {
+      Log.d(TAG, "Error while trying to get resourceCreatedEvent from aggregates");
+    } finally {
+      if (cursor != null && !cursor.isClosed()) {
+        cursor.close();
+      }
+    }
+
+    return resourceCreatedEvent;
   }
 
   public List<Event> getEventsFor(String entryId) {

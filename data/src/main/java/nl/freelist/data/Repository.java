@@ -13,8 +13,11 @@ import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.entities.Entry;
+import nl.freelist.domain.entities.Resource;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.Event;
+import nl.freelist.domain.events.ResourceCreatedEvent;
+import nl.freelist.domain.valueObjects.Email;
 
 public class Repository {
 
@@ -79,6 +82,13 @@ public class Repository {
             "",
             0);
     return entry;
+  }
+
+  public Resource getResourceById(String uuid) {
+    ResourceCreatedEvent resourceCreatedEvent = eventDatabaseHelper.getResourceCreatedEvent(uuid);
+    Resource resource =
+        Resource.Create(new Email("testEmail"), "testResource");
+    return resource;
   }
 
   public List<Event> getSavedEventsFor(String entryId) {

@@ -13,7 +13,7 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.NumberPicker.Formatter;
 import android.widget.NumberPicker.OnValueChangeListener;
-import io.reactivex.observers.DisposableCompletableObserver;
+import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
@@ -22,9 +22,11 @@ import nl.freelist.commands.ChangeEntryDurationCommand;
 import nl.freelist.commands.ChangeEntryParentCommand;
 import nl.freelist.commands.ChangeEntryTitleCommand;
 import nl.freelist.commands.CreateEntryCommand;
+import nl.freelist.commands.ScheduleEntryCommand;
 import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
+import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.freelist.R;
 import nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel;
 import nl.freelist.views.NumberPickerDuration;
@@ -511,12 +513,18 @@ public class AddEditEntryActivity extends AppCompatActivity {
             Log.d(TAG, "scheduleButton clicked for entry ..." + uuid);
             scheduleButton.setEnabled(false);
             scheduleButton.setText("scheduling...");
-            AddEditEntryActivityViewModel.scheduleEntry(uuid, defaultUuid)
+
+            ScheduleEntryCommand scheduleEntryCommand;
+            scheduleEntryCommand = new ScheduleEntryCommand(
+                uuid, uuid, lastSavedEventSequenceNumber, repository);
+            lastSavedEventSequenceNumber += 1;
+            AddEditEntryActivityViewModel.handle(scheduleEntryCommand)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe(new DisposableCompletableObserver() {
+                .subscribe(new DisposableSingleObserver<Result>() {
+
                   @Override
-                  public void onComplete() {
+                  public void onSuccess(Result result) {
                     // update View
                     runOnUiThread(
                         new Runnable() {

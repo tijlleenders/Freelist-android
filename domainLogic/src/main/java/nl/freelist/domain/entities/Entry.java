@@ -26,6 +26,7 @@ public class Entry {
   private List<Event> eventList = new ArrayList<>();
 
   public Entry(
+      //Todo: make private and expose via public static method Entry.Create so validation can be included
       UUID ownerUuid, UUID parentUuid, UUID uuid, String title, String description, int duration) {
     this.ownerUuid = ownerUuid;
     this.parentUuid = parentUuid;
@@ -97,8 +98,12 @@ public class Entry {
             break;
         }
         break;
+      case "EntryScheduledEvent":
+        //Do nothing
+        break;
       default:
-        //Todo: Log or throw?
+        LOGGER.log(Level.INFO,
+            "Event can't be applied to entry " + uuid.toString() + " ; event type not recognized");
         break;
     }
     eventList.add(event);
