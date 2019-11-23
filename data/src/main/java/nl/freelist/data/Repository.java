@@ -167,7 +167,33 @@ public class Repository {
     List<ViewModelEvent> viewModelEventListSorted = new ArrayList<>();
     for (Event event : eventList) {
       //Todo: checkout sort loop in for calendarEntry
-      viewModelEventListSorted.add(new ViewModelEvent("testDateTime", "testId"));
+      String eventMessage;
+      switch (event.getClass().getSimpleName()) {
+        case "EntryCreatedEvent":
+          eventMessage = "Created";
+          break;
+        case "EntryDescriptionChangedEvent":
+          eventMessage = "Description changed";
+          break;
+        case "EntryDurationChangedEvent":
+          eventMessage = "Duration changed";
+          break;
+        case "EntryParentChangedEvent":
+          eventMessage = "Parent changed";
+          break;
+        case "EntryScheduledEvent":
+          eventMessage = "Scheduled";
+          break;
+        case "EntryTitleChangedEvent":
+          eventMessage = "Title changed";
+          break;
+        default:
+          eventMessage = "Unrecognized: " + event.getClass().getSimpleName();
+          break;
+      }
+      viewModelEventListSorted.add(
+          new ViewModelEvent(event.getOccurredDateTime().toString(), event.getEntryId(),
+              eventMessage));
     }
     return viewModelEventListSorted;
   }
