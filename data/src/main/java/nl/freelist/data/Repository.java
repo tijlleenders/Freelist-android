@@ -167,7 +167,11 @@ public class Repository {
     List<ViewModelEvent> viewModelEventListSorted = new ArrayList<>();
     for (Event event : eventList) {
       //Todo: checkout sort loop in for calendarEntry
-      viewModelEventListSorted.add(new ViewModelEvent("testDateTime", "testId"));
+      String eventMessage;
+      eventMessage = event.getClass().getSimpleName();
+      viewModelEventListSorted.add(
+          new ViewModelEvent(event.getOccurredDateTime().toString(), event.getEntryId(),
+              eventMessage));
     }
     return viewModelEventListSorted;
   }

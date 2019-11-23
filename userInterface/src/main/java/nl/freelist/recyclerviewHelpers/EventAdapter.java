@@ -65,8 +65,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventHolder> {
   public void onBindViewHolder(@NonNull EventHolder eventHolder, int position) {
     Log.d(TAG, "onBindViewHolder called.");
     ViewModelEvent viewModelEvent = viewModelEvents.get(position);
-    eventHolder.textViewTitle.setText("eventTitle");
-    eventHolder.textViewTime.setText("eventTime");
+    eventHolder.textViewTitle.setText(viewModelEvent.getEventMessage());
+    eventHolder.textViewTime.setText(viewModelEvent.getOccurredDateTime());
   }
 
   @Override

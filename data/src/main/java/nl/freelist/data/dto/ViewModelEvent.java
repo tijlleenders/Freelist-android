@@ -8,10 +8,12 @@ public class ViewModelEvent {
 
   private String occurredDateTime;
   private String entryId;
+  private String eventMessage;
 
-  public ViewModelEvent(String occurredDateTime, String entryId) {
+  public ViewModelEvent(String occurredDateTime, String entryId, String eventMessage) {
     this.occurredDateTime = occurredDateTime;
     this.entryId = entryId;
+    this.eventMessage = eventMessage;
 
     Log.d(TAG, "ViewModelEvent created");
   }
@@ -22,5 +24,9 @@ public class ViewModelEvent {
 
   public String getOccurredDateTime() {
     return occurredDateTime;
+  }
+
+  public String getEventMessage() {
+    return eventMessage;
   }
 }

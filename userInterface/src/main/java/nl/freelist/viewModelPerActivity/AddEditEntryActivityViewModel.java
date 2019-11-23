@@ -46,11 +46,11 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
   }
 
   public Observable<List<ViewModelEvent>> getAllEventsFor(String uuid) {
-    Observable<List<ViewModelEvent>> calendarEntryList = Observable
+    Observable<List<ViewModelEvent>> eventList = Observable
         .fromCallable(
             () -> repository.getAllEventsForId(uuid))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
-    return calendarEntryList;
+    return eventList;
   }
 
 }
