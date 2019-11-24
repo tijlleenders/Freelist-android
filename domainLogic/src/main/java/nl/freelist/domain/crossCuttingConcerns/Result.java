@@ -6,12 +6,23 @@ public class Result {
 
   private List<ValidationError> validationErrorList;
   private boolean isSuccess;
+  private String parameters;
+  private String message;
 
-  public Result(boolean isSuccess) {
+  private Result(boolean isSuccess, List<ValidationError> validationErrorList
+      , String parameters, String message) {
     this.isSuccess = isSuccess;
+    this.validationErrorList = validationErrorList;
+    this.parameters = parameters;
+    this.message = message;
   }
 
-  ;
+  public static Result Create(boolean isSuccess, List<ValidationError> validationErrorList
+      , String parameters, String message) {
+    Result result;
+    result = new Result(isSuccess, validationErrorList, parameters, message);
+    return result;
+  }
 
   public boolean isSuccess() {
     return isSuccess;

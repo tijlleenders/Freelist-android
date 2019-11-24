@@ -41,6 +41,6 @@ public class ChangeEntryDurationCommand extends Command {
     entry.applyEvents(eventList);
     List<sqlBundle> sqlBundleList = repository.insert(entry);
     repository.executeSqlBundles(sqlBundleList);
-    return new Result(true);
+    return Result.Create(true, null, "", "");
   }
 }

@@ -31,6 +31,6 @@ public class CreateResourceCommand extends Command {
 //    resource.applyEvent(resourceCreatedEvent);
 //    List<sqlBundle> sqlBundleList = repository.insert(resource);
 //    repository.executeSqlBundles(sqlBundleList);
-    return new Result(true);
+    return Result.Create(true, null, "", "");
   }
 }

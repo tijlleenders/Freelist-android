@@ -327,6 +327,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         return gson.toJson(event, EntryDurationChangedEvent.class);
       case "EntryParentChangedEvent":
         return gson.toJson(event, EntryParentChangedEvent.class);
+      case "EntryScheduledEvent":
+        return gson.toJson(event, EntryScheduledEvent.class);
       default:
         return "Event class not found.";
     }
