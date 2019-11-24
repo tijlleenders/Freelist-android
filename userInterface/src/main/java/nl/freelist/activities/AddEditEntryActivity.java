@@ -119,7 +119,20 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
       AddEditEntryActivityViewModel.handle(createEntryCommand)
           .subscribeOn(Schedulers.io())
           .observeOn(Schedulers.io())
-          .subscribe();
+          .subscribe(
+              (result -> {
+                // update View
+                runOnUiThread(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        if (result.isSuccess()) {
+                          updateRecyclerView();
+                        }
+                      }
+                    });
+              })
+          );
     }
 
     attachViewListeners();
@@ -224,7 +237,18 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
                 AddEditEntryActivityViewModel.handle(changeEntryTitleCommand)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
-                    .subscribe();
+                    .subscribe((result -> {
+                      // update View
+                      runOnUiThread(
+                          new Runnable() {
+                            @Override
+                            public void run() {
+                              if (result.isSuccess()) {
+                                updateRecyclerView();
+                              }
+                            }
+                          });
+                    }));
               }
             }
           }
@@ -260,7 +284,20 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
                 AddEditEntryActivityViewModel.handle(changeEntryDescriptionCommand)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
-                    .subscribe();
+                    .subscribe(
+                        (result -> {
+                          // update View
+                          runOnUiThread(
+                              new Runnable() {
+                                @Override
+                                public void run() {
+                                  if (result.isSuccess()) {
+                                    updateRecyclerView();
+                                  }
+                                }
+                              });
+                        })
+                    );
               }
             }
           }
@@ -286,7 +323,19 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe();
+                .subscribe(
+                    (result -> {
+                      // update View
+                      runOnUiThread(
+                          new Runnable() {
+                            @Override
+                            public void run() {
+                              if (result.isSuccess()) {
+                                updateRecyclerView();
+                              }
+                            }
+                          });
+                    }));
           }
         };
     secondPicker.setOnValueChangedListener(secondPickerOnValueChangeListener);
@@ -310,7 +359,19 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe();
+                .subscribe(
+                    (result -> {
+                      // update View
+                      runOnUiThread(
+                          new Runnable() {
+                            @Override
+                            public void run() {
+                              if (result.isSuccess()) {
+                                updateRecyclerView();
+                              }
+                            }
+                          });
+                    }));
           }
         };
     minutePicker.setOnValueChangedListener(minutePickerOnValueChangeListener);
@@ -334,7 +395,19 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe();
+                .subscribe(
+                    (result -> {
+                      // update View
+                      runOnUiThread(
+                          new Runnable() {
+                            @Override
+                            public void run() {
+                              if (result.isSuccess()) {
+                                updateRecyclerView();
+                              }
+                            }
+                          });
+                    }));
           }
         };
     hourPicker.setOnValueChangedListener(hourPickerOnValueChangeListener);
@@ -358,7 +431,20 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe();
+                .subscribe(
+                    (result -> {
+                      // update View
+                      runOnUiThread(
+                          new Runnable() {
+                            @Override
+                            public void run() {
+                              if (result.isSuccess()) {
+                                updateRecyclerView();
+                              }
+                            }
+                          });
+                    })
+                );
           }
         };
     dayPicker.setOnValueChangedListener(dayPickerOnValueChangeListener);
@@ -382,7 +468,19 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe();
+                .subscribe(
+                    (result -> {
+                      // update View
+                      runOnUiThread(
+                          new Runnable() {
+                            @Override
+                            public void run() {
+                              if (result.isSuccess()) {
+                                updateRecyclerView();
+                              }
+                            }
+                          });
+                    }));
           }
         };
     weekPicker.setOnValueChangedListener(weekPickerOnValueChangeListener);
@@ -406,7 +504,20 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
             AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe();
+                .subscribe(
+                    (result -> {
+                      // update View
+                      runOnUiThread(
+                          new Runnable() {
+                            @Override
+                            public void run() {
+                              if (result.isSuccess()) {
+                                updateRecyclerView();
+                              }
+                            }
+                          });
+                    })
+                );
           }
         };
     yearPicker.setOnValueChangedListener(yearPickerOnValueChangeListener);
@@ -497,7 +608,20 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
         AddEditEntryActivityViewModel.handle(changeEntryParentCommand)
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
-            .subscribe();
+            .subscribe(
+                (result -> {
+                  // update View
+                  runOnUiThread(
+                      new Runnable() {
+                        @Override
+                        public void run() {
+                          if (result.isSuccess()) {
+                            updateRecyclerView();
+                          }
+                        }
+                      });
+                })
+            );
         parentUuid = bundle.getString(Constants.EXTRA_ENTRY_ID);
         setParentButtonText();
       }
@@ -605,6 +729,7 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
     secondPicker.setValue(viewModelEntry.getSeconds());
     initializeParentButtonWithUuid(viewModelEntry.getParentUuid());
     lastSavedEventSequenceNumber = viewModelEntry.getLastSavedEventSequenceNumber();
+    updateRecyclerView();
     return;
   }
 
