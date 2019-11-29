@@ -11,6 +11,7 @@ It is also a way to collaborate efficiently with others to achieve shared goals.
 * The second phase will be collaborative.
 
 A lot of things in life can be managed by making lists (of lists...).
+
 See https://github.com/tijlleenders/Freelist-android/wiki for some ideas.
 
 ### Freelist design principles
