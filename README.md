@@ -1,7 +1,4 @@
 ## Freelist: a platform for planning your purpose(s).
-* The first phase is in the form of a todo-app for a single individual.
-* The second phase will be collaborative.
-
 
 Freelist gives you the peace of mind to live in the now by making sure that:
 * your life is on track with your priorities/goals
@@ -9,6 +6,10 @@ Freelist gives you the peace of mind to live in the now by making sure that:
 * you won't forget anything important
 
 It is also a way to collaborate efficiently with others to achieve shared goals.
+
+* The first phase is in the form of a todo-app for a single individual.
+* The second phase will be collaborative.
+
 
 See https://github.com/tijlleenders/Freelist-android/wiki for more ideas
 
