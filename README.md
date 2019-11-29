@@ -10,8 +10,8 @@ It is also a way to collaborate efficiently with others to achieve shared goals.
 * The first phase is in the form of a todo-app for a single individual.
 * The second phase will be collaborative.
 
-
-See https://github.com/tijlleenders/Freelist-android/wiki for more ideas
+A lot of things in life can be managed by making lists (of lists...).
+See https://github.com/tijlleenders/Freelist-android/wiki for some ideas.
 
 ### Freelist design principles
 * (F) Free
