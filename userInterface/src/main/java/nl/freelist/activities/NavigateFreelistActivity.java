@@ -2,9 +2,12 @@ package nl.freelist.activities;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.bottomappbar.BottomAppBar;
 import android.support.design.widget.FloatingActionButton;
@@ -20,10 +23,15 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import io.reactivex.schedulers.Schedulers;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
+import nl.freelist.domain.valueObjects.DateTimeRange;
+import nl.freelist.domain.valueObjects.Email;
 import nl.freelist.freelist.R;
 import nl.freelist.recyclerviewHelpers.FreelistEntryAdapter;
 import nl.freelist.recyclerviewHelpers.ItemClickListener;
@@ -59,12 +67,18 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     Log.d(TAG, "onCreate called.");
     super.onCreate(savedInstanceState);
 
-    initializeSharedPreferences();
-
     setContentView(R.layout.activity_navigate_freelist);
 
     navigateEntriesViewModel = ViewModelProviders.of(this)
         .get(NavigateEntriesViewModel.class);
+
+    try {
+      initializeSharedPreferences();
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+
     navigateEntriesViewModel.setParentUuid(myUuid);
 
     initializeViews();
@@ -76,8 +90,40 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     setupSwipeActions();
   }
 
-  private void initializeSharedPreferences() {
+  private void initializeSharedPreferences()
+      throws Exception {
     MySettings mySettings = new MySettings(this);
+    SharedPreferences sharedPreferences;
+    Editor editor;
+    sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+    //Todo: possible to use MySetting without having to pass the application context to it?
+    //use getSharedPreferences(String name, int mode) rather than getPreferences (int mode)
+
+    //If Resource not yet set, create (and persist) Resource with default anonymous@freelist.nl
+    if (mySettings.getResourceUuid() == null) {
+      if (!sharedPreferences.contains(Constants.SETTINGS_USER_UUID)) {
+        editor = sharedPreferences.edit();
+        Email email = new Email("anonymous@freelist.nl");
+        DateTimeRange lifetimeDateTimeRange = DateTimeRange.Create(
+            OffsetDateTime.now(ZoneOffset.UTC),
+            OffsetDateTime.now(ZoneOffset.UTC).plusYears(1));
+
+        editor.putString(
+            Constants.SETTINGS_USER_UUID,
+            UUID.nameUUIDFromBytes(email.getEmailString().getBytes()).toString());
+        editor.putString(
+            Constants.SETTINGS_RESOURCE_UUID,
+            UUID.nameUUIDFromBytes(email.getEmailString().getBytes()).toString());
+        //Make sure Resource is created + persisted before committing to SharedPreferences
+        //Not asynchronous as it is blocking for application to continue
+        if (!navigateEntriesViewModel.createResource(email, email, lifetimeDateTimeRange)
+            .isSuccess()) {
+          throw new Exception("Couldn't create a Resource");
+        }
+        editor.commit();
+      }
+    }
     myUuid = mySettings.getUuid();
   }
 
@@ -198,7 +244,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   }
 
   private void initializeBreadcrumb(List<ViewModelEntry> entries) {
-    switch (entries.size()) {
+    int entriesSize = 0;
+    if (entries != null) {
+      entriesSize = entries.size();
+    }
+    switch (entriesSize) {
       case 1:
         breadcrumb0.setText("Home");
         breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(myUuid));

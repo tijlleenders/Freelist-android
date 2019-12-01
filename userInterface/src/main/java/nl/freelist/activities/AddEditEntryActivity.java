@@ -16,7 +16,6 @@ import android.widget.NumberPicker;
 import android.widget.NumberPicker.Formatter;
 import android.widget.NumberPicker.OnValueChangeListener;
 import android.widget.Toast;
-import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
@@ -25,11 +24,9 @@ import nl.freelist.commands.ChangeEntryDurationCommand;
 import nl.freelist.commands.ChangeEntryParentCommand;
 import nl.freelist.commands.ChangeEntryTitleCommand;
 import nl.freelist.commands.CreateEntryCommand;
-import nl.freelist.commands.ScheduleEntryCommand;
 import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.freelist.R;
 import nl.freelist.recyclerviewHelpers.EventAdapter;
 import nl.freelist.recyclerviewHelpers.ItemClickListener;
@@ -69,7 +66,7 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
   @Override
   protected void onResume() {
     Log.d(TAG, "onResume called.");
-
+    //Todo: do something with bundle from ChooseCalendarOptionActivity
     super.onResume();
     updateRecyclerView();
   }
@@ -158,8 +155,9 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
                           Toast.LENGTH_SHORT)
                           .show();
                     }
+
                   });
-            });
+            }, throwable -> Log.e(TAG, "Throwable " + throwable.getMessage()));
   }
 
   private void initializeForAddNew(Bundle bundle) {
@@ -674,42 +672,14 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
           @Override
           public void onClick(View v) {
             Log.d(TAG, "scheduleButton clicked for entry ..." + uuid);
-            scheduleButton.setEnabled(false);
-            scheduleButton.setText("scheduling...");
-
-            ScheduleEntryCommand scheduleEntryCommand;
-            scheduleEntryCommand = new ScheduleEntryCommand(
-                uuid, uuid, lastSavedEventSequenceNumber, repository);
-            lastSavedEventSequenceNumber += 1;
-            AddEditEntryActivityViewModel.handle(scheduleEntryCommand)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(new DisposableSingleObserver<Result>() {
-
-                  @Override
-                  public void onSuccess(Result result) {
-                    // update View
-                    runOnUiThread(
-                        new Runnable() {
-                          @Override
-                          public void run() {
-                            scheduleButton.setText("Scheduling completed!");
-                          }
-                        });
-                  }
-
-                  @Override
-                  public void onError(Throwable e) {
-                    // update View
-                    runOnUiThread(
-                        new Runnable() {
-                          @Override
-                          public void run() {
-                            scheduleButton.setText("Scheduling failed!");
-                          }
-                        });
-                  }
-                });
+            Intent intent = new Intent(AddEditEntryActivity.this,
+                ChooseCalendarOptionActivity.class);
+            intent.putExtra(
+                Constants.EXTRA_ENTRY_ID, uuid);
+            intent.putExtra(
+                Constants.EXTRA_RESOURCE_ID, defaultUuid);
+            startActivityForResult(intent, Constants.CHOOSE_CALENDAR_OPTION_REQUEST);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }
         }
     );

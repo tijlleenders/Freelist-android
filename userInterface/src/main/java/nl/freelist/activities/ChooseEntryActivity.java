@@ -128,6 +128,9 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
         return true;
+      case android.R.id.home:
+        this.finish();
+        return true;
       default:
         return true;
     }

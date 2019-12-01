@@ -1,5 +1,8 @@
 package nl.freelist.commands;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.data.Repository;
 import nl.freelist.data.sqlBundle;
@@ -9,39 +12,63 @@ import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.entities.Resource;
 import nl.freelist.domain.events.EntryScheduledEvent;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.valueObjects.DateTime;
+import nl.freelist.domain.valueObjects.Calendar;
 
 public class ScheduleEntryCommand extends Command {
 
   String entryUuid;
   String resourceUuid;
   int lastSavedEventSequenceNumber;
+  int lastSavedResourceSequenceNumber;
   Repository repository;
+  Calendar calendar;
 
   public ScheduleEntryCommand(String entryUuid, String resourceUuid,
-      int lastSavedEventSequenceNumber, Repository repository) {
+      int lastSavedEventSequenceNumber, int lastSavedResourceSequenceNumber, Repository repository,
+      Calendar calendar) {
     this.entryUuid = entryUuid;
     this.resourceUuid = resourceUuid;
     this.lastSavedEventSequenceNumber = lastSavedEventSequenceNumber;
     this.repository = repository;
+    this.lastSavedResourceSequenceNumber = lastSavedResourceSequenceNumber;
+    this.calendar = calendar;
   }
 
   @Override
   public Result execute() {
     EntryScheduledEvent entryScheduledEvent = EntryScheduledEvent
-        .Create(DateTime.Create("now"), entryUuid, lastSavedEventSequenceNumber + 1);
+        .Create(
+            OffsetDateTime.now(ZoneOffset.UTC),
+            entryUuid,
+            resourceUuid,
+            lastSavedResourceSequenceNumber + 1,
+            lastSavedEventSequenceNumber + 1,
+            calendar
+        );
 
-    Entry entry = repository.getById(entryUuid);
-    List<Event> entryEventList = repository.getSavedEventsFor(entryUuid);
+    //How to know if it fails?
+    List<sqlBundle> sqlBundleList = new ArrayList<>();
+    List<Event> eventsToAddList = new ArrayList<>();
+    eventsToAddList.add(entryScheduledEvent);
 
-    Resource resource = repository.getResourceById(resourceUuid);
-    resource.schedule(entry);
+    Resource resource = repository.getResourceWithSavedEventsById(resourceUuid);
+    resource.applyEvents(eventsToAddList);
+    List<sqlBundle> sqlBundleListResource = repository.insert(resource);
+    if (sqlBundleListResource != null) {
+      sqlBundleList.addAll(sqlBundleListResource);
+    }
 
-    entryEventList.add(entryScheduledEvent);
-    entry.applyEvents(entryEventList);
-    List<sqlBundle> sqlBundleList = repository.insert(entry);
+    Entry entry = repository.getEntryWithSavedEventsById(entryUuid);
+    entry.applyEvents(eventsToAddList);
+    List<sqlBundle> sqlBundleListEntry = repository.insert(entry);
+    if (sqlBundleListEntry != null) {
+      sqlBundleList.addAll(sqlBundleListEntry); //Todo: schedule events are not being persisted
+    }
 
-    repository.executeSqlBundles(sqlBundleList);
-    return Result.Create(true, null, "", "");
+    if (sqlBundleList != null) {
+      repository.executeSqlBundles(sqlBundleList);
+      return Result.Create(true, null, "", "");
+    }
+    return Result.Create(false, null, "", "");
   }
 }

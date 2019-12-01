@@ -1,5 +1,8 @@
 package nl.freelist.commands;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.data.Repository;
 import nl.freelist.data.sqlBundle;
@@ -8,7 +11,6 @@ import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.valueObjects.DateTime;
 
 public class ChangeEntryDurationCommand extends Command {
 
@@ -33,12 +35,13 @@ public class ChangeEntryDurationCommand extends Command {
   @Override
   public Result execute() {
     EntryDurationChangedEvent entryDurationChangedEvent = EntryDurationChangedEvent
-        .Create(DateTime.Create("now"), uuid, lastSavedEventSequenceNumber + 1, durationBefore,
+        .Create(OffsetDateTime.now(ZoneOffset.UTC), uuid, lastSavedEventSequenceNumber + 1,
+            durationBefore,
             durationAfter, unitOfMeasure);
-    Entry entry = repository.getById(uuid);
-    List<Event> eventList = repository.getSavedEventsFor(uuid);
-    eventList.add(entryDurationChangedEvent);
-    entry.applyEvents(eventList);
+    Entry entry = repository.getEntryWithSavedEventsById(uuid);
+    List<Event> eventsToAddList = new ArrayList<>();
+    eventsToAddList.add(entryDurationChangedEvent);
+    entry.applyEvents(eventsToAddList);
     List<sqlBundle> sqlBundleList = repository.insert(entry);
     repository.executeSqlBundles(sqlBundleList);
     return Result.Create(true, null, "", "");

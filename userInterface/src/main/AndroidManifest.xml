@@ -31,9 +31,11 @@
       android:parentActivityName="nl.freelist.activities.AddEditEntryActivity">
     </activity>
     <activity
+      android:name="nl.freelist.activities.ChooseCalendarOptionActivity"
+      android:parentActivityName="nl.freelist.activities.AddEditEntryActivity"></activity>
+    <activity
       android:name="nl.freelist.activities.CalendarActivity"
-      android:launchMode="singleInstance">
-    </activity>
+      android:launchMode="singleInstance"></activity>
     <activity
       android:name="nl.freelist.activities.SearchActivity"
       android:launchMode="singleInstance">

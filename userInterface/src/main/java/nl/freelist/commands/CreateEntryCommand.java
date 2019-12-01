@@ -1,5 +1,7 @@
 package nl.freelist.commands;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import nl.freelist.data.Repository;
@@ -8,7 +10,6 @@ import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.events.EntryCreatedEvent;
-import nl.freelist.domain.valueObjects.DateTime;
 
 public class CreateEntryCommand extends Command {
 
@@ -30,7 +31,7 @@ public class CreateEntryCommand extends Command {
     Entry entry = new Entry(ownerUuid, parentUuid, uuid, "", "", 0);
     EntryCreatedEvent entryCreatedEvent =
         EntryCreatedEvent.Create(
-            DateTime.Create("now"),
+            OffsetDateTime.now(ZoneOffset.UTC),
             ownerUuid.toString(),
             parentUuid.toString(),
             uuid.toString(),

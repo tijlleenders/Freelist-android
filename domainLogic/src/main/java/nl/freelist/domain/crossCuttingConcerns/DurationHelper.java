@@ -1,19 +1,23 @@
 package nl.freelist.domain.crossCuttingConcerns;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
 
 public class DurationHelper { //Todo: move to value object in domain model
 
-  public static int getDurationIntFromInts(int years, int weeks, int days, int hours, int minutes,
-      int seconds) {
-    int result = 0;
-    result += years * (3600 * 24 * 365 + 3600 * 6);
-    result += weeks * (3600 * 24 * 7);
-    result += days * (3600 * 24);
-    result += hours * 3600;
-    result += minutes * 60;
-    result += seconds;
-    return result;
+  public static String getFormattedDateFrom(OffsetDateTime offsetDateTime) {
+    LocalDate localDate = offsetDateTime.toLocalDate();
+    LocalDate nowDate = OffsetDateTime.now(ZoneOffset.UTC).toLocalDate();
+    if (localDate.equals(nowDate)) {
+      return "Today";
+    }
+    if (offsetDateTime.getYear() == OffsetDateTime.now().getYear()
+        && offsetDateTime.getDayOfYear() == OffsetDateTime.now().getDayOfYear() + 1) {
+      return "Tomorrow";
+    }
+    return offsetDateTime.toLocalDate().toString();
   }
 
   public static int getDurationSecondsDeltaFromDurationChangedEvent(

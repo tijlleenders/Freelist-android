@@ -2,16 +2,16 @@ package nl.freelist.data.dto;
 
 import android.util.Log;
 
-public class CalendarEntry {
+public final class CalendarEntry {
 
   private static final String TAG = "CalendarEntry dto";
 
-  private String entryUuid;
-  private String title;
-  private int type;
-  private String date;
-  private String time;
-  private String durationString;
+  private final String entryUuid;
+  private final String title;
+  private final int type;
+  private final String date;
+  private final String time;
+  private final String durationString;
 
   public CalendarEntry(String entryUuid, String title, int type, String date, String time,
       String durationString) {

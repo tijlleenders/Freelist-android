@@ -16,8 +16,10 @@
       android:id="@+id/sublist_of"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Sublist of:"
-      android:inputType="text"/>
+      android:clickable="false"
+      android:duplicateParentState="false"
+      android:editable="false"
+      android:text="Sublist of:" />
     <Button
       android:id="@+id/button_parent_change"
       android:layout_width="wrap_content"
@@ -30,15 +32,17 @@
     android:id="@+id/edit_text_title"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:hint="Title"
-    android:inputType="text"/>
+    android:autofillHints="@string/title_hint"
+    android:hint="@string/title_hint"
+    android:inputType="text" />
 
   <EditText
     android:id="@+id/edit_text_description"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:hint="Description"
-    android:inputType="textMultiLine"/>
+    android:autofillHints="@string/description_hint"
+    android:hint="@string/description_hint"
+    android:inputType="textMultiLine" />
 
 
   <LinearLayout
@@ -83,7 +87,7 @@
     android:id="@+id/schedule_button"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="Schedule in first free spot"/>
+    android:text="@string/schedule" />
   <android.support.v7.widget.RecyclerView
     android:id="@+id/recycler_view"
     android:layout_width="match_parent"

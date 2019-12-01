@@ -1,20 +1,25 @@
 package nl.freelist.domain.events;
 
-import nl.freelist.domain.valueObjects.DateTime;
+import java.time.OffsetDateTime;
 
 public class EntryCreatedEvent extends Event {
 
   private String ownerUuid;
   private String parentUuid;
+  private String entryId;
+  private int eventSequenceNumber;
 
-  private EntryCreatedEvent(DateTime occurredDateTime, String ownerUuid, String parentUuid,
+
+  private EntryCreatedEvent(OffsetDateTime occurredDateTime, String ownerUuid, String parentUuid,
       String aggregateId, int eventSequenceNumber) {
-    super(occurredDateTime, aggregateId, eventSequenceNumber);
+    super(occurredDateTime);
     this.ownerUuid = ownerUuid;
     this.parentUuid = parentUuid;
+    this.entryId = aggregateId;
+    this.eventSequenceNumber = eventSequenceNumber;
   }
 
-  public static EntryCreatedEvent Create(DateTime occurredDateTime, String ownerUuid,
+  public static EntryCreatedEvent Create(OffsetDateTime occurredDateTime, String ownerUuid,
       String parentUuid, String aggregateId, int eventSequenceNumber) {
     EntryCreatedEvent entryCreatedEvent = new EntryCreatedEvent(occurredDateTime, ownerUuid,
         parentUuid, aggregateId, eventSequenceNumber);
@@ -29,4 +34,11 @@ public class EntryCreatedEvent extends Event {
     return parentUuid;
   }
 
+  public String getEntryUuid() {
+    return entryId;
+  }
+
+  public int getEventSequenceNumber() {
+    return eventSequenceNumber;
+  }
 }

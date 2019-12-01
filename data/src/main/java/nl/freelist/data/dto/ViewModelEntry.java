@@ -4,27 +4,27 @@ import android.util.Log;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
 
-public class ViewModelEntry {
+public final class ViewModelEntry {
 
   private static final String TAG = "ViewModelEntry dto";
 
-  private String uuid;
-  private String parentUuid;
-  private String ownerUuid;
-  private String title;
-  private String description;
-  private String durationString;
-  private String childrenDurationString;
-  private int duration;
-  private int years;
-  private int weeks;
-  private int days;
-  private int hours;
-  private int minutes;
-  private int seconds;
-  private int childrenCount;
-  private int childrenDuration;
-  private int lastSavedEventSequenceNumber;
+  private final String uuid;
+  private final String parentUuid;
+  private final String ownerUuid;
+  private final String title;
+  private final String description;
+  private final String durationString;
+  private final String childrenDurationString;
+  private final int duration;
+  private final int years;
+  private final int weeks;
+  private final int days;
+  private final int hours;
+  private final int minutes;
+  private final int seconds;
+  private final int childrenCount;
+  private final int childrenDuration;
+  private final int lastSavedEventSequenceNumber;
 
   public ViewModelEntry(
       String ownerUuid,
@@ -82,16 +82,8 @@ public class ViewModelEntry {
     return title;
   }
 
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
   public String getDescription() {
     return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
   }
 
   public String getDurationString() {
@@ -133,7 +125,6 @@ public class ViewModelEntry {
   public int getChildrenDuration() {
     return childrenDuration;
   }
-
 
   public String getChildrenDurationString() {
     return childrenDurationString;

@@ -2,24 +2,20 @@ package nl.freelist.data.dto;
 
 import android.util.Log;
 
-public class ViewModelEvent {
+public final class ViewModelEvent {
 
   private static final String TAG = "ViewModelEvent dto";
 
-  private String occurredDateTime;
-  private String entryId;
-  private String eventMessage;
+  private final String occurredDateTime;
+  private final String eventMessage;
+  private final String entryId;
 
   public ViewModelEvent(String occurredDateTime, String entryId, String eventMessage) {
     this.occurredDateTime = occurredDateTime;
-    this.entryId = entryId;
     this.eventMessage = eventMessage;
+    this.entryId = entryId;
 
     Log.d(TAG, "ViewModelEvent created");
-  }
-
-  public String getEntryId() {
-    return entryId;
   }
 
   public String getOccurredDateTime() {
@@ -28,5 +24,9 @@ public class ViewModelEvent {
 
   public String getEventMessage() {
     return eventMessage;
+  }
+
+  public String getEntryId() {
+    return entryId;
   }
 }

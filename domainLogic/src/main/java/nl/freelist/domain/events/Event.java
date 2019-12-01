@@ -1,30 +1,18 @@
 package nl.freelist.domain.events;
 
-import nl.freelist.domain.valueObjects.DateTime;
+import java.time.OffsetDateTime;
 
 public abstract class Event {
 
   //Todo: should events get a guid?
-  private DateTime occurredDateTime;
-  private String entryId; //Todo: replace with uuidString VO
-  private int eventSequenceNumber;
+  private OffsetDateTime occurredDateTime;
 
-  protected Event(DateTime occurredDateTime, String entryId, int eventSequenceNumber) {
+  protected Event(OffsetDateTime occurredDateTime) {
     // Create/Validation logic in static Create method of subclasses (easier to test)
     this.occurredDateTime = occurredDateTime;
-    this.entryId = entryId;
-    this.eventSequenceNumber = eventSequenceNumber;
   }
 
-  public DateTime getOccurredDateTime() {
+  public OffsetDateTime getOccurredDateTime() {
     return occurredDateTime;
-  }
-
-  public String getEntryId() {
-    return entryId;
-  }
-
-  public int getEventSequenceNumber() {
-    return eventSequenceNumber;
   }
 }

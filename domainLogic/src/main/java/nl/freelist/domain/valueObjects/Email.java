@@ -9,7 +9,7 @@ public class Email {
     this.email = email;
   }
 
-  public String getEmail() {
+  public String getEmailString() {
     return email;
   }
 

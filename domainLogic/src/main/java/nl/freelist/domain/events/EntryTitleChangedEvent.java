@@ -1,25 +1,29 @@
 package nl.freelist.domain.events;
 
-import nl.freelist.domain.valueObjects.DateTime;
+import java.time.OffsetDateTime;
 
 public class EntryTitleChangedEvent extends Event {
 
   private String titleBefore;
   private String titleAfter;
+  private String entryId;
+  private int eventSequenceNumber;
 
   private EntryTitleChangedEvent(
-      DateTime occurredDateTime,
+      OffsetDateTime occurredDateTime,
       String entryId,
       int eventSequenceNumber,
       String titleBefore,
       String titleAfter) {
-    super(occurredDateTime, entryId, eventSequenceNumber);
+    super(occurredDateTime);
     this.titleBefore = titleBefore;
     this.titleAfter = titleAfter;
+    this.entryId = entryId;
+    this.eventSequenceNumber = eventSequenceNumber;
   }
 
   public static EntryTitleChangedEvent Create(
-      DateTime occurredDateTime,
+      OffsetDateTime occurredDateTime,
       String entryId,
       int eventSequenceNumber,
       String titleBefore,
@@ -32,5 +36,17 @@ public class EntryTitleChangedEvent extends Event {
 
   public String getTitleAfter() {
     return titleAfter;
+  }
+
+  public String getTitleBefore() {
+    return titleBefore;
+  }
+
+  public String getEntryId() {
+    return entryId;
+  }
+
+  public int getEventSequenceNumber() {
+    return eventSequenceNumber;
   }
 }

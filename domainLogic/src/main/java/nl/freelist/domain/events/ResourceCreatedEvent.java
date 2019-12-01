@@ -1,24 +1,50 @@
 package nl.freelist.domain.events;
 
-import nl.freelist.domain.valueObjects.DateTime;
+import java.time.OffsetDateTime;
+import nl.freelist.domain.valueObjects.DateTimeRange;
+import nl.freelist.domain.valueObjects.Email;
 
 public class ResourceCreatedEvent extends Event {
 
+  private Email ownerEmail;
+  private Email resourceEmail;
   private String ownerUuid;
   private String resourceUuid;
+  private DateTimeRange lifetimeDateTimeRange;
+  private int eventSequenceNumber;
 
-  private ResourceCreatedEvent(DateTime occurredDateTime, String ownerUuid, String resourceUuid,
+  private ResourceCreatedEvent(
+      OffsetDateTime occurredDateTime,
+      Email ownerEmail,
+      Email resourceEmail,
+      String ownerUuid,
+      String resourceUuid,
+      DateTimeRange lifetimeDateTimeRange,
       int eventSequenceNumber) {
-    super(occurredDateTime, resourceUuid, eventSequenceNumber);
+    super(occurredDateTime);
+    this.ownerEmail = ownerEmail;
+    this.resourceEmail = resourceEmail;
     this.ownerUuid = ownerUuid;
     this.resourceUuid = resourceUuid;
+    this.lifetimeDateTimeRange = lifetimeDateTimeRange;
+    this.eventSequenceNumber = eventSequenceNumber;
   }
 
-  public static ResourceCreatedEvent Create(DateTime occurredDateTime, String ownerUuid,
-      String resourceUuid, int eventSequenceNumber) {
+  public static ResourceCreatedEvent Create(
+      OffsetDateTime occurredDateTime,
+      Email ownerEmail,
+      Email resourceEmail,
+      String ownerUuid,
+      String resourceUuid,
+      DateTimeRange lifetimeDateTimeRange,
+      int eventSequenceNumber) {
     ResourceCreatedEvent resourceCreatedEvent = new ResourceCreatedEvent(occurredDateTime,
+        ownerEmail,
+        resourceEmail,
         ownerUuid,
-        resourceUuid, eventSequenceNumber);
+        resourceUuid,
+        lifetimeDateTimeRange,
+        eventSequenceNumber);
     return resourceCreatedEvent;
   }
 
@@ -30,4 +56,19 @@ public class ResourceCreatedEvent extends Event {
     return resourceUuid;
   }
 
+  public int getEventSequenceNumber() {
+    return eventSequenceNumber;
+  }
+
+  public Email getOwnerEmail() {
+    return ownerEmail;
+  }
+
+  public Email getResourceEmail() {
+    return resourceEmail;
+  }
+
+  public DateTimeRange getLifetimeDateTimeRange() {
+    return lifetimeDateTimeRange;
+  }
 }
