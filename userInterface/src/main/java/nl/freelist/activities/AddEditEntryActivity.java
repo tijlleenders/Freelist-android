@@ -67,6 +67,7 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
   protected void onResume() {
     Log.d(TAG, "onResume called.");
     //Todo: do something with bundle from ChooseCalendarOptionActivity
+
     super.onResume();
     updateRecyclerView();
   }

@@ -8,11 +8,11 @@ import nl.freelist.data.Repository;
 import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
+import nl.freelist.domain.entities.Calendar;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.entities.Resource;
 import nl.freelist.domain.events.EntryScheduledEvent;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.valueObjects.Calendar;
 
 public class ScheduleEntryCommand extends Command {
 
@@ -62,7 +62,7 @@ public class ScheduleEntryCommand extends Command {
     entry.applyEvents(eventsToAddList);
     List<sqlBundle> sqlBundleListEntry = repository.insert(entry);
     if (sqlBundleListEntry != null) {
-      sqlBundleList.addAll(sqlBundleListEntry); //Todo: schedule events are not being persisted
+      sqlBundleList.addAll(sqlBundleListEntry);
     }
 
     if (sqlBundleList != null) {

@@ -1,7 +1,7 @@
 package nl.freelist.domain.events;
 
 import java.time.OffsetDateTime;
-import nl.freelist.domain.valueObjects.Calendar;
+import nl.freelist.domain.entities.Calendar;
 
 public class EntryScheduledEvent extends Event {
 

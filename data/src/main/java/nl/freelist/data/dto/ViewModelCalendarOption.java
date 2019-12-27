@@ -3,7 +3,7 @@ package nl.freelist.data.dto;
 import android.util.Log;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
-import nl.freelist.domain.valueObjects.Calendar;
+import nl.freelist.domain.entities.Calendar;
 import nl.freelist.domain.valueObjects.DateTimeRange;
 
 public class ViewModelCalendarOption {

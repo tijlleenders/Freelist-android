@@ -16,6 +16,7 @@ import nl.freelist.data.dto.ViewModelCalendarOption;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.dto.ViewModelEvent;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
+import nl.freelist.domain.entities.Calendar;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.entities.Resource;
 import nl.freelist.domain.events.EntryCreatedEvent;
@@ -25,8 +26,6 @@ import nl.freelist.domain.events.EntryParentChangedEvent;
 import nl.freelist.domain.events.EntryScheduledEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.events.ResourceCreatedEvent;
-import nl.freelist.domain.valueObjects.Calendar;
 
 public class Repository {
 
@@ -37,7 +36,6 @@ public class Repository {
 
   public Repository(Context appContext) {
     eventDatabaseHelper = EventDatabaseHelper.getInstance(appContext);
-    eventDatabaseHelper.tempFillViewModelCalendar();
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
   }
 
@@ -110,38 +108,11 @@ public class Repository {
   }
 
   public Entry getEntryWithSavedEventsById(String uuid) {
-    EntryCreatedEvent entryCreatedEvent = eventDatabaseHelper.getEntryCreatedEvent(
-        uuid); //Todo: remove as EntryCreatedEvent gets applied so not necessary?
-    Entry entry =
-        new Entry(
-            UUID.fromString(entryCreatedEvent.getOwnerUuid()),
-            UUID.fromString(entryCreatedEvent.getParentUuid()),
-            UUID.fromString(entryCreatedEvent.getEntryUuid()),
-            "",
-            "",
-            0);
-    List<Event> eventList = getSavedEventsFor(uuid);
-    entry.applyEvents(eventList);
-    return entry;
+    return eventDatabaseHelper.getEntryWithSavedEventsById(uuid);
   }
 
   public Resource getResourceWithSavedEventsById(String uuid) {
-    ResourceCreatedEvent resourceCreatedEvent = eventDatabaseHelper.getResourceCreatedEvent(
-        uuid); //Todo: remove as ResourceCreatedEvent gets applied so not necessary?
-    //How does it get created?
-    Resource resource =
-        Resource.Create(
-            resourceCreatedEvent.getOwnerEmail(),
-            resourceCreatedEvent.getResourceEmail(),
-            resourceCreatedEvent.getLifetimeDateTimeRange());
-    List<Event> eventList = getSavedEventsFor(uuid);
-    resource.applyEvents(eventList);
-    return resource;
-  }
-
-  public List<Event> getSavedEventsFor(String uuid) {
-    List<Event> eventList = eventDatabaseHelper.getEventsFor(uuid);
-    return eventList;
+    return eventDatabaseHelper.getResourceWithSavedEventsById(uuid);
   }
 
   public ViewModelEntry getViewModelEntryById(UUID uuid) {
@@ -190,7 +161,7 @@ public class Repository {
     for (CalendarEntry calendarEntry : calendarEntryList) {
       if (!calendarEntry.getDate().equals(date)) {
         date = calendarEntry.getDate();
-        calendarEntryListSorted
+        calendarEntryListSorted //Add date section headers
             .add(new CalendarEntry("", date, Constants.CALENDAR_ENTRY_DATE_VIEW_TYPE
                 , "", "", ""));
       }

@@ -10,13 +10,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.gson.Converters;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
+import nl.freelist.domain.entities.Entry;
+import nl.freelist.domain.entities.Resource;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.EntryDescriptionChangedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
@@ -210,7 +214,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     Log.d(TAG, "getResourceQueriesForEvent called.");
     List<sqlBundle> sqlBundleList = new ArrayList<>();
     int toSaveSequenceNumber;
-    String resourceId;
+    String resourceId = "";
 
     switch (event.getClass().getSimpleName()) {
       case "EntryCreatedEvent":
@@ -218,7 +222,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       case "EntryDurationChangedEvent":
       case "EntryParentChangedEvent":
       case "EntryTitleChangedEvent":
-        return null;
+        return null; //Todo: what entry events affect the calendar and should thus also be applied to the resource? ie duration changed
       case "ResourceCreatedEvent":
         ResourceCreatedEvent resourceCreatedEvent = (ResourceCreatedEvent) event;
         toSaveSequenceNumber = resourceCreatedEvent.getEventSequenceNumber();
@@ -228,6 +232,27 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
         toSaveSequenceNumber = entryScheduledEvent.getResourceEventSequenceNumber();
         resourceId = entryScheduledEvent.getResourceUuid();
+        Entry entry = getEntryWithSavedEventsById(entryScheduledEvent.getEntryUuid());
+
+        ContentValues calendarContentValues2 = new ContentValues();
+        calendarContentValues2.put("entryUuid", entry.getUuid().toString());
+        calendarContentValues2.put("title", entry.getTitle());
+        calendarContentValues2.put("date", entryScheduledEvent.getCalendar()
+            .getEntryLastScheduledDateTimeRange()
+            .getStartDateTime()
+            .format(DateTimeFormatter.ISO_DATE));
+        calendarContentValues2.put("time", entryScheduledEvent.getCalendar()
+            .getEntryLastScheduledDateTimeRange()
+            .getStartDateTime()
+            .format(DateTimeFormatter.ISO_LOCAL_TIME));
+        calendarContentValues2.put("duration", entryScheduledEvent.getCalendar()
+            .getEntryLastScheduledDateTimeRange()
+            .getDuration());
+        calendarContentValues2.put("isDone", 0);
+        calendarContentValues2
+            .put("lastSavedEventSequenceNumber", expectedLastSavedEventSequenceNumber + 1);
+
+        sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues2));
         break;
       default:
         Log.e(TAG, "Unrecognized: " + event.getClass().getSimpleName());
@@ -263,7 +288,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
 
   private List<sqlBundle> getEntryQueriesForEvent(
       //Todo: sort out below mess...
-      // maybe move viewModelqueries to the case statements?
       String aggregateIdType, int expectedLastSavedEventSequenceNumber, Event event)
       throws Exception {
     Log.d(TAG, "getEntryQueriesForEvent called.");
@@ -277,6 +301,10 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
         toSaveSequenceNumber = entryCreatedEvent.getEventSequenceNumber();
         entryId = entryCreatedEvent.getEntryUuid();
+        Log.d(TAG, "creating initial viewModelEntry query for EntryCreatedEvent");
+        sqlBundleList.addAll(
+            modifyChildrenCountAndDurationIncludingAncestorsFor(
+                entryCreatedEvent.getParentUuid(), 0, 1, entryCreatedEvent.getOwnerUuid()));
         break;
       case "EntryDescriptionChangedEvent":
         EntryDescriptionChangedEvent entryDescriptionChangedEvent = (EntryDescriptionChangedEvent) event;
@@ -287,11 +315,34 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
         toSaveSequenceNumber = entryDurationChangedEvent.getEventSequenceNumber();
         entryId = entryDurationChangedEvent.getEntryUuid();
+        Log.d(TAG, "creating additional viewModelEntry query for EntryDurationChangedEvent");
+        ViewModelEntry changedEntry = viewModelEntryFor(entryDurationChangedEvent.getEntryUuid());
+        sqlBundleList.addAll(
+            modifyChildrenCountAndDurationIncludingAncestorsFor(
+                changedEntry.getParentUuid(),
+                DurationHelper.getDurationSecondsDeltaFromDurationChangedEvent(
+                    entryDurationChangedEvent),
+                0,
+                changedEntry.getOwnerUuid()));
         break;
       case "EntryParentChangedEvent":
         EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
         toSaveSequenceNumber = entryParentChangedEvent.getEventSequenceNumber();
         entryId = entryParentChangedEvent.getEntryUuid();
+        Log.d(TAG, "creating additional viewModelEntry query for EntryParentChangedEvent");
+        ViewModelEntry childEntry = viewModelEntryFor(entryParentChangedEvent.getEntryUuid());
+        sqlBundleList.addAll(
+            modifyChildrenCountAndDurationIncludingAncestorsFor(
+                entryParentChangedEvent.getParentBefore(),
+                -childEntry.getChildrenDuration() - childEntry.getDuration(),
+                -childEntry.getChildrenCount() - 1,
+                childEntry.getOwnerUuid()));
+        sqlBundleList.addAll(
+            modifyChildrenCountAndDurationIncludingAncestorsFor(
+                entryParentChangedEvent.getParentAfter(),
+                childEntry.getChildrenDuration() + childEntry.getDuration(),
+                childEntry.getChildrenCount() + 1,
+                childEntry.getOwnerUuid()));
         break;
       case "ResourceCreatedEvent":
         return null;
@@ -299,6 +350,9 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
         toSaveSequenceNumber = entryScheduledEvent.getEntryEventSequenceNumber();
         entryId = entryScheduledEvent.getEntryUuid();
+        Log.d(TAG, "creating viewModelEntry query for EntryScheduledEvent");
+        //Todo: create sqlBudleList => not necessary? viewModelEntry is updated from repository in insert(Entry)
+        //Calendar update is done when Event is applied to Resource
         break;
       case "EntryTitleChangedEvent":
         EntryTitleChangedEvent entryTitleChangedEvent = (EntryTitleChangedEvent) event;
@@ -333,52 +387,37 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     eventContentValues.put("eventSequenceNumber", lastSavedEventSequenceNumber + 1);
     sqlBundleList.add(new sqlBundle("events", eventContentValues));
 
-    switch (event.getClass().getSimpleName()) {
-      case "EntryCreatedEvent":
-        Log.d(TAG, "creating viewModelEntry query for EntryCreatedEvent");
-        EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
-        sqlBundleList.addAll(
-            modifyChildrenCountAndDurationIncludingAncestorsFor(
-                entryCreatedEvent.getParentUuid(), 0, 1, entryCreatedEvent.getOwnerUuid()));
-        break;
-      case "EntryDurationChangedEvent":
-        Log.d(TAG, "creating viewModelEntry query for EntryDurationChangedEvent");
-        EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
-        ViewModelEntry changedEntry = viewModelEntryFor(entryDurationChangedEvent.getEntryUuid());
-        sqlBundleList.addAll(
-            modifyChildrenCountAndDurationIncludingAncestorsFor(
-                changedEntry.getParentUuid(),
-                DurationHelper.getDurationSecondsDeltaFromDurationChangedEvent(
-                    entryDurationChangedEvent),
-                0,
-                changedEntry.getOwnerUuid()));
-        break;
-      case "EntryParentChangedEvent":
-        Log.d(TAG, "creating viewModelEntry query for EntryParentChangedEvent");
-        EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
-        ViewModelEntry childEntry = viewModelEntryFor(entryParentChangedEvent.getEntryUuid());
-        sqlBundleList.addAll(
-            modifyChildrenCountAndDurationIncludingAncestorsFor(
-                entryParentChangedEvent.getParentBefore(),
-                -childEntry.getChildrenDuration() - childEntry.getDuration(),
-                -childEntry.getChildrenCount() - 1,
-                childEntry.getOwnerUuid()));
-        sqlBundleList.addAll(
-            modifyChildrenCountAndDurationIncludingAncestorsFor(
-                entryParentChangedEvent.getParentAfter(),
-                childEntry.getChildrenDuration() + childEntry.getDuration(),
-                childEntry.getChildrenCount() + 1,
-                childEntry.getOwnerUuid()));
-        break;
-      case "EntryScheduledEvent":
-        Log.d(TAG, "creating viewModelEntry query for EntryScheduledEvent");
-        EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
-        //Todo: create sqlBudleList
-        break;
-      default:
-        Log.d(TAG, "type of event not recognized!");
-    }
     return sqlBundleList;
+  }
+
+  public Entry getEntryWithSavedEventsById(String uuid) {
+    EntryCreatedEvent entryCreatedEvent = getEntryCreatedEvent(
+        uuid); //Todo: remove as EntryCreatedEvent gets applied so not necessary?
+    Entry entry =
+        new Entry(
+            UUID.fromString(entryCreatedEvent.getOwnerUuid()),
+            UUID.fromString(entryCreatedEvent.getParentUuid()),
+            UUID.fromString(entryCreatedEvent.getEntryUuid()),
+            "",
+            "",
+            0);
+    List<Event> eventList = getEventsFor(uuid);
+    entry.applyEvents(eventList);
+    return entry;
+  }
+
+  public Resource getResourceWithSavedEventsById(String uuid) {
+    ResourceCreatedEvent resourceCreatedEvent = getResourceCreatedEvent(
+        uuid); //Todo: remove as ResourceCreatedEvent gets applied so not necessary?
+    //How does it get created?
+    Resource resource =
+        Resource.Create(
+            resourceCreatedEvent.getOwnerEmail(),
+            resourceCreatedEvent.getResourceEmail(),
+            resourceCreatedEvent.getLifetimeDateTimeRange());
+    List<Event> eventList = getEventsFor(uuid);
+    resource.applyEvents(eventList);
+    return resource;
   }
 
   public void executeSqlBundles(List<sqlBundle> sqlBundleList) {

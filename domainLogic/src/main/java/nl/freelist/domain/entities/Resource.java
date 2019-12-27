@@ -9,7 +9,6 @@ import nl.freelist.domain.events.EntryScheduledEvent;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.ResourceCreatedEvent;
 import nl.freelist.domain.valueObjects.Appointment;
-import nl.freelist.domain.valueObjects.Calendar;
 import nl.freelist.domain.valueObjects.DateTimeRange;
 import nl.freelist.domain.valueObjects.Email;
 

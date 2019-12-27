@@ -18,7 +18,7 @@ import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.commands.ScheduleEntryCommand;
 import nl.freelist.data.Repository;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.valueObjects.Calendar;
+import nl.freelist.domain.entities.Calendar;
 import nl.freelist.freelist.R;
 import nl.freelist.recyclerviewHelpers.ChooseCalendarOptionAdapter;
 import nl.freelist.recyclerviewHelpers.ItemClickListener;

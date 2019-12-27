@@ -1,13 +1,16 @@
-package nl.freelist.domain.valueObjects;
+package nl.freelist.domain.entities;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import nl.freelist.domain.valueObjects.Appointment;
+import nl.freelist.domain.valueObjects.DateTimeRange;
 
 public final class Calendar {
 
+
   private final List<Appointment> appointmentList;
-  private final UUID resourceUuid;
+  private final UUID resourceUuid; //Todo: does Calendar need resource Uuid as Resource is the aggregate root?
   private final int resourceLastAppliedEventSequenceNumber;
   private final int entryLastAppliedEventSequenceNumber;
   private final int lastScheduledAppointmentPosition;
@@ -27,7 +30,7 @@ public final class Calendar {
     this.lastScheduledAppointmentPosition = lastScheduledAppointmentPosition;
     this.numberOfProblems = 0;
     this.numberOfReschedules = 0;
-    //Do the logic
+    //Todo: move logic to method in Resource?
     List<DateTimeRange> freeDateTimeRanges = new ArrayList<>();
     freeDateTimeRanges.add(resourceLifetimeDateTimeRange);
     int appointmentListSize;
