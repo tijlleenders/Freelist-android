@@ -1,8 +1,9 @@
 package nl.freelist.domain.crossCuttingConcerns;
 
 import java.util.List;
+import nl.freelist.domain.valueObjects.ValidationError;
 
-public class Result {
+public class Result { //should this be a value object?
 
   private List<ValidationError> validationErrorList;
   private boolean isSuccess;
