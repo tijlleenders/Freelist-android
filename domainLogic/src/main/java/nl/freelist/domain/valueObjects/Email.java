@@ -1,6 +1,6 @@
 package nl.freelist.domain.valueObjects;
 
-public class Email {
+public final class Email {
 
   private String email;
 
