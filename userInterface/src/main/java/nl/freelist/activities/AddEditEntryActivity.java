@@ -5,22 +5,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.NumberPicker;
-import android.widget.NumberPicker.Formatter;
-import android.widget.NumberPicker.OnValueChangeListener;
 import android.widget.Toast;
 import io.reactivex.schedulers.Schedulers;
 import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.commands.ChangeEntryDescriptionCommand;
-import nl.freelist.commands.ChangeEntryDurationCommand;
 import nl.freelist.commands.ChangeEntryParentCommand;
 import nl.freelist.commands.ChangeEntryTitleCommand;
 import nl.freelist.commands.CreateEntryCommand;
@@ -28,12 +22,9 @@ import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.freelist.R;
-import nl.freelist.recyclerviewHelpers.EventAdapter;
-import nl.freelist.recyclerviewHelpers.ItemClickListener;
 import nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel;
-import nl.freelist.views.NumberPickerDuration;
 
-public class AddEditEntryActivity extends AppCompatActivity implements ItemClickListener {
+public class AddEditEntryActivity extends AppCompatActivity {
 
   private static final String TAG = "AddEditEntryActivity";
 
@@ -46,22 +37,19 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
 
   private EditText editTextTitle;
   private EditText editTextDescription;
-  private Button parentButton;
   private Button scheduleButton;
 
-  // Todo: move to fragment invoked by tapping the (readable) duration display button
-  private NumberPickerDuration yearPicker;
-  private NumberPickerDuration weekPicker;
-  private NumberPickerDuration dayPicker;
-  private NumberPickerDuration hourPicker;
-  private NumberPickerDuration minutePicker;
-  private NumberPickerDuration secondPicker;
+  // Todo: connect
+  private EditText yearPicker;
+  private EditText weekPicker;
+  private EditText dayPicker;
+  private EditText hourPicker;
+  private EditText minutePicker;
+  private EditText secondPicker;
 
   private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel
       AddEditEntryActivityViewModel;
 
-  private EventAdapter adapter;
-  private RecyclerView recyclerView;
 
   @Override
   protected void onResume() {
@@ -69,7 +57,6 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
     //Todo: do something with bundle from ChooseCalendarOptionActivity
 
     super.onResume();
-    updateRecyclerView();
   }
 
   @Override
@@ -124,8 +111,10 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
                     new Runnable() {
                       @Override
                       public void run() {
-                        if (result.isSuccess()) {
-                          updateRecyclerView();
+                        if (!result.isSuccess()) {
+                          Toast.makeText(AddEditEntryActivity.this, "Sorry! Create entry failed!",
+                              Toast.LENGTH_SHORT)
+                              .show();
                         }
                       }
                     });
@@ -136,37 +125,13 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
     attachViewListeners();
   }
 
-  private void updateRecyclerView() {
-    Log.d(TAG, "updateRecyclerView called.");
-    AddEditEntryActivityViewModel
-        .getAllEventsFor(uuid)
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .subscribe(
-            events -> {
-              // update RecyclerView
-              runOnUiThread(
-                  new Runnable() {
-                    @Override
-                    public void run() {
-                      adapter.setViewModelEvents(events);
-                      Toast.makeText(
-                          AddEditEntryActivity.this,
-                          "AddEditEntryActivity ViewModelEvent recyclerView refreshed!",
-                          Toast.LENGTH_SHORT)
-                          .show();
-                    }
-
-                  });
-            }, throwable -> Log.e(TAG, "Throwable " + throwable.getMessage()));
-  }
 
   private void initializeForAddNew(Bundle bundle) {
     if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
       initializeParentButtonWithUuid(parentUuid);
       uuid = UUID.randomUUID().toString();
     }
-    setTitle("Add new");
+    setTitle("Add new Freelist");
   }
 
   private void initializeForEditExisting(Bundle bundle) {
@@ -187,23 +152,16 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
                   });
             }));
 
-    setTitle("Edit existing");
+    setTitle("Edit existing Freelist");
   }
 
   private void initializeViews() {
     editTextTitle = findViewById(R.id.edit_text_title);
-    editTextDescription = findViewById(R.id.edit_text_description);
+    editTextDescription = findViewById(R.id.edit_text_notes);
 
-    recyclerView = findViewById(R.id.recycler_view);
-    recyclerView.setLayoutManager(new LinearLayoutManager(this));
-    recyclerView.setHasFixedSize(true);
-    adapter = new EventAdapter(this);
-    recyclerView.setAdapter(adapter);
-
-    parentButton = findViewById(R.id.button_parent_change);
     scheduleButton = findViewById(R.id.schedule_button);
 
-    initializeDurationPicker();
+    //Todo: initialize editTexts for duration
   }
 
   private void attachViewListeners() {
@@ -242,8 +200,10 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
                           new Runnable() {
                             @Override
                             public void run() {
-                              if (result.isSuccess()) {
-                                updateRecyclerView();
+                              if (!result.isSuccess()) {
+                                Toast.makeText(AddEditEntryActivity.this,
+                                    "Sorry! Title change failed!", Toast.LENGTH_SHORT)
+                                    .show();
                               }
                             }
                           });
@@ -290,8 +250,10 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
                               new Runnable() {
                                 @Override
                                 public void run() {
-                                  if (result.isSuccess()) {
-                                    updateRecyclerView();
+                                  if (!result.isSuccess()) {
+                                    Toast.makeText(AddEditEntryActivity.this,
+                                        "Sorry! Change description failed!", Toast.LENGTH_SHORT)
+                                        .show();
                                   }
                                 }
                               });
@@ -303,289 +265,7 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
         };
     editTextDescription.setOnFocusChangeListener(editTextDescriptionOnFocusChangeListener);
 
-    OnValueChangeListener secondPickerOnValueChangeListener =
-        new OnValueChangeListener() {
-          @Override
-          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-            Log.d(
-                TAG,
-                "Seconds changed from "
-                    + oldVal
-                    + " to "
-                    + newVal
-                    + " with eventSequenceNumber "
-                    + lastSavedEventSequenceNumber);
-            ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(
-                    uuid, oldVal, newVal, "seconds", lastSavedEventSequenceNumber, repository);
-            lastSavedEventSequenceNumber += 1;
-            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(
-                    (result -> {
-                      // update View
-                      runOnUiThread(
-                          new Runnable() {
-                            @Override
-                            public void run() {
-                              if (result.isSuccess()) {
-                                updateRecyclerView();
-                              }
-                            }
-                          });
-                    }));
-          }
-        };
-    secondPicker.setOnValueChangedListener(secondPickerOnValueChangeListener);
-
-    OnValueChangeListener minutePickerOnValueChangeListener =
-        new OnValueChangeListener() {
-          @Override
-          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-            Log.d(
-                TAG,
-                "Minutes changed from "
-                    + oldVal
-                    + " to "
-                    + newVal
-                    + " with eventSequenceNumber "
-                    + lastSavedEventSequenceNumber);
-            ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(
-                    uuid, oldVal, newVal, "minutes", lastSavedEventSequenceNumber, repository);
-            lastSavedEventSequenceNumber += 1;
-            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(
-                    (result -> {
-                      // update View
-                      runOnUiThread(
-                          new Runnable() {
-                            @Override
-                            public void run() {
-                              if (result.isSuccess()) {
-                                updateRecyclerView();
-                              }
-                            }
-                          });
-                    }));
-          }
-        };
-    minutePicker.setOnValueChangedListener(minutePickerOnValueChangeListener);
-
-    OnValueChangeListener hourPickerOnValueChangeListener =
-        new OnValueChangeListener() {
-          @Override
-          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-            Log.d(
-                TAG,
-                "Hours changed from "
-                    + oldVal
-                    + " to "
-                    + newVal
-                    + " with eventSequenceNumber "
-                    + lastSavedEventSequenceNumber);
-            ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(
-                    uuid, oldVal, newVal, "hours", lastSavedEventSequenceNumber, repository);
-            lastSavedEventSequenceNumber += 1;
-            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(
-                    (result -> {
-                      // update View
-                      runOnUiThread(
-                          new Runnable() {
-                            @Override
-                            public void run() {
-                              if (result.isSuccess()) {
-                                updateRecyclerView();
-                              }
-                            }
-                          });
-                    }));
-          }
-        };
-    hourPicker.setOnValueChangedListener(hourPickerOnValueChangeListener);
-
-    OnValueChangeListener dayPickerOnValueChangeListener =
-        new OnValueChangeListener() {
-          @Override
-          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-            Log.d(
-                TAG,
-                "Days changed from "
-                    + oldVal
-                    + " to "
-                    + newVal
-                    + " with eventSequenceNumber "
-                    + lastSavedEventSequenceNumber);
-            ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(
-                    uuid, oldVal, newVal, "days", lastSavedEventSequenceNumber, repository);
-            lastSavedEventSequenceNumber += 1;
-            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(
-                    (result -> {
-                      // update View
-                      runOnUiThread(
-                          new Runnable() {
-                            @Override
-                            public void run() {
-                              if (result.isSuccess()) {
-                                updateRecyclerView();
-                              }
-                            }
-                          });
-                    })
-                );
-          }
-        };
-    dayPicker.setOnValueChangedListener(dayPickerOnValueChangeListener);
-
-    OnValueChangeListener weekPickerOnValueChangeListener =
-        new OnValueChangeListener() {
-          @Override
-          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-            Log.d(
-                TAG,
-                "Weeks changed from "
-                    + oldVal
-                    + " to "
-                    + newVal
-                    + " with eventSequenceNumber "
-                    + lastSavedEventSequenceNumber);
-            ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(
-                    uuid, oldVal, newVal, "weeks", lastSavedEventSequenceNumber, repository);
-            lastSavedEventSequenceNumber += 1;
-            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(
-                    (result -> {
-                      // update View
-                      runOnUiThread(
-                          new Runnable() {
-                            @Override
-                            public void run() {
-                              if (result.isSuccess()) {
-                                updateRecyclerView();
-                              }
-                            }
-                          });
-                    }));
-          }
-        };
-    weekPicker.setOnValueChangedListener(weekPickerOnValueChangeListener);
-
-    OnValueChangeListener yearPickerOnValueChangeListener =
-        new OnValueChangeListener() {
-          @Override
-          public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-            Log.d(
-                TAG,
-                "Years changed from "
-                    + oldVal
-                    + " to "
-                    + newVal
-                    + " with eventSequenceNumber "
-                    + lastSavedEventSequenceNumber);
-            ChangeEntryDurationCommand changeEntryDurationCommand =
-                new ChangeEntryDurationCommand(
-                    uuid, oldVal, newVal, "years", lastSavedEventSequenceNumber, repository);
-            lastSavedEventSequenceNumber += 1;
-            AddEditEntryActivityViewModel.handle(changeEntryDurationCommand)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(
-                    (result -> {
-                      // update View
-                      runOnUiThread(
-                          new Runnable() {
-                            @Override
-                            public void run() {
-                              if (result.isSuccess()) {
-                                updateRecyclerView();
-                              }
-                            }
-                          });
-                    })
-                );
-          }
-        };
-    yearPicker.setOnValueChangedListener(yearPickerOnValueChangeListener);
-
     attachScheduleButtonListener();
-  }
-
-  private void initializeDurationPicker() {
-    yearPicker = findViewById(R.id.year_picker);
-    yearPicker.setMaxValue(99);
-    yearPicker.setFormatter(
-        new Formatter() {
-          @Override
-          public String format(int value) {
-            return Integer.toString(value) + "y";
-          }
-        });
-
-    weekPicker = findViewById(R.id.week_picker);
-    weekPicker.setMaxValue(51);
-    weekPicker.setFormatter(
-        new Formatter() {
-          @Override
-          public String format(int value) {
-            return Integer.toString(value) + "w";
-          }
-        });
-
-    dayPicker = findViewById(R.id.day_picker);
-    dayPicker.setMaxValue(6);
-    dayPicker.setFormatter(
-        new Formatter() {
-          @Override
-          public String format(int value) {
-            return Integer.toString(value) + "d";
-          }
-        });
-
-    hourPicker = findViewById(R.id.hour_picker);
-    hourPicker.setMaxValue(23);
-    hourPicker.setFormatter(
-        new Formatter() {
-          @Override
-          public String format(int value) {
-            return Integer.toString(value) + "h";
-          }
-        });
-
-    minutePicker = findViewById(R.id.minute_picker);
-    minutePicker.setMinValue(0);
-    minutePicker.setMaxValue(59);
-    minutePicker.setFormatter(
-        new Formatter() {
-          @Override
-          public String format(int value) {
-            return Integer.toString(value) + "m";
-          }
-        });
-
-    secondPicker = findViewById(R.id.second_picker);
-    secondPicker.setMinValue(0);
-    secondPicker.setMaxValue(59);
-    secondPicker.setFormatter(
-        new Formatter() {
-          @Override
-          public String format(int value) {
-            return Integer.toString(value) + "s";
-          }
-        });
   }
 
   @Override
@@ -614,8 +294,11 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
                       new Runnable() {
                         @Override
                         public void run() {
-                          if (result.isSuccess()) {
-                            updateRecyclerView();
+                          if (!result.isSuccess()) {
+                            Toast
+                                .makeText(AddEditEntryActivity.this, "Sorry! Change parent failed!",
+                                    Toast.LENGTH_SHORT)
+                                .show();
                           }
                         }
                       });
@@ -628,43 +311,9 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
   }
 
   private void setParentButtonText() {
-    if (parentUuid.equals(defaultUuid)) {
-      parentButton.setText("");
-      return;
-    } else {
-      AddEditEntryActivityViewModel.getViewModelEntry(parentUuid)
-          .subscribeOn(Schedulers.io())
-          .observeOn(Schedulers.io())
-          .subscribe(
-              (viewModelEntryParent -> {
-                // update View
-                runOnUiThread(
-                    new Runnable() {
-                      @Override
-                      public void run() {
-                        parentButton.setText(viewModelEntryParent.getTitle());
-                      }
-                    });
-              }));
-    }
   }
 
   private void initializeParentButtonWithUuid(String parentUuid) {
-    this.parentUuid = parentUuid;
-    parentButton.setOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            Intent chooseParentActivityIntent =
-                new Intent(AddEditEntryActivity.this, ChooseEntryActivity.class);
-            chooseParentActivityIntent.putExtra(
-                Constants.EXTRA_REQUEST_TYPE_CHOOSE_PARENT, Constants.CHOOSE_PARENT_REQUEST);
-            chooseParentActivityIntent.putExtra(Constants.EXTRA_ENTRY_ID, uuid);
-            startActivityForResult(chooseParentActivityIntent, Constants.CHOOSE_PARENT_REQUEST);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-          }
-        });
-    setParentButtonText();
   }
 
   private void attachScheduleButtonListener() {
@@ -691,25 +340,9 @@ public class AddEditEntryActivity extends AppCompatActivity implements ItemClick
     Log.d(TAG, "initializeEditActivityWith viewModelEntry " + viewModelEntry.getTitle() + "called");
     editTextTitle.setText(viewModelEntry.getTitle());
     editTextDescription.setText(viewModelEntry.getDescription());
-    // Todo: fix bug in NumberPicker that doesn't display formatting on first rendering
-    yearPicker.setValue(viewModelEntry.getYears());
-    weekPicker.setValue(viewModelEntry.getWeeks());
-    dayPicker.setValue(viewModelEntry.getDays());
-    hourPicker.setValue(viewModelEntry.getHours());
-    minutePicker.setValue(viewModelEntry.getMinutes());
-    secondPicker.setValue(viewModelEntry.getSeconds());
     initializeParentButtonWithUuid(viewModelEntry.getParentUuid());
     lastSavedEventSequenceNumber = viewModelEntry.getLastSavedEventSequenceNumber();
-    updateRecyclerView();
     return;
   }
 
-  @Override
-  public void onItemClick(View view, int position) {
-    Log.d(TAG, "onItemClick called.");
-    String parentToSet = adapter.getEventAt(position).getEntryId();
-//    navigateEntriesViewModel.updateParentUuid(parentToSet);
-//    updateView();
-    adapter.setCurrentId(parentToSet);
-  }
 }
