@@ -1,7 +1,7 @@
 package nl.freelist.activities;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import nl.freelist.freelist.R;
 
 public class SettingsActivity extends AppCompatActivity {

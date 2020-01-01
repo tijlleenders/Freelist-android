@@ -3,8 +3,8 @@ package nl.freelist.viewModelPerActivity;
 // OK according to https://developer.android.com/topic/libraries/architecture/viewmodel
 
 import android.app.Application;
-import android.arch.lifecycle.AndroidViewModel;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;

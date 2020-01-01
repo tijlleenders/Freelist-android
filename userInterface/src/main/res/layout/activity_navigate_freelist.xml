@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
@@ -8,7 +8,7 @@
   android:orientation="vertical"
   tools:context="nl.freelist.activities.NavigateFreelistActivity">
 
-  <android.support.v7.widget.LinearLayoutCompat
+  <androidx.appcompat.widget.LinearLayoutCompat
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -16,13 +16,13 @@
     app:layout_anchorGravity="top"
     >
 
-    <android.support.v7.widget.LinearLayoutCompat
+    <androidx.appcompat.widget.LinearLayoutCompat
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
       android:layout_marginStart="8dp">
 
-      <android.support.v7.widget.CardView
+      <androidx.cardview.widget.CardView
         android:id="@+id/breadcrumb_level_0"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -32,7 +32,7 @@
       android:layout_height="wrap_content"
       android:text="Home"
       android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
-  </android.support.v7.widget.CardView>
+      </androidx.cardview.widget.CardView>
 
       <TextView
         android:id="@+id/breadcrumb_divider_0_1"
@@ -43,7 +43,7 @@
         android:text=">"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
-  <android.support.v7.widget.CardView
+      <androidx.cardview.widget.CardView
     android:id="@+id/breadcrumb_level_1"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
@@ -53,7 +53,7 @@
       android:layout_height="wrap_content"
       android:text="breadcrumb_1"
       android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
-  </android.support.v7.widget.CardView>
+      </androidx.cardview.widget.CardView>
 
   <TextView
     android:id="@+id/breadcrumb_divider_1_2"
@@ -64,7 +64,7 @@
     android:text=">"
     android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
-  <android.support.v7.widget.CardView
+      <androidx.cardview.widget.CardView
     android:id="@+id/breadcrumb_level_2"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
@@ -75,10 +75,10 @@
       android:ellipsize="end"
       android:text="breadcrumb_2"
       android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
-  </android.support.v7.widget.CardView>
-    </android.support.v7.widget.LinearLayoutCompat>
+      </androidx.cardview.widget.CardView>
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
-  <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/recycler_view"
     android:layout_width="match_parent"
     android:layout_height="608dp"
@@ -86,9 +86,9 @@
     android:layout_marginBottom="2dp"
     tools:listitem="@layout/main_entry_single"/>
 
-  </android.support.v7.widget.LinearLayoutCompat>
+  </androidx.appcompat.widget.LinearLayoutCompat>
 
-  <android.support.design.widget.FloatingActionButton
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
     android:id="@+id/button_add_entry"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -99,7 +99,7 @@
     app:layout_anchor="@id/bottom_app_bar"
     />
 
-  <android.support.design.bottomappbar.BottomAppBar
+  <com.google.android.material.bottomappbar.BottomAppBar
     android:id="@+id/bottom_app_bar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -112,7 +112,6 @@
     app:fabCradleVerticalOffset="0dp"
     app:hideOnScroll="false"
     app:navigationIcon="@drawable/ic_menu"
-    app:menu="@menu/bottom_app_bar_menu">
-  </android.support.design.bottomappbar.BottomAppBar>
+    app:menu="@menu/bottom_app_bar_menu"></com.google.android.material.bottomappbar.BottomAppBar>
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

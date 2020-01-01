@@ -1,16 +1,16 @@
 package nl.freelist.activities;
 
-import android.arch.lifecycle.ViewModel;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.support.design.bottomappbar.BottomAppBar;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProviders;
+import com.google.android.material.bottomappbar.BottomAppBar;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.freelist.R;
 import nl.freelist.viewModelPerActivity.NavigateEntriesViewModel;
