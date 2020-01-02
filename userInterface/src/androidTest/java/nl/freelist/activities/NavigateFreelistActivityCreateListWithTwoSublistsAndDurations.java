@@ -168,7 +168,7 @@ public class NavigateFreelistActivityCreateListWithTwoSublistsAndDurations {
     appCompatEditText3.perform(typeText("subTest1"), closeSoftKeyboard());
 
     ViewInteraction numberPickerDuration = onView(
-        allOf(withId(R.id.duration_filler),
+        allOf(withId(R.id.edit_text_duration),
             childAtPosition(
                 allOf(withId(R.id.duration_picker),
                     childAtPosition(
@@ -181,7 +181,7 @@ public class NavigateFreelistActivityCreateListWithTwoSublistsAndDurations {
     ViewInteraction customEditText0 = onView(
         allOf(withClassName(is("android.widget.NumberPicker$CustomEditText")), withText("0"),
             childAtPosition(
-                allOf(withId(R.id.duration_filler),
+                allOf(withId(R.id.edit_text_duration),
                     childAtPosition(
                         withId(R.id.duration_picker),
                         3)),
@@ -192,7 +192,7 @@ public class NavigateFreelistActivityCreateListWithTwoSublistsAndDurations {
     ViewInteraction customEditText1 = onView(
         allOf(withClassName(is("android.widget.NumberPicker$CustomEditText")), withText("1"),
             childAtPosition(
-                allOf(withId(R.id.duration_filler),
+                allOf(withId(R.id.edit_text_duration),
                     childAtPosition(
                         withId(R.id.duration_picker),
                         3)),
@@ -203,7 +203,7 @@ public class NavigateFreelistActivityCreateListWithTwoSublistsAndDurations {
     ViewInteraction customEditText2 = onView(
         allOf(withClassName(is("android.widget.NumberPicker$CustomEditText")), withText("1"),
             childAtPosition(
-                allOf(withId(R.id.duration_filler),
+                allOf(withId(R.id.edit_text_duration),
                     childAtPosition(
                         withId(R.id.duration_picker),
                         3)),

@@ -16,13 +16,15 @@
       android:layout_height="wrap_content"
       android:orientation="vertical">
 
-      <!-- TODO: app:endIconMode="clear_text" -->
+      <!-- TODO: add custom endIconMode to validate text entry and hide keyboard-->
       <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/text_input_layout_title"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:focusable="auto"
         android:hint="@string/title_hint"
+        app:endIconMode="clear_text"
         app:hintEnabled="true">
         <com.google.android.material.textfield.TextInputEditText
           android:id="@+id/edit_text_title"
@@ -31,35 +33,40 @@
       </com.google.android.material.textfield.TextInputLayout>
 
       <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/text_input_layout_start_datetime"
+        android:id="@+id/text_input_layout_start"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:hint="Starts at or after">
         <com.google.android.material.textfield.TextInputEditText
+          android:id="@+id/edit_text_start"
           android:layout_width="match_parent"
           android:layout_height="wrap_content" />
       </com.google.android.material.textfield.TextInputLayout>
 
       <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_input_layout_duration"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:hint="Lasts for">
+        android:hint="Lasts for"
+        app:endIconMode="clear_text">
         <com.google.android.material.textfield.TextInputEditText
-          android:id="@+id/duration_filler"
+          android:id="@+id/edit_text_duration"
           android:layout_width="match_parent"
           android:layout_height="wrap_content" />
       </com.google.android.material.textfield.TextInputLayout>
 
       <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/text_input_layout_finish_datetime"
+        android:id="@+id/text_input_layout_end"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:hint="Finishes at or before">
+        android:hint="Finishes at or before"
+        app:endIconMode="clear_text">
         <com.google.android.material.textfield.TextInputEditText
+          android:id="@+id/edit_text_end"
           android:layout_width="match_parent"
           android:layout_height="wrap_content" />
       </com.google.android.material.textfield.TextInputLayout>
@@ -81,7 +88,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:hint="@string/notes_hint"
-        app:hintEnabled="true">
+        app:hintEnabled="true"
+        app:endIconMode="clear_text">
         <com.google.android.material.textfield.TextInputEditText
           android:id="@+id/edit_text_notes"
           android:layout_width="match_parent"
