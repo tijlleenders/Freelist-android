@@ -14,4 +14,7 @@
   <string name="notes_hint">Optional notes</string>
   <string name="title_hint">Title</string>
   <string name="sublist_of">Sublist of</string>
+  <string name="hint_hours">Hours</string>
+  <string name="hint_minutes">Minutes</string>
+  <string name="ok">Ok</string>
 </resources>

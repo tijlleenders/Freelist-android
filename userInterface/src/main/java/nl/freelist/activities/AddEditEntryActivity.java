@@ -21,11 +21,13 @@ import nl.freelist.commands.ChangeEntryTitleCommand;
 import nl.freelist.commands.CreateEntryCommand;
 import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.dialogs.DurationPickerDialog;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.freelist.R;
 import nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel;
 
-public class AddEditEntryActivity extends AppCompatActivity implements OnFocusChangeListener {
+public class AddEditEntryActivity extends AppCompatActivity
+    implements OnFocusChangeListener, DurationPickerDialog.NoticeDialogListener {
 
   private static final String TAG = "AddEditEntryActivity";
 
@@ -360,12 +362,26 @@ public class AddEditEntryActivity extends AppCompatActivity implements OnFocusCh
     return;
   }
 
+
   @Override
   public void onFocusChange(View view, boolean b) {
     switch (view.getId()) {
+      case R.id.edit_text_duration:
+        if (textInputEditTextDuration.hasFocus()) {
+          Log.d(TAG, "duration clicked");
+          DurationPickerDialog durationPickerDialog = new DurationPickerDialog();
+          durationPickerDialog.show(getSupportFragmentManager(), "testDialog");
+        }
+        break;
       default:
         saveChangedFields();
         break;
     }
+  }
+
+  @Override
+  public void onDialogPositiveClick(String durationString) {
+    textInputEditTextDuration.setText(durationString);
+    textInputEditTextDuration.clearFocus();
   }
 }
