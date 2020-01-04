@@ -113,7 +113,7 @@ public class Resource {
         LOGGER.log(Level.INFO,
             "ResourceCreatedEvent applied to resource");
         ResourceCreatedEvent resourceCreatedEvent = (ResourceCreatedEvent) event;
-        this.uuid = UUID.fromString(resourceCreatedEvent.getResourceUuid());
+        this.uuid = UUID.fromString(resourceCreatedEvent.getAggregateId());
         this.ownerEmail = resourceCreatedEvent.getOwnerEmail();
         this.resourceEmail = resourceCreatedEvent.getResourceEmail();
         this.lifetimeDateTimeRange = resourceCreatedEvent.getLifetimeDateTimeRange();

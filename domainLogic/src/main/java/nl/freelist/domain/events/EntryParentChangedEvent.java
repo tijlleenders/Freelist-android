@@ -6,7 +6,6 @@ public class EntryParentChangedEvent extends Event {
 
   private String parentBefore;
   private String parentAfter;
-  private String entryId;
   private int eventSequenceNumber;
 
   private EntryParentChangedEvent(
@@ -15,10 +14,9 @@ public class EntryParentChangedEvent extends Event {
       int eventSequenceNumber,
       String parentBefore,
       String parentAfter) {
-    super(occurredDateTime);
+    super(occurredDateTime, entryId);
     this.parentBefore = parentBefore;
     this.parentAfter = parentAfter;
-    this.entryId = entryId;
     this.eventSequenceNumber = eventSequenceNumber;
   }
 
@@ -40,10 +38,6 @@ public class EntryParentChangedEvent extends Event {
 
   public String getParentAfter() {
     return parentAfter;
-  }
-
-  public String getEntryUuid() {
-    return entryId;
   }
 
   public int getEventSequenceNumber() {

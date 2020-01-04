@@ -9,7 +9,6 @@ public class ResourceCreatedEvent extends Event {
   private Email ownerEmail;
   private Email resourceEmail;
   private String ownerUuid;
-  private String resourceUuid;
   private DateTimeRange lifetimeDateTimeRange;
   private int eventSequenceNumber;
 
@@ -21,11 +20,10 @@ public class ResourceCreatedEvent extends Event {
       String resourceUuid,
       DateTimeRange lifetimeDateTimeRange,
       int eventSequenceNumber) {
-    super(occurredDateTime);
+    super(occurredDateTime, resourceUuid);
     this.ownerEmail = ownerEmail;
     this.resourceEmail = resourceEmail;
     this.ownerUuid = ownerUuid;
-    this.resourceUuid = resourceUuid;
     this.lifetimeDateTimeRange = lifetimeDateTimeRange;
     this.eventSequenceNumber = eventSequenceNumber;
   }
@@ -50,10 +48,6 @@ public class ResourceCreatedEvent extends Event {
 
   public String getOwnerUuid() {
     return ownerUuid;
-  }
-
-  public String getResourceUuid() {
-    return resourceUuid;
   }
 
   public int getEventSequenceNumber() {

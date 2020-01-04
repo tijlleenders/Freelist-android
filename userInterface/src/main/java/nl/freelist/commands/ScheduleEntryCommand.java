@@ -46,6 +46,8 @@ public class ScheduleEntryCommand extends Command {
             calendar
         );
 
+    //Todo: create second event for repository (events are about aggregate state changes, so same event can't be shared by two aggregates)
+
     //How to know if it fails?
     List<sqlBundle> sqlBundleList = new ArrayList<>();
     List<Event> eventsToAddList = new ArrayList<>();

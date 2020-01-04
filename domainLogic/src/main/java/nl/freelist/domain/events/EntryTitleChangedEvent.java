@@ -6,7 +6,6 @@ public class EntryTitleChangedEvent extends Event {
 
   private String titleBefore;
   private String titleAfter;
-  private String entryId;
   private int eventSequenceNumber;
 
   private EntryTitleChangedEvent(
@@ -15,10 +14,9 @@ public class EntryTitleChangedEvent extends Event {
       int eventSequenceNumber,
       String titleBefore,
       String titleAfter) {
-    super(occurredDateTime);
+    super(occurredDateTime, entryId);
     this.titleBefore = titleBefore;
     this.titleAfter = titleAfter;
-    this.entryId = entryId;
     this.eventSequenceNumber = eventSequenceNumber;
   }
 
@@ -40,10 +38,6 @@ public class EntryTitleChangedEvent extends Event {
 
   public String getTitleBefore() {
     return titleBefore;
-  }
-
-  public String getEntryId() {
-    return entryId;
   }
 
   public int getEventSequenceNumber() {

@@ -5,7 +5,6 @@ import nl.freelist.domain.entities.Calendar;
 
 public class EntryScheduledEvent extends Event {
 
-  private String entryUuid;
   private String resourceUuid;
   private int resourceEventSequenceNumber;
   private int entryEventSequenceNumber;
@@ -19,8 +18,7 @@ public class EntryScheduledEvent extends Event {
       int entryEventSequenceNumber,
       Calendar calendar
   ) {
-    super(occurredDateTime);
-    this.entryUuid = entryUuid;
+    super(occurredDateTime, entryUuid);
     this.resourceUuid = resourceUuid;
     this.resourceEventSequenceNumber = resourceEventSequenceNumber;
     this.entryEventSequenceNumber = entryEventSequenceNumber;
@@ -40,10 +38,6 @@ public class EntryScheduledEvent extends Event {
             occurredDateTime, entryUuid, resourceUuid, resourceEventSequenceNumber,
             entryEventSequenceNumber, calendar);
     return entryDescriptionChangedEvent;
-  }
-
-  public String getEntryUuid() {
-    return entryUuid;
   }
 
   public String getResourceUuid() {

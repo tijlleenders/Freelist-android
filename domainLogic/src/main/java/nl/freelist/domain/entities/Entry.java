@@ -46,7 +46,7 @@ public class Entry {
     switch (eventClass) {
       case "EntryCreatedEvent":
         EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
-        this.uuid = UUID.fromString(entryCreatedEvent.getEntryUuid());
+        this.uuid = UUID.fromString(entryCreatedEvent.getAggregateId());
         this.ownerUuid = UUID.fromString(entryCreatedEvent.getOwnerUuid());
         this.parentUuid = UUID.fromString(entryCreatedEvent.getParentUuid());
         break;

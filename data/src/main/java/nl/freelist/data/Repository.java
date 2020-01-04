@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,6 +17,7 @@ import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelCalendarOption;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.dto.ViewModelEvent;
+import nl.freelist.data.gson.Converters;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.entities.Calendar;
 import nl.freelist.domain.entities.Entry;
@@ -89,18 +92,44 @@ public class Repository {
       }
     }
 
+    ContentValues viewModelEntryContentValues2 = new ContentValues();
+    viewModelEntryContentValues2.put("uuid", entry.getUuid().toString());
+    viewModelEntryContentValues2.put("parentUuid", entry.getParentUuid().toString());
+    viewModelEntryContentValues2.put("ownerUuid", entry.getOwnerUuid().toString());
+    viewModelEntryContentValues2.put("title", entry.getTitle());
+    viewModelEntryContentValues2.put("description", entry.getDescription());
+    viewModelEntryContentValues2.put("duration", entry.getDuration());
+    viewModelEntryContentValues2.put(
+        "lastSavedEventSequenceNumber", lastSavedEventSequenceNumber + newEventsToSave.size());
+    sqlBundleList.add(new sqlBundle("viewModelEntry", viewModelEntryContentValues2));
+
     ContentValues viewModelEntryContentValues = new ContentValues();
     viewModelEntryContentValues.put("uuid", entry.getUuid().toString());
-    viewModelEntryContentValues.put("parentUuid", entry.getParentUuid().toString());
-    viewModelEntryContentValues.put("ownerUuid", entry.getOwnerUuid().toString());
-    viewModelEntryContentValues.put("title", entry.getTitle());
-    viewModelEntryContentValues.put("description", entry.getDescription());
-    viewModelEntryContentValues.put("duration", entry.getDuration());
-    viewModelEntryContentValues.put(
-        "lastSavedEventSequenceNumber", lastSavedEventSequenceNumber + newEventsToSave.size());
-    sqlBundleList.add(new sqlBundle("viewModelEntry", viewModelEntryContentValues));
+    viewModelEntryContentValues.put("json", jsonOf(getViewModelEntryFrom(entry)));
+    sqlBundleList.add(new sqlBundle("viewModelEntry2", viewModelEntryContentValues));
 
     return sqlBundleList;
+  }
+
+  private ViewModelEntry getViewModelEntryFrom(Entry entry) {
+    ViewModelEntry viewModelEntry;
+    viewModelEntry = new ViewModelEntry(
+        entry.getOwnerUuid().toString(),
+        entry.getParentUuid().toString(),
+        entry.getUuid().toString(),
+        entry.getTitle(),
+        entry.getDescription(),
+        entry.getDuration(),
+        999,
+        999,
+        entry.getLastAppliedEventSequenceNumber()
+    );
+    return viewModelEntry;
+  }
+
+  private String jsonOf(ViewModelEntry viewModelEntry) {
+    Gson gson = Converters.registerOffsetDateTime(new GsonBuilder()).create();
+    return gson.toJson(viewModelEntry);
   }
 
   public void executeSqlBundles(List<sqlBundle> sqlBundleList) {
@@ -189,32 +218,32 @@ public class Repository {
         case "EntryCreatedEvent":
           eventMessage = "Created";
           EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
-          entryId = entryCreatedEvent.getEntryUuid();
+          entryId = entryCreatedEvent.getAggregateId();
           break;
         case "EntryDescriptionChangedEvent":
           eventMessage = "Description changed";
           EntryDescriptionChangedEvent entryDescriptionChangedEvent = (EntryDescriptionChangedEvent) event;
-          entryId = entryDescriptionChangedEvent.getEntryUuid();
+          entryId = entryDescriptionChangedEvent.getAggregateId();
           break;
         case "EntryDurationChangedEvent":
           eventMessage = "Duration changed";
           EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
-          entryId = entryDurationChangedEvent.getEntryUuid();
+          entryId = entryDurationChangedEvent.getAggregateId();
           break;
         case "EntryParentChangedEvent":
           eventMessage = "Parent changed";
           EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
-          entryId = entryParentChangedEvent.getEntryUuid(); //Todo doublecheck if not parentAfter
+          entryId = entryParentChangedEvent.getAggregateId(); //Todo doublecheck if not parentAfter
           break;
         case "EntryScheduledEvent":
           eventMessage = "Scheduled";
           EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
-          entryId = entryScheduledEvent.getEntryUuid();
+          entryId = entryScheduledEvent.getAggregateId();
           break;
         case "EntryTitleChangedEvent":
           eventMessage = "Title changed";
           EntryTitleChangedEvent entryTitleChangedEvent = (EntryTitleChangedEvent) event;
-          entryId = entryTitleChangedEvent.getEntryId();
+          entryId = entryTitleChangedEvent.getAggregateId();
           break;
         default:
           eventMessage = "Unrecognized: " + event.getClass().getSimpleName();
