@@ -135,55 +135,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return sqlBundleList;
   }
 
-  public void tempFillViewModelCalendar() {
-    Log.d(TAG, "tempFillViewModelCalendar called.");
-
-    List<sqlBundle> sqlBundleList = new ArrayList<>();
-
-    ContentValues calendarContentValues = new ContentValues();
-    calendarContentValues.put("entryUuid", "6910aac6-e16c-4ba0-8282-4d48f1281e16");
-    calendarContentValues.put("title", "title1");
-    calendarContentValues.put("date", "2019-01-01");
-    calendarContentValues.put("time", "");
-    calendarContentValues.put("duration", 0);
-    calendarContentValues.put("isDone", 0);
-    calendarContentValues.put("lastSavedEventSequenceNumber", 0);
-
-    ContentValues calendarContentValues4 = new ContentValues();
-    calendarContentValues4.put("entryUuid", "6910aac6-e16c-4ba0-8282-4d48f1281e16");
-    calendarContentValues4.put("title", "title2");
-    calendarContentValues4.put("date", "2019-01-10");
-    calendarContentValues4.put("time", "12:00");
-    calendarContentValues4.put("duration", 0);
-    calendarContentValues4.put("isDone", 0);
-    calendarContentValues4.put("lastSavedEventSequenceNumber", 0);
-
-    ContentValues calendarContentValues2 = new ContentValues();
-    calendarContentValues2.put("entryUuid", "6910aac6-e16c-4ba0-8282-4d48f1281e16");
-    calendarContentValues2.put("title", "title2");
-    calendarContentValues2.put("date", "2019-01-10");
-    calendarContentValues2.put("time", "11:00");
-    calendarContentValues2.put("duration", 0);
-    calendarContentValues2.put("isDone", 0);
-    calendarContentValues2.put("lastSavedEventSequenceNumber", 0);
-
-    ContentValues calendarContentValues3 = new ContentValues();
-    calendarContentValues3.put("entryUuid", "6910aac6-e16c-4ba0-8282-4d48f1281e16");
-    calendarContentValues3.put("title", "title3");
-    calendarContentValues3.put("date", "2019-02-10");
-    calendarContentValues3.put("time", "");
-    calendarContentValues3.put("duration", 60);
-    calendarContentValues3.put("isDone", 0);
-    calendarContentValues3.put("lastSavedEventSequenceNumber", 0);
-
-    sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues));
-    sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues4));
-    sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues2));
-    sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues3));
-
-    executeSqlBundles(sqlBundleList);
-  }
-
   public List<sqlBundle> getQueriesForEvent( //Todo: sort out below mess...
       String aggregateIdType, int expectedLastSavedEventSequenceNumber, Event event)
       throws Exception {
