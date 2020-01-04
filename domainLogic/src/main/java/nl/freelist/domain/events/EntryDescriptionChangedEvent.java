@@ -26,6 +26,9 @@ public class EntryDescriptionChangedEvent extends Event {
       int eventSequenceNumber,
       String descriptionBefore,
       String descriptionAfter) {
+    if (descriptionAfter.equals(descriptionBefore)) {
+      return null;
+    }
     EntryDescriptionChangedEvent entryDescriptionChangedEvent =
         new EntryDescriptionChangedEvent(
             occurredDateTime, entryId, eventSequenceNumber, descriptionBefore, descriptionAfter);

@@ -26,6 +26,9 @@ public class EntryParentChangedEvent extends Event {
       int eventSequenceNumber,
       String parentBefore,
       String parentAfter) {
+    if (parentAfter.equals(parentBefore)) {
+      return null;
+    }
     EntryParentChangedEvent entryParentChangedEvent =
         new EntryParentChangedEvent(
             occurredDateTime, entryId, eventSequenceNumber, parentBefore, parentAfter);

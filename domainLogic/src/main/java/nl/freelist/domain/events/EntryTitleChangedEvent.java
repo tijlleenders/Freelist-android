@@ -26,6 +26,9 @@ public class EntryTitleChangedEvent extends Event {
       int eventSequenceNumber,
       String titleBefore,
       String titleAfter) {
+    if (titleAfter.equals(titleBefore)) {
+      return null;
+    }
     EntryTitleChangedEvent entryTitleChangedEvent =
         new EntryTitleChangedEvent(
             occurredDateTime, entryId, eventSequenceNumber, titleBefore, titleAfter);

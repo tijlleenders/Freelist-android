@@ -30,6 +30,9 @@ public class EntryDurationChangedEvent extends Event {
       int durationBefore,
       int durationAfter,
       String unitOfMeasure) {
+    if (durationAfter == durationBefore) {
+      return null;
+    }
     EntryDurationChangedEvent entryDurationChangedEvent =
         new EntryDurationChangedEvent(
             occurredDateTime, entryId, eventSequenceNumber, durationBefore, durationAfter,
