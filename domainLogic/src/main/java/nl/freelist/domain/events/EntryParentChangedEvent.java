@@ -7,6 +7,7 @@ public class EntryParentChangedEvent extends Event {
   private String parentBefore;
   private String parentAfter;
   private int eventSequenceNumber;
+  private String eventType = "EntryParentChangedEvent";
 
   private EntryParentChangedEvent(
       OffsetDateTime occurredDateTime,
@@ -45,5 +46,9 @@ public class EntryParentChangedEvent extends Event {
 
   public int getEventSequenceNumber() {
     return eventSequenceNumber;
+  }
+
+  public String getEventType() {
+    return eventType;
   }
 }

@@ -7,6 +7,7 @@ public class EntryCreatedEvent extends Event {
   private String ownerUuid;
   private String parentUuid;
   private int eventSequenceNumber;
+  private String eventType = "EntryCreatedEvent";
 
 
   private EntryCreatedEvent(OffsetDateTime occurredDateTime, String ownerUuid, String parentUuid,
@@ -34,5 +35,9 @@ public class EntryCreatedEvent extends Event {
 
   public int getEventSequenceNumber() {
     return eventSequenceNumber;
+  }
+
+  public String getEventType() {
+    return eventType;
   }
 }

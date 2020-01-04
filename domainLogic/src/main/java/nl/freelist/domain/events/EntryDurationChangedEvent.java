@@ -8,6 +8,7 @@ public class EntryDurationChangedEvent extends Event {
   private int durationAfter;
   private String unitOfMeasure;
   private int eventSequenceNumber;
+  private String eventType = "EntryDurationChangedEvent";
 
   private EntryDurationChangedEvent(
       OffsetDateTime occurredDateTime,
@@ -54,5 +55,9 @@ public class EntryDurationChangedEvent extends Event {
 
   public int getEventSequenceNumber() {
     return eventSequenceNumber;
+  }
+
+  public String getEventType() {
+    return eventType;
   }
 }

@@ -7,6 +7,8 @@ public class EntryTitleChangedEvent extends Event {
   private String titleBefore;
   private String titleAfter;
   private int eventSequenceNumber;
+  private String eventType = "EntryTitleChangedEvent";
+
 
   private EntryTitleChangedEvent(
       OffsetDateTime occurredDateTime,
@@ -45,5 +47,9 @@ public class EntryTitleChangedEvent extends Event {
 
   public int getEventSequenceNumber() {
     return eventSequenceNumber;
+  }
+
+  public String getEventType() {
+    return eventType;
   }
 }

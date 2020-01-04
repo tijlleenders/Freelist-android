@@ -11,6 +11,8 @@ public class ResourceCreatedEvent extends Event {
   private String ownerUuid;
   private DateTimeRange lifetimeDateTimeRange;
   private int eventSequenceNumber;
+  private String eventType = "ResourceCreatedEvent";
+
 
   private ResourceCreatedEvent(
       OffsetDateTime occurredDateTime,
@@ -64,5 +66,9 @@ public class ResourceCreatedEvent extends Event {
 
   public DateTimeRange getLifetimeDateTimeRange() {
     return lifetimeDateTimeRange;
+  }
+
+  public String getEventType() {
+    return eventType;
   }
 }

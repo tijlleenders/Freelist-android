@@ -9,6 +9,7 @@ public class EntryScheduledEvent extends Event {
   private int resourceEventSequenceNumber;
   private int entryEventSequenceNumber;
   private Calendar calendar;
+  private String eventType = "EntryScheduledEvent";
 
   private EntryScheduledEvent(
       OffsetDateTime occurredDateTime,
@@ -54,5 +55,9 @@ public class EntryScheduledEvent extends Event {
 
   public Calendar getCalendar() {
     return calendar;
+  }
+
+  public String getEventType() {
+    return eventType;
   }
 }
