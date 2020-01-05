@@ -29,16 +29,10 @@ public class Entry {
 
   public Entry(
       //Todo: make private and expose via public static method Entry.Create so validation can be included
-      UUID ownerUuid, UUID parentUuid, UUID uuid, String title, String description, int duration) {
-    this.ownerUuid = ownerUuid;
-    this.parentUuid = parentUuid;
-    this.uuid = uuid;
-    this.title = title;
-    this.description = description;
-    this.duration = duration;
+  ) {
     lastAppliedEventSequenceNumber = -1;
     LOGGER.log(Level.INFO,
-        "Entry " + uuid.toString() + " created with lastAppliedEventSequenceNumber "
+        "Entry created with lastAppliedEventSequenceNumber "
             + lastAppliedEventSequenceNumber);
   }
 

@@ -13,7 +13,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.gson.Converters;
@@ -79,18 +78,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
           "CREATE TABLE IF NOT EXISTS viewModelEntry (\n"
               + "   `uuid` TEXT NOT NULL\n"
               + "   , `parentUuid` TEXT NOT NULL\n"
-              + "   , `ownerUuid` TEXT NOT NULL\n"
-              + "   , `title` TEXT\n"
-              + "   , `description` TEXT\n"
-              + "   , `duration` INTEGER NOT NULL DEFAULT 0\n"
-              + "   , `childrenCount` INTEGER NOT NULL DEFAULT 0"
-              + "   , `childrenDuration` INTEGER NOT NULL DEFAULT 0"
-              + "   , `lastSavedEventSequenceNumber` INTEGER"
-              + "   , PRIMARY KEY(`uuid`))");
-      db.execSQL(
-          "CREATE TABLE IF NOT EXISTS viewModelEntry2 (\n"
-              + "   `uuid` TEXT NOT NULL\n"
-              + "   , `parentUuid` TEXT NOT NULL\n"
               + "   , `json` TEXT\n"
               + "   , PRIMARY KEY(`uuid`))");
       db.execSQL(
@@ -133,7 +120,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     List<sqlBundle> sqlBundleList = new ArrayList<>();
 
     List<String> oldAncestorJsonList =
-        getAncestorJsonsExcludingRootForAndIncludingThisParent(firstParent, root);
+        getAncestorJsonListExcludingRootForAndIncludingThisParent(firstParent, root);
     List<ViewModelEntry> oldAncestorViewModelList = getViewModelEntriesFromJsonList(
         oldAncestorJsonList);
     Gson gson = Converters.registerOffsetDateTime(new GsonBuilder()).create();
@@ -150,7 +137,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
           .put("parentUuid", oldParentViewModelEntry.getParentUuid().toString());
       viewModelEntryContentValues.put("json", gson.toJson(oldParentViewModelEntry));
 
-      sqlBundleList.add(new sqlBundle("viewModelEntry2", viewModelEntryContentValues));
+      sqlBundleList.add(new sqlBundle("viewModelEntry", viewModelEntryContentValues));
     }
 
     Log.d(TAG, sqlBundleList.toString());
@@ -280,6 +267,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
         toSaveSequenceNumber = entryCreatedEvent.getEventSequenceNumber();
         entryId = entryCreatedEvent.getAggregateId();
+
         Log.d(TAG, "creating initial viewModelEntry query for EntryCreatedEvent");
         sqlBundleList.addAll(
             modifyChildrenCountAndDurationIncludingAncestorsFor(
@@ -289,6 +277,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         EntryDescriptionChangedEvent entryDescriptionChangedEvent = (EntryDescriptionChangedEvent) event;
         toSaveSequenceNumber = entryDescriptionChangedEvent.getEventSequenceNumber();
         entryId = entryDescriptionChangedEvent.getAggregateId();
+
         break;
       case "EntryDurationChangedEvent":
         EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
@@ -330,7 +319,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         toSaveSequenceNumber = entryScheduledEvent.getEntryEventSequenceNumber();
         entryId = entryScheduledEvent.getAggregateId();
         Log.d(TAG, "creating viewModelEntry query for EntryScheduledEvent");
-        //Todo: create sqlBudleList => not necessary? viewModelEntry is updated from repository in insert(Entry)
+        //Todo: create sqlBudleList
         //Calendar update is done when Event is applied to Resource
         break;
       case "EntryTitleChangedEvent":
@@ -370,16 +359,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
   }
 
   public Entry getEntryWithSavedEventsById(String uuid) {
-    EntryCreatedEvent entryCreatedEvent = getEntryCreatedEvent(
-        uuid); //Todo: remove as EntryCreatedEvent gets applied so not necessary?
-    Entry entry =
-        new Entry(
-            UUID.fromString(entryCreatedEvent.getOwnerUuid()),
-            UUID.fromString(entryCreatedEvent.getParentUuid()),
-            UUID.fromString(entryCreatedEvent.getAggregateId()),
-            "",
-            "",
-            0);
+    Entry entry = new Entry();
     List<Event> eventList = getEventsFor(uuid);
     entry.applyEvents(eventList);
     return entry;
@@ -401,8 +381,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
 
   public void executeSqlBundles(List<sqlBundle> sqlBundleList) {
     Log.d(TAG, "executeSqlBundles called.");
-    // Todo: use conflict rollback to rollback transaction on conflict?
-
     Log.d(TAG, "sqlBundle length : " + sqlBundleList.size());
     try {
       db.beginTransaction();
@@ -429,30 +407,13 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
                 sqlBundle.getContentValues(),
                 SQLiteDatabase.CONFLICT_REPLACE);
             break;
-          case "viewModelEntry2":
+          case "viewModelEntry":
             Log.d(TAG, "case table viewModelCalendar2");
             db.insertWithOnConflict(
                 sqlBundle.getTable(),
                 null,
                 sqlBundle.getContentValues(),
                 SQLiteDatabase.CONFLICT_REPLACE);
-            break;
-          case "viewModelEntry":
-            Log.d(TAG, "case viewModelEntry");
-            if (sqlBundle
-                .getContentValues()
-                .get("lastSavedEventSequenceNumber")
-                .toString()
-                .equals("0")) {
-              db.insertOrThrow("viewModelEntry", null, sqlBundle.getContentValues());
-            } else {
-              db.updateWithOnConflict(
-                  "viewModelEntry",
-                  sqlBundle.getContentValues(),
-                  "uuid = ?",
-                  new String[]{sqlBundle.getContentValues().get("uuid").toString()},
-                  SQLiteDatabase.CONFLICT_REPLACE);
-            }
             break;
           default:
             Log.d(TAG, "Error: sqlBundle not handled since table not recognized");
@@ -560,7 +521,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
   }
 
   public ViewModelEntry viewModelEntryFor(String entryId) {
-    String SELECT_VIEWMODELENTRY_QUERY = "SELECT json FROM viewModelEntry2 WHERE uuid = ?";
+    String SELECT_VIEWMODELENTRY_QUERY = "SELECT json FROM viewModelEntry WHERE uuid = ?";
 
     Cursor cursor = db.rawQuery(SELECT_VIEWMODELENTRY_QUERY, new String[]{entryId});
     String jsonBlob;
@@ -604,9 +565,10 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return childrenIdList;
   }
 
-  public List<String> getAncestorJsonsExcludingRootForAndIncludingThisParent(
+  public List<String> getAncestorJsonListExcludingRootForAndIncludingThisParent(
       String parentId, String root) {
-    Log.d(TAG, "getAncestorJsonsExcludingRootForAndIncludingThisParent for parentId " + parentId +
+    Log.d(TAG,
+        "getAncestorJsonListExcludingRootForAndIncludingThisParent for parentId " + parentId +
         " and root " + root);
     String SELECT_ANCESTOR_IDS_QUERY =
         "with recursive\n"

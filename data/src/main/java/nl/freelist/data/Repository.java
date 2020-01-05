@@ -92,22 +92,11 @@ public class Repository {
       }
     }
 
-    ContentValues viewModelEntryContentValues2 = new ContentValues();
-    viewModelEntryContentValues2.put("uuid", entry.getUuid().toString());
-    viewModelEntryContentValues2.put("parentUuid", entry.getParentUuid().toString());
-    viewModelEntryContentValues2.put("ownerUuid", entry.getOwnerUuid().toString());
-    viewModelEntryContentValues2.put("title", entry.getTitle());
-    viewModelEntryContentValues2.put("description", entry.getDescription());
-    viewModelEntryContentValues2.put("duration", entry.getDuration());
-    viewModelEntryContentValues2.put(
-        "lastSavedEventSequenceNumber", lastSavedEventSequenceNumber + newEventsToSave.size());
-    sqlBundleList.add(new sqlBundle("viewModelEntry", viewModelEntryContentValues2));
-
     ContentValues viewModelEntryContentValues = new ContentValues();
     viewModelEntryContentValues.put("uuid", entry.getUuid().toString());
     viewModelEntryContentValues.put("parentUuid", entry.getParentUuid().toString());
     viewModelEntryContentValues.put("json", jsonOf(getViewModelEntryFrom(entry)));
-    sqlBundleList.add(new sqlBundle("viewModelEntry2", viewModelEntryContentValues));
+    sqlBundleList.add(new sqlBundle("viewModelEntry", viewModelEntryContentValues));
 
     return sqlBundleList;
   }

@@ -28,7 +28,7 @@ public class CreateEntryCommand extends Command {
 
   @Override
   public Result execute() {
-    Entry entry = new Entry(ownerUuid, parentUuid, uuid, "", "", 0);
+    Entry entry = new Entry();
     EntryCreatedEvent entryCreatedEvent =
         EntryCreatedEvent.Create(
             OffsetDateTime.now(ZoneOffset.UTC),
