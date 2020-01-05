@@ -366,14 +366,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
   }
 
   public Resource getResourceWithSavedEventsById(String uuid) {
-    ResourceCreatedEvent resourceCreatedEvent = getResourceCreatedEvent(
-        uuid); //Todo: remove as ResourceCreatedEvent gets applied so not necessary?
-    //How does it get created?
-    Resource resource =
-        Resource.Create(
-            resourceCreatedEvent.getOwnerEmail(),
-            resourceCreatedEvent.getResourceEmail(),
-            resourceCreatedEvent.getLifetimeDateTimeRange());
+    Resource resource = Resource.Create();
     List<Event> eventList = getEventsFor(uuid);
     resource.applyEvents(eventList);
     return resource;

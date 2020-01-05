@@ -19,42 +19,23 @@ public class Resource {
   private Email ownerEmail;
   private Email resourceEmail;
   private UUID uuid;
-  private int lastAppliedEventSequenceNumber; //Todo: apply resourceCreatedEvent
+  private int lastAppliedEventSequenceNumber;
   private List<Event> eventList = new ArrayList<>();
   private DateTimeRange lifetimeDateTimeRange;
   private Calendar calendar;
 
   private Resource(
-      Email ownerEmail,
-      Email resourceEmail,
-      DateTimeRange lifetimeDateTimeRange
   ) {
-    this.ownerEmail = ownerEmail;
-    this.resourceEmail = resourceEmail;
-    uuid = UUID.randomUUID();
     lastAppliedEventSequenceNumber = -1;
-    this.lifetimeDateTimeRange = lifetimeDateTimeRange;
-    calendar = Calendar
-        .Create(
-            null,
-            uuid,
-            lastAppliedEventSequenceNumber,
-            -1,
-            lifetimeDateTimeRange,
-            null,
-            -1);
     LOGGER.log(Level.INFO,
-        "Resource " + uuid.toString() + " created with lastAppliedEventSequenceNumber "
+        "Resource created with lastAppliedEventSequenceNumber "
             + lastAppliedEventSequenceNumber);
   }
 
   public static Resource Create(
-      Email ownerEmail,
-      Email resourceEmail,
-      DateTimeRange lifetimeDateTimeRange
   ) {
     //Todo: validation as static method?
-    return new Resource(ownerEmail, resourceEmail, lifetimeDateTimeRange);
+    return new Resource();
   }
 
 
@@ -117,6 +98,16 @@ public class Resource {
         this.ownerEmail = resourceCreatedEvent.getOwnerEmail();
         this.resourceEmail = resourceCreatedEvent.getResourceEmail();
         this.lifetimeDateTimeRange = resourceCreatedEvent.getLifetimeDateTimeRange();
+        calendar = Calendar
+            .Create(
+                null,
+                uuid,
+                lastAppliedEventSequenceNumber,
+                -1,
+                lifetimeDateTimeRange,
+                null,
+                -1);
+
         break;
       case "EntryScheduledEvent":
         LOGGER.log(Level.INFO,

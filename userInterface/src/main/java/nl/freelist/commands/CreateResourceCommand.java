@@ -40,7 +40,7 @@ public class CreateResourceCommand extends Command {
   @Override
   public Result execute() {
 //    Todo: make it possible to add resources from UI - for now only one default resource anonymous@freelist.nl on initial startup
-    Resource resource = Resource.Create(ownerEmail, resourceEmail, lifetimeDateTimeRange);
+    Resource resource = Resource.Create();
     ResourceCreatedEvent resourceCreatedEvent =
         ResourceCreatedEvent.Create(
             OffsetDateTime.now(ZoneOffset.UTC),
