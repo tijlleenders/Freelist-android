@@ -105,6 +105,7 @@ public class Repository {
 
     ContentValues viewModelEntryContentValues = new ContentValues();
     viewModelEntryContentValues.put("uuid", entry.getUuid().toString());
+    viewModelEntryContentValues.put("parentUuid", entry.getParentUuid().toString());
     viewModelEntryContentValues.put("json", jsonOf(getViewModelEntryFrom(entry)));
     sqlBundleList.add(new sqlBundle("viewModelEntry2", viewModelEntryContentValues));
 

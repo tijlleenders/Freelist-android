@@ -90,6 +90,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       db.execSQL(
           "CREATE TABLE IF NOT EXISTS viewModelEntry2 (\n"
               + "   `uuid` TEXT NOT NULL\n"
+              + "   , `parentUuid` TEXT NOT NULL\n"
               + "   , `json` TEXT\n"
               + "   , PRIMARY KEY(`uuid`))");
       db.execSQL(
@@ -110,27 +111,48 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     }
   }
 
+  private List<ViewModelEntry> getViewModelEntriesFromJsonList(
+      List<String> viewModelEntryJsonList) {
+    List<ViewModelEntry> viewModelEntryList = new ArrayList<>();
+    Gson gson = new GsonBuilder().create();
+
+    for (String viewModelEntryJson : viewModelEntryJsonList) {
+      ViewModelEntry viewModelEntry;
+      viewModelEntry = gson.fromJson(viewModelEntryJson, ViewModelEntry.class);
+      viewModelEntryList.add(viewModelEntry);
+    }
+
+    return viewModelEntryList;
+  }
+
   private List<sqlBundle> modifyChildrenCountAndDurationIncludingAncestorsFor(
-      //todo: refactor to use json viewModelEntry
       String firstParent, int childDurationDelta, int childCountDelta, String root) {
     Log.d(TAG,
         "modifyChildrenCountAndDurationIncludingAncestorsFor called with firstParent " + firstParent
             + " and root " + root);
     List<sqlBundle> sqlBundleList = new ArrayList<>();
-    List<String> oldAncestorList =
-        getAncestorIdsExcludingRootForAndIncludingThisParent(firstParent, root);
-    for (String oldParent : oldAncestorList) {
-      ViewModelEntry oldParentEntry = viewModelEntryFor(oldParent);
-      ContentValues oldParentEntryContentValues = new ContentValues();
-      oldParentEntryContentValues.put("uuid", oldParentEntry.getUuid());
-      oldParentEntryContentValues.put(
-          "lastSavedEventSequenceNumber", oldParentEntry.getLastSavedEventSequenceNumber());
-      oldParentEntryContentValues.put(
-          "childrenCount", oldParentEntry.getChildrenCount() + childCountDelta);
-      oldParentEntryContentValues.put(
-          "childrenDuration", oldParentEntry.getChildrenDuration() + childDurationDelta);
-      sqlBundleList.add(new sqlBundle("viewModelEntry", oldParentEntryContentValues));
+
+    List<String> oldAncestorJsonList =
+        getAncestorJsonsExcludingRootForAndIncludingThisParent(firstParent, root);
+    List<ViewModelEntry> oldAncestorViewModelList = getViewModelEntriesFromJsonList(
+        oldAncestorJsonList);
+    Gson gson = Converters.registerOffsetDateTime(new GsonBuilder()).create();
+
+    for (ViewModelEntry oldParentViewModelEntry : oldAncestorViewModelList) {
+      oldParentViewModelEntry
+          .setChildrenCount(oldParentViewModelEntry.getChildrenCount() + childCountDelta);
+      oldParentViewModelEntry
+          .setChildrenDuration(oldParentViewModelEntry.getChildrenDuration() + childDurationDelta);
+
+      ContentValues viewModelEntryContentValues = new ContentValues();
+      viewModelEntryContentValues.put("uuid", oldParentViewModelEntry.getUuid().toString());
+      viewModelEntryContentValues
+          .put("parentUuid", oldParentViewModelEntry.getParentUuid().toString());
+      viewModelEntryContentValues.put("json", gson.toJson(oldParentViewModelEntry));
+
+      sqlBundleList.add(new sqlBundle("viewModelEntry2", viewModelEntryContentValues));
     }
+
     Log.d(TAG, sqlBundleList.toString());
     return sqlBundleList;
   }
@@ -256,7 +278,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     switch (event.getClass().getSimpleName()) {
       case "EntryCreatedEvent":
         EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
-
         toSaveSequenceNumber = entryCreatedEvent.getEventSequenceNumber();
         entryId = entryCreatedEvent.getAggregateId();
         Log.d(TAG, "creating initial viewModelEntry query for EntryCreatedEvent");
@@ -276,7 +297,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         Log.d(TAG, "creating additional viewModelEntry query for EntryDurationChangedEvent");
         ViewModelEntry changedEntry = viewModelEntryFor(entryDurationChangedEvent.getAggregateId());
         sqlBundleList.addAll(
-            //Todo: Refactor to emit new SublistDurationChangedEvent + generate queries via recursive call to getEntryQueriesForEvent(Event)
             modifyChildrenCountAndDurationIncludingAncestorsFor(
                 changedEntry.getParentUuid(),
                 DurationHelper.getDurationSecondsDeltaFromDurationChangedEvent(
@@ -291,7 +311,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         Log.d(TAG, "creating additional viewModelEntry query for EntryParentChangedEvent");
         ViewModelEntry childEntry = viewModelEntryFor(entryParentChangedEvent.getAggregateId());
         sqlBundleList.addAll(
-            //Todo: Refactor to emit new SublistAddedEvent/SublistRemovedEvent + generate queries via recursive call to getEntryQueriesForEvent(Event)
             modifyChildrenCountAndDurationIncludingAncestorsFor(
                 entryParentChangedEvent.getParentBefore(),
                 -childEntry.getChildrenDuration() - childEntry.getDuration(),
@@ -391,11 +410,11 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         Log.d(TAG, "executing sqlBundle " + sqlBundle.toString());
         switch (sqlBundle.getTable()) {
           case "events":
-            Log.d(TAG, "case events");
+            Log.d(TAG, "case table events");
             db.insertOrThrow("events", null, sqlBundle.getContentValues());
             break;
           case "aggregates":
-            Log.d(TAG, "case aggregates");
+            Log.d(TAG, "case table aggregates");
             db.insertWithOnConflict(
                 sqlBundle.getTable(),
                 null,
@@ -403,6 +422,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
                 SQLiteDatabase.CONFLICT_REPLACE);
             break;
           case "viewModelCalendar":
+            Log.d(TAG, "case table viewModelCalendar");
             db.insertWithOnConflict(
                 sqlBundle.getTable(),
                 null,
@@ -410,6 +430,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
                 SQLiteDatabase.CONFLICT_REPLACE);
             break;
           case "viewModelEntry2":
+            Log.d(TAG, "case table viewModelCalendar2");
             db.insertWithOnConflict(
                 sqlBundle.getTable(),
                 null,
@@ -434,7 +455,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             }
             break;
           default:
-            Log.d(TAG, "Error: sqlBundle not handled");
+            Log.d(TAG, "Error: sqlBundle not handled since table not recognized");
             throw new Exception("Error in sqlBundle handling, table in sqlBundle not recognized.");
         }
       }
@@ -583,9 +604,9 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return childrenIdList;
   }
 
-  public List<String> getAncestorIdsExcludingRootForAndIncludingThisParent(
+  public List<String> getAncestorJsonsExcludingRootForAndIncludingThisParent(
       String parentId, String root) {
-    Log.d(TAG, "getAncestorIdsExcludingRootForAndIncludingThisParent for parentId " + parentId +
+    Log.d(TAG, "getAncestorJsonsExcludingRootForAndIncludingThisParent for parentId " + parentId +
         " and root " + root);
     String SELECT_ANCESTOR_IDS_QUERY =
         "with recursive\n"

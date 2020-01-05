@@ -22,8 +22,8 @@ public final class ViewModelEntry {
   private final int hours;
   private final int minutes;
   private final int seconds;
-  private final int childrenCount;
-  private final int childrenDuration;
+  private int childrenCount;
+  private int childrenDuration;
   private final int lastSavedEventSequenceNumber;
 
   public ViewModelEntry(
@@ -134,4 +134,11 @@ public final class ViewModelEntry {
     return lastSavedEventSequenceNumber;
   }
 
+  public void setChildrenCount(int childrenCount) {
+    this.childrenCount = childrenCount;
+  }
+
+  public void setChildrenDuration(int childrenDuration) {
+    this.childrenDuration = childrenDuration;
+  }
 }

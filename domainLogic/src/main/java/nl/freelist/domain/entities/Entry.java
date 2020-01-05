@@ -22,6 +22,8 @@ public class Entry {
   private String title;
   private String description;
   private int duration;
+  //Duration of sublists is a projected attribute
+  // as it depends on what subLists are visible to the specific user
   private int lastAppliedEventSequenceNumber;
   private List<Event> eventList = new ArrayList<>();
 
