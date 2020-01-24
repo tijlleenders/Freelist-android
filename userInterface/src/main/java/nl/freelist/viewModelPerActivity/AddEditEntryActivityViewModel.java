@@ -28,7 +28,7 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
     repository = new Repository(getApplication().getApplicationContext());
   }
 
-  public Single<ViewModelEntry> getViewModelEntry(String uuid) { //Todo: replace by Command
+  public Single<ViewModelEntry> getViewModelEntry(String uuid) {
     Single<ViewModelEntry> result = Single.fromCallable(
         () -> repository.getViewModelEntryById(UUID.fromString(uuid)))
         .observeOn(Schedulers.io())

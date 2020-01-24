@@ -75,7 +75,7 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
     }
     if (currentEntry.getType() == Constants.SINGLE_ENTRY_VIEW_TYPE
         || currentEntry.getType() == Constants.STACK_ENTRY_VIEW_TYPE) {
-      entryHolder.textViewDescription.setText(currentEntry.getDescription());
+      entryHolder.textViewDescription.setText(currentEntry.getNotes());
     }
   }
 

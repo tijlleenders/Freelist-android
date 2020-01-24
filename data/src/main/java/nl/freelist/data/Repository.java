@@ -23,10 +23,12 @@ import nl.freelist.domain.entities.Calendar;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.entities.Resource;
 import nl.freelist.domain.events.EntryCreatedEvent;
-import nl.freelist.domain.events.EntryDescriptionChangedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
+import nl.freelist.domain.events.EntryEndDateTimeChangedEvent;
+import nl.freelist.domain.events.EntryNotesChangedEvent;
 import nl.freelist.domain.events.EntryParentChangedEvent;
 import nl.freelist.domain.events.EntryScheduledEvent;
+import nl.freelist.domain.events.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
 
@@ -55,13 +57,17 @@ public class Repository {
         resource.getListOfEventsWithSequenceHigherThan(lastSavedEventSequenceNumber);
     Log.d(TAG, "newEventsToSave list with size " + newEventsToSave.size() + " retrieved.");
 
+    int eventSequenceNumberForQuery = lastSavedEventSequenceNumber;
+
     for (Event event : newEventsToSave) {
       try {
         sqlBundleList.addAll(
             eventDatabaseHelper.getQueriesForEvent(
                 "resource",
-                lastSavedEventSequenceNumber + newEventsToSave.indexOf(event),
-                event));
+                eventSequenceNumberForQuery,
+                event)
+        );
+        eventSequenceNumberForQuery += 1;
       } catch (Exception e) {
         Log.d(TAG, "Error while executing insert(Resource resource):" + e.toString());
       }
@@ -69,8 +75,9 @@ public class Repository {
     return sqlBundleList;
   }
 
-  public List<sqlBundle> insert(Entry entry) {
-    Log.d(TAG, "Repository insert called with entry " + entry.getUuid());
+  public List<sqlBundle> insert(Entry entry)
+      throws Exception {
+    Log.i(TAG, "Repository insert called with entry " + entry.getUuid());
 
     List<sqlBundle> sqlBundleList = new ArrayList<>();
 
@@ -82,14 +89,12 @@ public class Repository {
         entry.getListOfEventsWithSequenceHigherThan(lastSavedEventSequenceNumber);
     Log.d(TAG, "newEventsToSave list with size " + newEventsToSave.size() + " retrieved.");
 
+    int eventSequenceNumberForQuery = lastSavedEventSequenceNumber + 1;
     for (Event event : newEventsToSave) {
-      try {
-        sqlBundleList.addAll(
-            eventDatabaseHelper.getQueriesForEvent(
-                "entry", lastSavedEventSequenceNumber + newEventsToSave.indexOf(event), event));
-      } catch (Exception e) {
-        Log.d(TAG, "Error while executing insert(Entry entry):" + e.toString());
-      }
+      sqlBundleList.addAll(
+          eventDatabaseHelper.getQueriesForEvent("entry", eventSequenceNumberForQuery, event)
+      );
+      eventSequenceNumberForQuery += 1;
     }
 
     ContentValues viewModelEntryContentValues = new ContentValues();
@@ -108,8 +113,10 @@ public class Repository {
         entry.getParentUuid().toString(),
         entry.getUuid().toString(),
         entry.getTitle(),
-        entry.getDescription(),
+        entry.getStartDateTime(),
         entry.getDuration(),
+        entry.getEndDateTime(),
+        entry.getNotes(),
         999,
         999,
         entry.getLastAppliedEventSequenceNumber()
@@ -210,10 +217,10 @@ public class Repository {
           EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
           entryId = entryCreatedEvent.getAggregateId();
           break;
-        case "EntryDescriptionChangedEvent":
+        case "EntryNotesChangedEvent":
           eventMessage = "Description changed";
-          EntryDescriptionChangedEvent entryDescriptionChangedEvent = (EntryDescriptionChangedEvent) event;
-          entryId = entryDescriptionChangedEvent.getAggregateId();
+          EntryNotesChangedEvent entryNotesChangedEvent = (EntryNotesChangedEvent) event;
+          entryId = entryNotesChangedEvent.getAggregateId();
           break;
         case "EntryDurationChangedEvent":
           eventMessage = "Duration changed";
@@ -234,6 +241,16 @@ public class Repository {
           eventMessage = "Title changed";
           EntryTitleChangedEvent entryTitleChangedEvent = (EntryTitleChangedEvent) event;
           entryId = entryTitleChangedEvent.getAggregateId();
+          break;
+        case "EntryStartDateTimeChangedEvent":
+          eventMessage = "Start changed";
+          EntryStartDateTimeChangedEvent entryStartDateTimeChangedEvent = (EntryStartDateTimeChangedEvent) event;
+          entryId = entryStartDateTimeChangedEvent.getAggregateId();
+          break;
+        case "EntryEndDateTimeChangedEvent":
+          eventMessage = "Start changed";
+          EntryEndDateTimeChangedEvent entryEndDateTimeChangedEvent = (EntryEndDateTimeChangedEvent) event;
+          entryId = entryEndDateTimeChangedEvent.getAggregateId();
           break;
         default:
           eventMessage = "Unrecognized: " + event.getClass().getSimpleName();

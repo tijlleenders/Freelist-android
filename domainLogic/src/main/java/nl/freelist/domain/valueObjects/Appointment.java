@@ -7,11 +7,11 @@ public final class Appointment {
 
   private final int prio;
   private final UUID entryId;
-  private final int duration;
+  private final long duration;
   private final DateTimeRange scheduledDTR;
   private final boolean isDone;
 
-  private Appointment(int prio, UUID entryId, int duration, boolean isDone,
+  private Appointment(int prio, UUID entryId, long duration, boolean isDone,
       DateTimeRange scheduledDTR) {
     this.prio = prio;
     this.entryId = entryId;
@@ -20,7 +20,7 @@ public final class Appointment {
     this.scheduledDTR = scheduledDTR;
   }
 
-  public static Appointment Create(int prio, UUID entryId, int duration, boolean isDone,
+  public static Appointment Create(int prio, UUID entryId, long duration, boolean isDone,
       DateTimeRange scheduledDTR) {
     return new Appointment(prio, entryId, duration, isDone, scheduledDTR);
   }
@@ -45,7 +45,7 @@ public final class Appointment {
     return isDone;
   }
 
-  public int getDuration() {
+  public long getDuration() {
     return duration;
   }
 

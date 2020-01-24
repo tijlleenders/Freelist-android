@@ -4,57 +4,33 @@ import java.time.OffsetDateTime;
 
 public class EntryDurationChangedEvent extends Event {
 
-  private int durationBefore;
-  private int durationAfter;
-  private String unitOfMeasure;
-  private int eventSequenceNumber;
+  private long durationAfter;
   private String eventType = "EntryDurationChangedEvent";
 
   private EntryDurationChangedEvent(
       OffsetDateTime occurredDateTime,
       String entryId,
-      int eventSequenceNumber,
-      int durationBefore,
-      int durationAfter,
-      String unitOfMeasure) {
+      long durationAfter
+  ) {
     super(occurredDateTime, entryId);
-    this.durationBefore = durationBefore;
     this.durationAfter = durationAfter;
-    this.unitOfMeasure = unitOfMeasure;
-    this.eventSequenceNumber = eventSequenceNumber;
   }
 
   public static EntryDurationChangedEvent Create(
       OffsetDateTime occurredDateTime,
       String entryId,
-      int eventSequenceNumber,
-      int durationBefore,
-      int durationAfter,
-      String unitOfMeasure) {
-    if (durationAfter == durationBefore) {
-      return null;
-    }
-    EntryDurationChangedEvent entryDurationChangedEvent =
-        new EntryDurationChangedEvent(
-            occurredDateTime, entryId, eventSequenceNumber, durationBefore, durationAfter,
-            unitOfMeasure);
-    return entryDurationChangedEvent;
+      long durationAfter
+  ) {
+
+    return new EntryDurationChangedEvent(
+        occurredDateTime,
+        entryId,
+        durationAfter
+    );
   }
 
-  public int getDurationAfter() {
+  public long getDurationAfter() {
     return durationAfter;
-  }
-
-  public int getDurationBefore() {
-    return durationBefore;
-  }
-
-  public String getUnitOfMeasure() {
-    return unitOfMeasure;
-  }
-
-  public int getEventSequenceNumber() {
-    return eventSequenceNumber;
   }
 
   public String getEventType() {

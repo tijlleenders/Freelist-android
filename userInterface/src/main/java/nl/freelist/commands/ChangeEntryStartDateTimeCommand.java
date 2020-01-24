@@ -11,33 +11,33 @@ import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.events.EntryDurationChangedEvent;
+import nl.freelist.domain.events.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.Event;
 
-public class ChangeEntryDurationCommand extends Command {
+public class ChangeEntryStartDateTimeCommand extends Command {
 
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
   String uuid;
-  long durationAfter;
+  OffsetDateTime startDateTimeAfter;
   int lastSavedEventSequenceNumber;
   Repository repository;
 
-  public ChangeEntryDurationCommand(
+  public ChangeEntryStartDateTimeCommand(
       String uuid,
-      long durationAfter,
+      OffsetDateTime startDateTimeAfter,
       int lastSavedEventSequenceNumber,
       Repository repository
   ) {
     this.uuid = uuid;
-    this.durationAfter = durationAfter;
+    this.startDateTimeAfter = startDateTimeAfter;
     this.lastSavedEventSequenceNumber = lastSavedEventSequenceNumber;
     this.repository = repository;
   }
 
   @Override
   public Result execute() {
-    LOGGER.log(Level.INFO, "Executing ChangeEntryDurationCommand");
+    LOGGER.log(Level.INFO, "Executing ChangeEntryStartDateTimeCommand");
 
     Entry entry = repository.getEntryWithSavedEventsById(uuid);
     if (entry.getLastAppliedEventSequenceNumber() != lastSavedEventSequenceNumber) {
@@ -54,13 +54,13 @@ public class ChangeEntryDurationCommand extends Command {
     }
 
     List<Event> eventsToAddList = new ArrayList<>();
-    EntryDurationChangedEvent entryDurationChangedEvent = EntryDurationChangedEvent
+    EntryStartDateTimeChangedEvent entryStartDateTimeChangedEvent = EntryStartDateTimeChangedEvent
         .Create(
             OffsetDateTime.now(ZoneOffset.UTC),
             uuid,
-            durationAfter
+            startDateTimeAfter
         );
-    eventsToAddList.add(entryDurationChangedEvent);
+    eventsToAddList.add(entryStartDateTimeChangedEvent);
     entry.applyEvents(eventsToAddList);
     try {
       List<sqlBundle> sqlBundleList = repository.insert(entry);

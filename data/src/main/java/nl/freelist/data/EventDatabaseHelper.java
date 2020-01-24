@@ -8,8 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,19 +15,19 @@ import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.gson.Converters;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
+import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
 import nl.freelist.domain.entities.Entry;
 import nl.freelist.domain.entities.Resource;
 import nl.freelist.domain.events.EntryCreatedEvent;
-import nl.freelist.domain.events.EntryDescriptionChangedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
+import nl.freelist.domain.events.EntryEndDateTimeChangedEvent;
+import nl.freelist.domain.events.EntryNotesChangedEvent;
 import nl.freelist.domain.events.EntryParentChangedEvent;
 import nl.freelist.domain.events.EntryScheduledEvent;
+import nl.freelist.domain.events.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.ResourceCreatedEvent;
-import nl.freelist.domain.valueObjects.DateTimeRange;
-import nl.freelist.domain.valueObjects.Email;
 
 public class EventDatabaseHelper extends SQLiteOpenHelper {
 
@@ -101,7 +99,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
   private List<ViewModelEntry> getViewModelEntriesFromJsonList(
       List<String> viewModelEntryJsonList) {
     List<ViewModelEntry> viewModelEntryList = new ArrayList<>();
-    Gson gson = new GsonBuilder().create();
+    Gson gson = Converters.registerOffsetDateTime(new GsonBuilder()).create();
 
     for (String viewModelEntryJson : viewModelEntryJsonList) {
       ViewModelEntry viewModelEntry;
@@ -113,7 +111,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
   }
 
   private List<sqlBundle> modifyChildrenCountAndDurationIncludingAncestorsFor(
-      String firstParent, int childDurationDelta, int childCountDelta, String root) {
+      String firstParent, long childDurationDelta, int childCountDelta, String root) {
     Log.d(TAG,
         "modifyChildrenCountAndDurationIncludingAncestorsFor called with firstParent " + firstParent
             + " and root " + root);
@@ -145,25 +143,31 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
   }
 
   public List<sqlBundle> getQueriesForEvent( //Todo: sort out below mess...
-      String aggregateIdType, int expectedLastSavedEventSequenceNumber, Event event)
+      String aggregateIdType,
+      int eventSequenceNumberForQuery,
+      Event event)
       throws Exception {
     Log.d(TAG, "getQueriesForEvent called.");
 
     List<sqlBundle> sqlBundleList = new ArrayList<>();
     switch (aggregateIdType) {
       case "entry":
-        sqlBundleList.addAll(getEntryQueriesForEvent(
-            aggregateIdType,
-            expectedLastSavedEventSequenceNumber,
-            event
-        ));
+        sqlBundleList.addAll(
+            getEntryQueriesForEvent(
+                aggregateIdType,
+                eventSequenceNumberForQuery,
+                event
+            )
+        );
         break;
       case "resource":
-        sqlBundleList.addAll(getResourceQueriesForEvent(
-            aggregateIdType,
-            expectedLastSavedEventSequenceNumber,
-            event
-        ));
+        sqlBundleList.addAll(
+            getResourceQueriesForEvent(
+                aggregateIdType,
+                eventSequenceNumberForQuery,
+                event
+            )
+        );
         break;
       default:
         Log.e(TAG, "type of aggregate not recognized!");
@@ -174,29 +178,26 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
 
   private List<sqlBundle> getResourceQueriesForEvent(
       String aggregateIdType,
-      int expectedLastSavedEventSequenceNumber,
+      int eventSequenceNumberForQuery,
       Event event)
       throws Exception {
     Log.d(TAG, "getResourceQueriesForEvent called.");
     List<sqlBundle> sqlBundleList = new ArrayList<>();
-    int toSaveSequenceNumber;
     String resourceId = "";
 
     switch (event.getClass().getSimpleName()) {
       case "EntryCreatedEvent":
-      case "EntryDescriptionChangedEvent":
+      case "EntryNotesChangedEvent":
       case "EntryDurationChangedEvent":
       case "EntryParentChangedEvent":
       case "EntryTitleChangedEvent":
         return null; //Todo: what entry events affect the calendar and should thus also be applied to the resource? ie duration changed
       case "ResourceCreatedEvent":
         ResourceCreatedEvent resourceCreatedEvent = (ResourceCreatedEvent) event;
-        toSaveSequenceNumber = resourceCreatedEvent.getEventSequenceNumber();
         resourceId = resourceCreatedEvent.getAggregateId();
         break;
       case "EntryScheduledEvent":
         EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
-        toSaveSequenceNumber = entryScheduledEvent.getResourceEventSequenceNumber();
         resourceId = entryScheduledEvent.getResourceUuid();
         Entry entry = getEntryWithSavedEventsById(entryScheduledEvent.getAggregateId());
 
@@ -216,28 +217,20 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             .getDuration());
         calendarContentValues2.put("isDone", 0);
         calendarContentValues2
-            .put("lastSavedEventSequenceNumber", expectedLastSavedEventSequenceNumber + 1);
+            .put("lastSavedEventSequenceNumber", eventSequenceNumberForQuery + 1);
 
         sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues2));
         break;
       default:
         Log.e(TAG, "Unrecognized: " + event.getClass().getSimpleName());
-        toSaveSequenceNumber = -9;
         resourceId = "error unrecognized event class";
         break;
-    }
-
-    int lastSavedResourceSequenceNumber = toSaveSequenceNumber - 1;
-    Log.d(TAG, "lastSavedEventSequenceNumber = " + lastSavedResourceSequenceNumber);
-
-    if (lastSavedResourceSequenceNumber != expectedLastSavedEventSequenceNumber) {
-      throw new Exception("Optimistic concurrency exception");
     }
 
     ContentValues aggregateContentValues = new ContentValues();
     aggregateContentValues.put("aggregateId", resourceId);
     aggregateContentValues.put("type", aggregateIdType);
-    aggregateContentValues.put("lastSavedEventSequenceNumber", lastSavedResourceSequenceNumber + 1);
+    aggregateContentValues.put("lastSavedEventSequenceNumber", eventSequenceNumberForQuery);
     sqlBundleList.add(new sqlBundle("aggregates", aggregateContentValues));
 
     ContentValues eventContentValues = new ContentValues();
@@ -246,26 +239,31 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     eventContentValues.put("type", event.getClass().getSimpleName());
     String eventData = jsonOf(event);
     eventContentValues.put("data", eventData);
-    eventContentValues.put("eventSequenceNumber", lastSavedResourceSequenceNumber + 1);
+    eventContentValues.put("eventSequenceNumber", eventSequenceNumberForQuery);
     sqlBundleList.add(new sqlBundle("events", eventContentValues));
 
     return sqlBundleList;
   }
 
   private List<sqlBundle> getEntryQueriesForEvent(
-      //Todo: sort out below mess...
-      String aggregateIdType, int expectedLastSavedEventSequenceNumber, Event event)
+      String aggregateIdType, int eventSequenceNumberForQuery, Event event)
       throws Exception {
     Log.d(TAG, "getEntryQueriesForEvent called.");
+    //Todo: Reminder : An Event should know which other Events it should trigger within the same transaction
+    // Currently no such events
+
+    //Reminder: Updating of the viewModel projection should be done when creating sqlBundle for the Event
+
+    // Todo: What if multiple events update the viewModel? Is this possible?
+    //  The changes will conflict because executing sqlBundles occurs at end
+    //  mitigate by making sql get viewmodel, edit, save back?
 
     List<sqlBundle> sqlBundleList = new ArrayList<>();
-    int toSaveSequenceNumber;
     String entryId;
 
     switch (event.getClass().getSimpleName()) {
       case "EntryCreatedEvent":
         EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
-        toSaveSequenceNumber = entryCreatedEvent.getEventSequenceNumber();
         entryId = entryCreatedEvent.getAggregateId();
 
         Log.d(TAG, "creating initial viewModelEntry query for EntryCreatedEvent");
@@ -273,42 +271,39 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             modifyChildrenCountAndDurationIncludingAncestorsFor(
                 entryCreatedEvent.getParentUuid(), 0, 1, entryCreatedEvent.getOwnerUuid()));
         break;
-      case "EntryDescriptionChangedEvent":
-        EntryDescriptionChangedEvent entryDescriptionChangedEvent = (EntryDescriptionChangedEvent) event;
-        toSaveSequenceNumber = entryDescriptionChangedEvent.getEventSequenceNumber();
-        entryId = entryDescriptionChangedEvent.getAggregateId();
+      case "EntryNotesChangedEvent":
+        EntryNotesChangedEvent entryNotesChangedEvent = (EntryNotesChangedEvent) event;
+        entryId = entryNotesChangedEvent.getAggregateId();
 
         break;
       case "EntryDurationChangedEvent":
         EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
-        toSaveSequenceNumber = entryDurationChangedEvent.getEventSequenceNumber();
         entryId = entryDurationChangedEvent.getAggregateId();
         Log.d(TAG, "creating additional viewModelEntry query for EntryDurationChangedEvent");
         ViewModelEntry changedEntry = viewModelEntryFor(entryDurationChangedEvent.getAggregateId());
         sqlBundleList.addAll(
             modifyChildrenCountAndDurationIncludingAncestorsFor(
                 changedEntry.getParentUuid(),
-                DurationHelper.getDurationSecondsDeltaFromDurationChangedEvent(
+                getDurationDeltaForDurationChangedEvent(
                     entryDurationChangedEvent),
                 0,
                 changedEntry.getOwnerUuid()));
         break;
       case "EntryParentChangedEvent":
         EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
-        toSaveSequenceNumber = entryParentChangedEvent.getEventSequenceNumber();
         entryId = entryParentChangedEvent.getAggregateId();
         Log.d(TAG, "creating additional viewModelEntry query for EntryParentChangedEvent");
         ViewModelEntry childEntry = viewModelEntryFor(entryParentChangedEvent.getAggregateId());
         sqlBundleList.addAll(
             modifyChildrenCountAndDurationIncludingAncestorsFor(
-                entryParentChangedEvent.getParentBefore(),
-                -childEntry.getChildrenDuration() - childEntry.getDuration(),
+                getParentBeforeFromEvent(entryParentChangedEvent),
+                (int) (-childEntry.getChildrenDuration() - childEntry.getDuration()),
                 -childEntry.getChildrenCount() - 1,
                 childEntry.getOwnerUuid()));
         sqlBundleList.addAll(
             modifyChildrenCountAndDurationIncludingAncestorsFor(
                 entryParentChangedEvent.getParentAfter(),
-                childEntry.getChildrenDuration() + childEntry.getDuration(),
+                (int) (childEntry.getChildrenDuration() + childEntry.getDuration()),
                 childEntry.getChildrenCount() + 1,
                 childEntry.getOwnerUuid()));
         break;
@@ -316,7 +311,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         return null;
       case "EntryScheduledEvent":
         EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
-        toSaveSequenceNumber = entryScheduledEvent.getEntryEventSequenceNumber();
         entryId = entryScheduledEvent.getAggregateId();
         Log.d(TAG, "creating viewModelEntry query for EntryScheduledEvent");
         //Todo: create sqlBudleList
@@ -324,38 +318,53 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         break;
       case "EntryTitleChangedEvent":
         EntryTitleChangedEvent entryTitleChangedEvent = (EntryTitleChangedEvent) event;
-        toSaveSequenceNumber = entryTitleChangedEvent.getEventSequenceNumber();
         entryId = entryTitleChangedEvent.getAggregateId();
+        break;
+      case "EntryStartDateTimeChangedEvent":
+        EntryStartDateTimeChangedEvent entryStartDateTimeChangedEvent = (EntryStartDateTimeChangedEvent) event;
+        entryId = entryStartDateTimeChangedEvent.getAggregateId();
+        //Todo: create sqlBundleList for updating viewModelEntry
+        break;
+      case "EntryEndDateTimeChangedEvent":
+        EntryEndDateTimeChangedEvent entryEndDateTimeChangedEvent = (EntryEndDateTimeChangedEvent) event;
+        entryId = entryEndDateTimeChangedEvent.getAggregateId();
+        //Todo: create sqlBundleList for updating viewModelEntry
         break;
       default:
         Log.d(TAG, "Unrecognized: " + event.getClass().getSimpleName());
-        toSaveSequenceNumber = -9;
         entryId = "error unrecognized event class";
         break;
     }
-    int lastSavedEventSequenceNumber = toSaveSequenceNumber - 1;
-    Log.d(TAG, "lastSavedEventSequenceNumber = " + lastSavedEventSequenceNumber);
 
-    if (lastSavedEventSequenceNumber != expectedLastSavedEventSequenceNumber) {
-      throw new Exception("Optimistic concurrency exception");
-    }
-
+    //save to aggregates table
     ContentValues aggregateContentValues = new ContentValues();
     aggregateContentValues.put("aggregateId", entryId);
     aggregateContentValues.put("type", aggregateIdType);
-    aggregateContentValues.put("lastSavedEventSequenceNumber", lastSavedEventSequenceNumber + 1);
+    aggregateContentValues.put("lastSavedEventSequenceNumber", eventSequenceNumberForQuery);
     sqlBundleList.add(new sqlBundle("aggregates", aggregateContentValues));
 
+    //save to events table
     ContentValues eventContentValues = new ContentValues();
     eventContentValues.put("occurredDateTime", event.getOccurredDateTime().toString());
     eventContentValues.put("aggregateId", entryId);
     eventContentValues.put("type", event.getClass().getSimpleName());
     String eventData = jsonOf(event);
     eventContentValues.put("data", eventData);
-    eventContentValues.put("eventSequenceNumber", lastSavedEventSequenceNumber + 1);
+    eventContentValues.put("eventSequenceNumber", eventSequenceNumberForQuery);
     sqlBundleList.add(new sqlBundle("events", eventContentValues));
 
     return sqlBundleList;
+  }
+
+  private String getParentBeforeFromEvent(EntryParentChangedEvent entryParentChangedEvent) {
+    //Todo: implement using load entry + find previous event and compare
+    return "unknown";
+  }
+
+  private long getDurationDeltaForDurationChangedEvent(
+      EntryDurationChangedEvent entryDurationChangedEvent) {
+    //Todo: implement using load entry + find previous event and compare
+    return 0;
   }
 
   public Entry getEntryWithSavedEventsById(String uuid) {
@@ -401,7 +410,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
                 SQLiteDatabase.CONFLICT_REPLACE);
             break;
           case "viewModelEntry":
-            Log.d(TAG, "case table viewModelCalendar2");
+            Log.d(TAG, "case table viewModelEntry");
             db.insertWithOnConflict(
                 sqlBundle.getTable(),
                 null,
@@ -427,8 +436,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         return gson.toJson(event, EntryCreatedEvent.class);
       case "EntryTitleChangedEvent":
         return gson.toJson(event, EntryTitleChangedEvent.class);
-      case "EntryDescriptionChangedEvent":
-        return gson.toJson(event, EntryDescriptionChangedEvent.class);
+      case "EntryNotesChangedEvent":
+        return gson.toJson(event, EntryNotesChangedEvent.class);
       case "EntryDurationChangedEvent":
         return gson.toJson(event, EntryDurationChangedEvent.class);
       case "EntryParentChangedEvent":
@@ -437,6 +446,10 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         return gson.toJson(event, EntryScheduledEvent.class);
       case "ResourceCreatedEvent":
         return gson.toJson(event, ResourceCreatedEvent.class);
+      case "EntryStartDateTimeChangedEvent":
+        return gson.toJson(event, EntryStartDateTimeChangedEvent.class);
+      case "EntryEndDateTimeChangedEvent":
+        return gson.toJson(event, EntryEndDateTimeChangedEvent.class);
       default:
         return "Event class not found.";
     }
@@ -498,7 +511,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
           CalendarEntry calendarEntry =
               new CalendarEntry(entryUuid, title, Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE, date,
                   time,
-                  DurationHelper.getDurationStringFromInt(duration));
+                  TimeHelper.getDurationStringFrom(duration));
           calendarEntryList.add(calendarEntry);
         } while (cursor.moveToNext());
       }
@@ -521,7 +534,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     try {
       if (cursor.moveToFirst()) {
         jsonBlob = cursor.getString(cursor.getColumnIndex("json"));
-        Gson gson = new GsonBuilder().create();
+        Gson gson = Converters.registerOffsetDateTime(new GsonBuilder()).create();
         ViewModelEntry viewModelEntry;
         viewModelEntry = gson.fromJson(jsonBlob, ViewModelEntry.class);
         return viewModelEntry;
@@ -562,7 +575,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       String parentId, String root) {
     Log.d(TAG,
         "getAncestorJsonListExcludingRootForAndIncludingThisParent for parentId " + parentId +
-        " and root " + root);
+            " and root " + root);
     String SELECT_ANCESTOR_IDS_QUERY =
         "with recursive\n"
             + "    childEntry(uuid) as (\n"
@@ -605,65 +618,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return ancestorIdList;
   }
 
-  public EntryCreatedEvent getEntryCreatedEvent(String uuid) {
-
-    String SELECT_ENTRYCREATEDEVENT_QUERY =
-        "SELECT data FROM events WHERE aggregateId = ? AND eventSequenceNumber = 0";
-
-    Cursor cursor = db.rawQuery(SELECT_ENTRYCREATEDEVENT_QUERY, new String[]{uuid});
-    EntryCreatedEvent entryCreatedEvent =
-        EntryCreatedEvent.Create(OffsetDateTime.now(ZoneOffset.UTC), "", "", "", -1);
-    try {
-      if (cursor.moveToFirst()) {
-        String dataJson = cursor.getString(cursor.getColumnIndex("data"));
-        Gson gson = Converters.registerOffsetDateTime(new GsonBuilder()).create();
-        entryCreatedEvent = gson.fromJson(dataJson, EntryCreatedEvent.class);
-      }
-    } catch (Exception e) {
-      Log.d(TAG, "Error while trying to get entryCreatedEvent from aggregates");
-    } finally {
-      if (cursor != null && !cursor.isClosed()) {
-        cursor.close();
-      }
-    }
-
-    return entryCreatedEvent;
-  }
-
-  public ResourceCreatedEvent getResourceCreatedEvent(String uuid) {
-
-    String SELECT_RESOURCECREATEDEVENT_QUERY =
-        "SELECT data FROM events WHERE aggregateId = ? AND eventSequenceNumber = 0";
-
-    Cursor cursor = db.rawQuery(SELECT_RESOURCECREATEDEVENT_QUERY, new String[]{uuid});
-    ResourceCreatedEvent resourceCreatedEvent =
-        ResourceCreatedEvent.Create(
-            OffsetDateTime.now(ZoneOffset.UTC),
-            new Email("temp"),
-            new Email("temp"),
-            "",
-            "",
-            DateTimeRange.Create(
-                OffsetDateTime.now(ZoneOffset.UTC),
-                OffsetDateTime.now(ZoneOffset.UTC).plusYears(1)),
-            -1);
-    try {
-      if (cursor.moveToFirst()) {
-        String dataJson = cursor.getString(cursor.getColumnIndex("data"));
-        Gson gson = Converters.registerOffsetDateTime(new GsonBuilder()).create();
-        resourceCreatedEvent = gson.fromJson(dataJson, ResourceCreatedEvent.class);
-      }
-    } catch (Exception e) {
-      Log.d(TAG, "Error while trying to get resourceCreatedEvent from aggregates");
-    } finally {
-      if (cursor != null && !cursor.isClosed()) {
-        cursor.close();
-      }
-    }
-
-    return resourceCreatedEvent;
-  }
-
   public List<Event> getEventsFor(String uuid) {
 
     String SELECT_EVENTS_QUERY = "SELECT type, data FROM events WHERE aggregateId = ?";
@@ -683,8 +637,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             case "EntryTitleChangedEvent":
               eventList.add(gson.fromJson(dataJson, EntryTitleChangedEvent.class));
               break;
-            case "EntryDescriptionChangedEvent":
-              eventList.add(gson.fromJson(dataJson, EntryDescriptionChangedEvent.class));
+            case "EntryNotesChangedEvent":
+              eventList.add(gson.fromJson(dataJson, EntryNotesChangedEvent.class));
               break;
             case "EntryDurationChangedEvent":
               eventList.add(gson.fromJson(dataJson, EntryDurationChangedEvent.class));
@@ -697,6 +651,12 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
               break;
             case "ResourceCreatedEvent":
               eventList.add(gson.fromJson(dataJson, ResourceCreatedEvent.class));
+              break;
+            case "EntryStartDateTimeChangedEvent":
+              eventList.add(gson.fromJson(dataJson, EntryStartDateTimeChangedEvent.class));
+              break;
+            case "EntryEndDateTimeChangedEvent":
+              eventList.add(gson.fromJson(dataJson, EntryEndDateTimeChangedEvent.class));
               break;
             default:
               throw new Exception("ERROR: event gson not recognized!");

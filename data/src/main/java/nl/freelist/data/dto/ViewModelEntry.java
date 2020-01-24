@@ -1,8 +1,9 @@
 package nl.freelist.data.dto;
 
 import android.util.Log;
+import java.time.OffsetDateTime;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.crossCuttingConcerns.DurationHelper;
+import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
 
 public final class ViewModelEntry {
 
@@ -12,10 +13,12 @@ public final class ViewModelEntry {
   private final String parentUuid;
   private final String ownerUuid;
   private final String title;
-  private final String description;
+  private final OffsetDateTime startDateTime;
   private final String durationString;
+  private final OffsetDateTime endDateTime;
+  private final String notes;
   private final String childrenDurationString;
-  private final int duration;
+  private final long duration;
   private final int years;
   private final int weeks;
   private final int days;
@@ -23,35 +26,47 @@ public final class ViewModelEntry {
   private final int minutes;
   private final int seconds;
   private int childrenCount;
-  private int childrenDuration;
+  private long childrenDuration;
   private final int lastSavedEventSequenceNumber;
+
+  public OffsetDateTime getStartDateTime() {
+    return startDateTime;
+  }
+
+  public OffsetDateTime getEndDateTime() {
+    return endDateTime;
+  }
 
   public ViewModelEntry(
       String ownerUuid,
       String parentUuid,
       String uuid,
       String title,
-      String description,
-      int duration,
+      OffsetDateTime startDateTime,
+      long duration,
+      OffsetDateTime endDateTime,
+      String notes,
       int childrenCount,
-      int childrenDuration,
+      long childrenDuration,
       int lastSavedEventSequenceNumber) {
     this.ownerUuid = ownerUuid;
     this.parentUuid = parentUuid;
     this.uuid = uuid;
     this.title = title;
-    this.description = description;
+    this.startDateTime = startDateTime;
     this.duration = duration;
+    this.endDateTime = endDateTime;
+    this.notes = notes;
     this.childrenCount = childrenCount;
     this.childrenDuration = childrenDuration;
-    this.childrenDurationString = DurationHelper.getDurationStringFromInt(childrenDuration);
-    this.years = DurationHelper.getYearsIntFrom(duration);
-    this.weeks = DurationHelper.getWeeksIntFrom(duration);
-    this.days = DurationHelper.getDaysIntFrom(duration);
-    this.hours = DurationHelper.getHoursIntFrom(duration);
-    this.minutes = DurationHelper.getMinutesIntFrom(duration);
-    this.seconds = DurationHelper.getSecondsIntFrom(duration);
-    this.durationString = DurationHelper.getDurationStringFromInt(duration);
+    this.childrenDurationString = TimeHelper.getDurationStringFrom(childrenDuration);
+    this.years = TimeHelper.getWholeYearsFrom(duration);
+    this.weeks = TimeHelper.getStandaloneWeeksFrom(duration);
+    this.days = TimeHelper.getStandaloneDaysFrom(duration);
+    this.hours = TimeHelper.getStandaloneHoursFrom(duration);
+    this.minutes = TimeHelper.getStandaloneMinutesFrom(duration);
+    this.seconds = TimeHelper.getStandaloneSecondsFrom(duration);
+    this.durationString = TimeHelper.getDurationStringFrom(duration);
     this.lastSavedEventSequenceNumber = lastSavedEventSequenceNumber;
 
     Log.d(TAG,
@@ -82,8 +97,8 @@ public final class ViewModelEntry {
     return title;
   }
 
-  public String getDescription() {
-    return description;
+  public String getNotes() {
+    return notes;
   }
 
   public String getDurationString() {
@@ -94,7 +109,7 @@ public final class ViewModelEntry {
     return minutes;
   }
 
-  public int getDuration() {
+  public long getDuration() {
     return duration;
   }
 
@@ -122,7 +137,7 @@ public final class ViewModelEntry {
     return childrenCount;
   }
 
-  public int getChildrenDuration() {
+  public long getChildrenDuration() {
     return childrenDuration;
   }
 
@@ -138,7 +153,7 @@ public final class ViewModelEntry {
     this.childrenCount = childrenCount;
   }
 
-  public void setChildrenDuration(int childrenDuration) {
+  public void setChildrenDuration(long childrenDuration) {
     this.childrenDuration = childrenDuration;
   }
 }

@@ -11,33 +11,33 @@ import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.events.EntryDurationChangedEvent;
+import nl.freelist.domain.events.EntryNotesChangedEvent;
 import nl.freelist.domain.events.Event;
 
-public class ChangeEntryDurationCommand extends Command {
+public class ChangeEntryNotesCommand extends Command {
 
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
   String uuid;
-  long durationAfter;
+  String descriptionAfter;
   int lastSavedEventSequenceNumber;
   Repository repository;
 
-  public ChangeEntryDurationCommand(
+  public ChangeEntryNotesCommand(
       String uuid,
-      long durationAfter,
+      String descriptionAfter,
       int lastSavedEventSequenceNumber,
       Repository repository
   ) {
     this.uuid = uuid;
-    this.durationAfter = durationAfter;
+    this.descriptionAfter = descriptionAfter;
     this.lastSavedEventSequenceNumber = lastSavedEventSequenceNumber;
     this.repository = repository;
   }
 
   @Override
   public Result execute() {
-    LOGGER.log(Level.INFO, "Executing ChangeEntryDurationCommand");
+    LOGGER.log(Level.INFO, "Executing ChangeEntryNotesCommand");
 
     Entry entry = repository.getEntryWithSavedEventsById(uuid);
     if (entry.getLastAppliedEventSequenceNumber() != lastSavedEventSequenceNumber) {
@@ -54,13 +54,12 @@ public class ChangeEntryDurationCommand extends Command {
     }
 
     List<Event> eventsToAddList = new ArrayList<>();
-    EntryDurationChangedEvent entryDurationChangedEvent = EntryDurationChangedEvent
-        .Create(
-            OffsetDateTime.now(ZoneOffset.UTC),
+    EntryNotesChangedEvent entryNotesChangedEvent = EntryNotesChangedEvent
+        .Create(OffsetDateTime.now(ZoneOffset.UTC),
             uuid,
-            durationAfter
+            descriptionAfter
         );
-    eventsToAddList.add(entryDurationChangedEvent);
+    eventsToAddList.add(entryNotesChangedEvent);
     entry.applyEvents(eventsToAddList);
     try {
       List<sqlBundle> sqlBundleList = repository.insert(entry);

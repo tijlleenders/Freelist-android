@@ -6,22 +6,32 @@ public class EntryCreatedEvent extends Event {
 
   private String ownerUuid;
   private String parentUuid;
-  private int eventSequenceNumber;
   private String eventType = "EntryCreatedEvent";
 
 
-  private EntryCreatedEvent(OffsetDateTime occurredDateTime, String ownerUuid, String parentUuid,
-      String aggregateId, int eventSequenceNumber) {
+  private EntryCreatedEvent(
+      OffsetDateTime occurredDateTime,
+      String ownerUuid,
+      String parentUuid,
+      String aggregateId
+  ) {
     super(occurredDateTime, aggregateId);
     this.ownerUuid = ownerUuid;
     this.parentUuid = parentUuid;
-    this.eventSequenceNumber = eventSequenceNumber;
   }
 
-  public static EntryCreatedEvent Create(OffsetDateTime occurredDateTime, String ownerUuid,
-      String parentUuid, String aggregateId, int eventSequenceNumber) {
-    EntryCreatedEvent entryCreatedEvent = new EntryCreatedEvent(occurredDateTime, ownerUuid,
-        parentUuid, aggregateId, eventSequenceNumber);
+  public static EntryCreatedEvent Create(
+      OffsetDateTime occurredDateTime,
+      String ownerUuid,
+      String parentUuid,
+      String aggregateId
+  ) {
+    EntryCreatedEvent entryCreatedEvent = new EntryCreatedEvent(
+        occurredDateTime,
+        ownerUuid,
+        parentUuid,
+        aggregateId
+    );
     return entryCreatedEvent;
   }
 
@@ -31,10 +41,6 @@ public class EntryCreatedEvent extends Event {
 
   public String getParentUuid() {
     return parentUuid;
-  }
-
-  public int getEventSequenceNumber() {
-    return eventSequenceNumber;
   }
 
   public String getEventType() {

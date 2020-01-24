@@ -11,33 +11,33 @@ import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.events.EntryDurationChangedEvent;
+import nl.freelist.domain.events.EntryEndDateTimeChangedEvent;
 import nl.freelist.domain.events.Event;
 
-public class ChangeEntryDurationCommand extends Command {
+public class ChangeEntryEndDateTimeCommand extends Command {
 
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
   String uuid;
-  long durationAfter;
+  OffsetDateTime endDateTimeAfter;
   int lastSavedEventSequenceNumber;
   Repository repository;
 
-  public ChangeEntryDurationCommand(
+  public ChangeEntryEndDateTimeCommand(
       String uuid,
-      long durationAfter,
+      OffsetDateTime endDateTimeAfter,
       int lastSavedEventSequenceNumber,
       Repository repository
   ) {
     this.uuid = uuid;
-    this.durationAfter = durationAfter;
+    this.endDateTimeAfter = endDateTimeAfter;
     this.lastSavedEventSequenceNumber = lastSavedEventSequenceNumber;
     this.repository = repository;
   }
 
   @Override
   public Result execute() {
-    LOGGER.log(Level.INFO, "Executing ChangeEntryDurationCommand");
+    LOGGER.log(Level.INFO, "Executing ChangeEntryEndDateTimeCommand");
 
     Entry entry = repository.getEntryWithSavedEventsById(uuid);
     if (entry.getLastAppliedEventSequenceNumber() != lastSavedEventSequenceNumber) {
@@ -54,19 +54,18 @@ public class ChangeEntryDurationCommand extends Command {
     }
 
     List<Event> eventsToAddList = new ArrayList<>();
-    EntryDurationChangedEvent entryDurationChangedEvent = EntryDurationChangedEvent
-        .Create(
-            OffsetDateTime.now(ZoneOffset.UTC),
-            uuid,
-            durationAfter
-        );
-    eventsToAddList.add(entryDurationChangedEvent);
+    EntryEndDateTimeChangedEvent entryEndDateTimeChangedEvent = EntryEndDateTimeChangedEvent.Create(
+        OffsetDateTime.now(ZoneOffset.UTC),
+        uuid,
+        endDateTimeAfter
+    );
+    eventsToAddList.add(entryEndDateTimeChangedEvent);
     entry.applyEvents(eventsToAddList);
     try {
       List<sqlBundle> sqlBundleList = repository.insert(entry);
       repository.executeSqlBundles(sqlBundleList);
     } catch (Exception e) {
-      LOGGER.log(Level.WARNING, e.getMessage());
+      LOGGER.log(Level.FINE, e.getMessage());
       return Result.Create(false, null, "", e.getMessage());
     }
     return Result.Create(true, null, "", "");

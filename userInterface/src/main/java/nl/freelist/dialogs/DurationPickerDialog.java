@@ -19,15 +19,6 @@ public class DurationPickerDialog extends DialogFragment {
 
   public static final String TAG = "DurationPickerDialog";
 
-  /* The activity that creates an instance of this dialog fragment must
-   * implement this interface in order to receive event callbacks.
-   * Each method passes the DialogFragment in case the host needs to query it. */
-  public interface NoticeDialogListener {
-
-    public void onDialogPositiveClick(String durationString);
-    //public void onDialogNegativeClick(DialogFragment dialog);
-  }
-
   // Use this instance of the interface to deliver action events
   NoticeDialogListener listener;
 
@@ -71,24 +62,21 @@ public class DurationPickerDialog extends DialogFragment {
       public void onClick(DialogInterface dialog, int id) {
         // User clicked OK button
         Log.d(TAG, "OK clicked");
-        TextInputEditText textInputeditTextHours = getDialog().findViewById(R.id.edit_text_hours);
+        TextInputEditText textInputeditTextHours = getDialog()
+            .findViewById(R.id.edit_text_hours);
         TextInputEditText textInputEditTextMinutes = getDialog()
             .findViewById(R.id.edit_text_minutes);
         String hours = textInputeditTextHours.getText().toString();
         String minutes = textInputEditTextMinutes.getText().toString();
-        hours = hours + " hours";
-        minutes = minutes + " minutes";
-
-        if (hours.equals("0 hours") || hours.equals(" hours")) {
-          hours = "";
+        if (hours.equals("")) {
+          hours = "0";
         }
-        if (minutes.equals("0 minutes") || minutes.equals(" minutes")) {
-          minutes = "";
+        if (minutes.equals("")) {
+          minutes = "0";
         }
-        if (!hours.equals("") && !minutes.equals("")) {
-          hours = hours + " and ";
-        }
-        listener.onDialogPositiveClick(hours + minutes);
+        String durationString = String
+            .valueOf(Integer.valueOf(hours) * 3600 + Integer.valueOf(minutes) * 60);
+        listener.onDialogPositiveClick(durationString, "duration");
       }
     });
     // Create the AlertDialog object and return it
