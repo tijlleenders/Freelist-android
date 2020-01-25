@@ -161,7 +161,11 @@ public class Repository {
               sharedPreferences.getString(Constants.SETTINGS_USER_UUID, null).getBytes()))) {
         ViewModelEntry parentOfParentViewModelEntry =
             getViewModelEntryById(UUID.fromString(parentViewModelEntry.getParentUuid()));
-        allViewModelEntries.add(0, parentOfParentViewModelEntry);
+        if (parentOfParentViewModelEntry == null) {
+          return allViewModelEntries;
+        } else {
+          allViewModelEntries.add(0, parentOfParentViewModelEntry);
+        }
       }
     }
     return allViewModelEntries;

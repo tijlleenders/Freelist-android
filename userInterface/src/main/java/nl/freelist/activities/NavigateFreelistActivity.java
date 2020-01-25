@@ -233,11 +233,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
                     @Override
                     public void run() {
                       initializeBreadcrumb(entries);
-                      Toast.makeText(
-                          NavigateFreelistActivity.this,
-                          "navigateEntriesViewModel breadcrumb refreshed!",
-                          Toast.LENGTH_SHORT)
-                          .show();
+//                      Toast.makeText(
+//                          NavigateFreelistActivity.this,
+//                          "navigateEntriesViewModel breadcrumb refreshed!",
+//                          Toast.LENGTH_SHORT)
+//                          .show();
                     }
                   });
             });

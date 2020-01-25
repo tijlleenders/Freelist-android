@@ -118,7 +118,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     List<sqlBundle> sqlBundleList = new ArrayList<>();
 
     List<String> oldAncestorJsonList =
-        getAncestorJsonListExcludingRootForAndIncludingThisParent(firstParent, root);
+        getAncestorJsonListForAndIncludingThisParentIfNotRoot(firstParent, root);
     List<ViewModelEntry> oldAncestorViewModelList = getViewModelEntriesFromJsonList(
         oldAncestorJsonList);
     Gson gson = Converters.registerOffsetDateTime(new GsonBuilder()).create();
@@ -571,10 +571,10 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return childrenIdList;
   }
 
-  public List<String> getAncestorJsonListExcludingRootForAndIncludingThisParent(
+  public List<String> getAncestorJsonListForAndIncludingThisParentIfNotRoot(
       String parentId, String root) {
     Log.d(TAG,
-        "getAncestorJsonListExcludingRootForAndIncludingThisParent for parentId " + parentId +
+        "getAncestorJsonListForAndIncludingThisParentIfNotRoot for parentId " + parentId +
             " and root " + root);
     String SELECT_ANCESTOR_IDS_QUERY =
         "with recursive\n"
@@ -585,16 +585,16 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             + "        from viewModelEntry, childEntry\n"
             + "        where viewModelEntry.uuid = childEntry.uuid\n"
             + "    )\n"
-            + "select parentUuid from viewModelEntry\n"
+            + "select json from viewModelEntry\n"
             + "    where viewModelEntry.uuid in childEntry;";
 
     Cursor cursor = db.rawQuery(SELECT_ANCESTOR_IDS_QUERY, new String[]{parentId});
-    List<String> ancestorIdList = new ArrayList<>();
+    List<String> ancestorJsonList = new ArrayList<>();
     try {
       if (cursor.moveToFirst()) {
         do {
-          String parentUuid = cursor.getString(cursor.getColumnIndex("parentUuid"));
-          ancestorIdList.add(parentUuid);
+          String json = cursor.getString(cursor.getColumnIndex("json"));
+          ancestorJsonList.add(json);
 
         } while (cursor.moveToNext());
       }
@@ -606,16 +606,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       }
     }
 
-    if (ancestorIdList.size() > 0) {
-      ancestorIdList.remove(root);
-    }
-
-    if (!parentId.equals(root)) {
-      ancestorIdList.add(parentId);
-    }
-
-    Log.d(TAG, "ancestorIdList complete : " + ancestorIdList.toString());
-    return ancestorIdList;
+    Log.d(TAG, "ancestorJsonList complete : " + ancestorJsonList.toString());
+    return ancestorJsonList;
   }
 
   public List<Event> getEventsFor(String uuid) {
