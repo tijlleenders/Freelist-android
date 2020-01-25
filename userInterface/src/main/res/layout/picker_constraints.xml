@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content"
+  android:orientation="vertical"
+  android:padding="20dp">
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+    <CheckBox
+      android:id="@+id/checkMondays"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:checked="true"
+      android:text="@string/mondays" />
+    <CheckBox
+      android:id="@+id/checkTuesdays"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:checked="true"
+      android:text="@string/tuesdays" />
+    <CheckBox
+      android:id="@+id/checkWednesdays"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:checked="true"
+      android:text="@string/wednesdays" />
+    <CheckBox
+      android:id="@+id/checkThursdays"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:checked="true"
+      android:text="@string/thursdays" />
+    <CheckBox
+      android:id="@+id/checkFridays"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:checked="true"
+      android:text="@string/fridays" />
+  </LinearLayout>
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+    <View
+      android:id="@+id/view3"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:layout_weight="1" />
+    <View
+      android:id="@+id/view2"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:layout_weight="1" />
+    <View
+      android:id="@+id/view"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:layout_weight="1" />
+    <CheckBox
+      android:id="@+id/checkSaturdays"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:checked="false"
+      android:text="@string/saturdays" />
+    <CheckBox
+      android:id="@+id/checkSundays"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="@string/sundays" />
+  </LinearLayout>
+  <Space
+    android:layout_width="match_parent"
+    android:layout_height="20dp"
+    android:layout_weight="1" />
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+    <CheckBox
+      android:id="@+id/checkMornings"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="@string/mornings" />
+    <CheckBox
+      android:id="@+id/checkAfternoons"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="@string/afternoons" />
+    <CheckBox
+      android:id="@+id/checkEvenings"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="@string/evenings" />
+  </LinearLayout>
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <View
+      android:id="@+id/view5"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_weight="1" />
+    <View
+      android:id="@+id/view4"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_weight="1" />
+    <CheckBox
+      android:id="@+id/checkAtNight"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="@string/at_night" />
+  </LinearLayout>
+</LinearLayout>

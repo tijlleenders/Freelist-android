@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +21,7 @@ import nl.freelist.commands.CreateEntryCommand;
 import nl.freelist.commands.SaveEntryCommand;
 import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.dialogs.ConstraintPickerDialog;
 import nl.freelist.dialogs.DurationPickerDialog;
 import nl.freelist.dialogs.FDatePickerDialog;
 import nl.freelist.dialogs.FTimePickerDialog;
@@ -56,15 +56,15 @@ public class AddEditEntryActivity extends AppCompatActivity
   private TextInputLayout textInputLayoutStartDateTime;
   private TextInputLayout textInputLayoutDuration;
   private TextInputLayout textInputLayoutEndDateTime;
+  private TextInputLayout textInputLayoutSchedule;
   private TextInputLayout textInputLayoutNotes;
 
   private TextInputEditText textInputEditTextTitle;
   private TextInputEditText textInputEditTextStartDateTime;
   private TextInputEditText textInputEditTextDuration;
   private TextInputEditText textInputEditTextEndDateTime;
+  private TextInputEditText textInputEditTextSchedule;
   private TextInputEditText textInputEditTextNotes;
-
-  private Button scheduleButton;
 
   private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel
       AddEditEntryActivityViewModel;
@@ -160,7 +160,6 @@ public class AddEditEntryActivity extends AppCompatActivity
 
   private void initializeForAddNew(Bundle bundle) {
     if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
-      initializeParentButtonWithUuid(parentUuid);
       uuid = UUID.randomUUID().toString();
     }
     setTitle("Add new Freelist");
@@ -213,6 +212,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     textInputLayoutStartDateTime = findViewById(R.id.text_input_layout_start_date_time);
     textInputLayoutDuration = findViewById(R.id.text_input_layout_duration);
     textInputLayoutEndDateTime = findViewById(R.id.text_input_layout_end_date_time);
+    textInputLayoutSchedule = findViewById(R.id.text_input_layout_schedule);
     textInputLayoutNotes = findViewById(R.id.text_input_layout_notes);
 
     //Todo: Initialize via layout to pass along appropriate styling from layout
@@ -220,9 +220,9 @@ public class AddEditEntryActivity extends AppCompatActivity
     textInputEditTextStartDateTime = findViewById(R.id.edit_text_start_date_time);
     textInputEditTextDuration = findViewById(R.id.edit_text_duration);
     textInputEditTextEndDateTime = findViewById(R.id.edit_text_end_date_time);
+    textInputEditTextSchedule = findViewById(R.id.edit_text_schedule);
     textInputEditTextNotes = findViewById(R.id.edit_text_notes);
 
-    scheduleButton = findViewById(R.id.schedule_button);
   }
 
   private void attachViewListeners() {
@@ -230,6 +230,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     textInputEditTextStartDateTime.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextDuration.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextEndDateTime.setOnFocusChangeListener(this::onFocusChange);
+    textInputEditTextSchedule.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextNotes.setOnFocusChangeListener(this::onFocusChange);
 
     textInputLayoutTitle.setEndIconOnClickListener(new View.OnClickListener() {
@@ -272,7 +273,6 @@ public class AddEditEntryActivity extends AppCompatActivity
         textInputEditTextNotes.setText("");
       }
     });
-    attachScheduleButtonListener();
   }
 
   @Override
@@ -289,29 +289,6 @@ public class AddEditEntryActivity extends AppCompatActivity
     }
   }
 
-  private void initializeParentButtonWithUuid(String parentUuid) {
-    //Todo: implement
-  }
-
-  private void attachScheduleButtonListener() {
-    scheduleButton.setOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            Log.d(TAG, "scheduleButton clicked for entry ..." + uuid);
-            Intent intent = new Intent(AddEditEntryActivity.this,
-                ChooseCalendarOptionActivity.class);
-            intent.putExtra(
-                Constants.EXTRA_ENTRY_ID, uuid);
-            intent.putExtra(
-                Constants.EXTRA_RESOURCE_ID, defaultUuid);
-            startActivityForResult(intent, Constants.CHOOSE_CALENDAR_OPTION_REQUEST);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-          }
-        }
-    );
-    scheduleButton.setEnabled(true);
-  }
 
   private void initializeEditActivityWith(ViewModelEntry viewModelEntry) {
     Log.d(TAG, "initializeEditActivityWith viewModelEntry " + viewModelEntry.getTitle() + "called");
@@ -320,6 +297,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     startDateTime = viewModelEntry.getStartDateTime();
     endDateTime = viewModelEntry.getEndDateTime();
     notes = viewModelEntry.getNotes();
+    //Todo: implement schedule-text in viewModelEntry
 
     textInputEditTextTitle.setText(title);
     if (startDateTime != null) {
@@ -331,7 +309,6 @@ public class AddEditEntryActivity extends AppCompatActivity
     }
     textInputEditTextNotes.setText(notes);
 
-    initializeParentButtonWithUuid(viewModelEntry.getParentUuid());
     lastSavedEventSequenceNumber = viewModelEntry.getLastSavedEventSequenceNumber();
     return;
   }
@@ -343,6 +320,7 @@ public class AddEditEntryActivity extends AppCompatActivity
       case R.id.edit_text_start_date_time:
         if (textInputEditTextStartDateTime.hasFocus()) {
           Log.d(TAG, "startDateTime clicked");
+          hideSoftKeyboard();
           FTimePickerDialog fTimePickerDialog = new FTimePickerDialog("startTime");
           fTimePickerDialog.show(getSupportFragmentManager(), "timePicker");
           FDatePickerDialog fDatePickerDialog = new FDatePickerDialog("startDate");
@@ -352,6 +330,7 @@ public class AddEditEntryActivity extends AppCompatActivity
       case R.id.edit_text_duration:
         if (textInputEditTextDuration.hasFocus()) {
           Log.d(TAG, "duration clicked");
+          hideSoftKeyboard();
           DurationPickerDialog durationPickerDialog = new DurationPickerDialog();
           durationPickerDialog.show(getSupportFragmentManager(), "testDialog");
         }
@@ -359,10 +338,27 @@ public class AddEditEntryActivity extends AppCompatActivity
       case R.id.edit_text_end_date_time:
         if (textInputEditTextEndDateTime.hasFocus()) {
           Log.d(TAG, "endDateTime clicked");
+          hideSoftKeyboard();
           FTimePickerDialog fTimePickerDialog = new FTimePickerDialog("endTime");
           fTimePickerDialog.show(getSupportFragmentManager(), "timePicker");
           FDatePickerDialog fDatePickerDialog = new FDatePickerDialog("endDate");
           fDatePickerDialog.show(getSupportFragmentManager(), "datePicker");
+        }
+        break;
+      case R.id.edit_text_schedule:
+        if (textInputEditTextSchedule.hasFocus()) {
+          Log.d(TAG, "schedule clicked");
+          hideSoftKeyboard();
+          if (duration > 0
+              && startDateTime != null
+              && endDateTime != null
+              && startDateTime.plusSeconds(duration).toEpochSecond() != endDateTime.toEpochSecond()
+          ) { //it only makes sense to add constraints when not already constrained to a fixed date-time
+            ConstraintPickerDialog constraintPickerDialog = new ConstraintPickerDialog();
+            constraintPickerDialog.show(getSupportFragmentManager(), "constraintPicker");
+          }
+          //Todo: schedule entry
+          textInputEditTextSchedule.clearFocus();
         }
         break;
       default:

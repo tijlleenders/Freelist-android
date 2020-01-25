@@ -18,8 +18,19 @@
   <string name="hint_minutes">Minutes</string>
   <string name="ok">Ok</string>
   <string name="starts_at_or_after_time">time</string>
-  <string name="starts_at_or_after_date">Starts at or after date</string>
+  <string name="starts_at_or_after_date">Starts at or after</string>
   <string name="lasts_for">Lasts for</string>
-  <string name="finish_at_or_before_date">Finish at or before date</string>
+  <string name="finish_at_or_before_date">Finish at or before</string>
   <string name="finish_at_or_before_time">time</string>
+  <string name="mondays">Mon</string>
+  <string name="tuesdays">Tue</string>
+  <string name="wednesdays">Wed</string>
+  <string name="thursdays">Thu</string>
+  <string name="fridays">Fri</string>
+  <string name="saturdays">Sat</string>
+  <string name="sundays">Sun</string>
+  <string name="mornings">Mornings</string>
+  <string name="afternoons">Afternoons</string>
+  <string name="evenings">Evenings</string>
+  <string name="at_night">At night</string>
 </resources>

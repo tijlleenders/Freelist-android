@@ -76,16 +76,32 @@
           android:layout_height="wrap_content" />
       </com.google.android.material.textfield.TextInputLayout>
 
-      <Button
-        android:id="@+id/schedule_button"
+      <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_input_layout_schedule"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/schedule" />
-      <View
-        android:id="@+id/divider2"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:hint="@string/schedule">
+        <com.google.android.material.textfield.TextInputEditText
+          android:id="@+id/edit_text_schedule"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content" />
+      </com.google.android.material.textfield.TextInputLayout>
+
+      <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_input_parent"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:hint="@string/sublist_of">
+        <com.google.android.material.textfield.TextInputEditText
+          android:id="@+id/edit_text_parent"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content" />
+      </com.google.android.material.textfield.TextInputLayout>
+
 
       <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/text_input_layout_notes"
@@ -93,8 +109,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:hint="@string/notes_hint"
-        app:hintEnabled="true"
-        app:endIconMode="clear_text">
+        app:endIconMode="clear_text"
+        app:hintEnabled="true">
         <com.google.android.material.textfield.TextInputEditText
           android:id="@+id/edit_text_notes"
           android:layout_width="match_parent"
