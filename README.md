@@ -20,7 +20,7 @@ See https://github.com/tijlleenders/Freelist-android/wiki for some ideas.
 * (SS) Simple & Safe
 
 #### Free
-* F.1 100% financed by donations. 
+* F.1 100% financed by donations (except for corporations).
 * F.2 No ads. Not now, not ever - period.
 * F.3 Free as in zero cost to download and use in app stores*. 
 * F.4 Free as in open source.
