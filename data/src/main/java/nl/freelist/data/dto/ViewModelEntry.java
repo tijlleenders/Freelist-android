@@ -25,7 +25,7 @@ public final class ViewModelEntry {
   private final int hours;
   private final int minutes;
   private final int seconds;
-  private int childrenCount;
+  private long childrenCount;
   private long childrenDuration;
   private final int lastSavedEventSequenceNumber;
 
@@ -46,7 +46,7 @@ public final class ViewModelEntry {
       long duration,
       OffsetDateTime endDateTime,
       String notes,
-      int childrenCount,
+      long childrenCount,
       long childrenDuration,
       int lastSavedEventSequenceNumber) {
     this.ownerUuid = ownerUuid;
@@ -133,7 +133,7 @@ public final class ViewModelEntry {
     return seconds;
   }
 
-  public int getChildrenCount() {
+  public long getChildrenCount() {
     return childrenCount;
   }
 
@@ -149,11 +149,4 @@ public final class ViewModelEntry {
     return lastSavedEventSequenceNumber;
   }
 
-  public void setChildrenCount(int childrenCount) {
-    this.childrenCount = childrenCount;
-  }
-
-  public void setChildrenDuration(long childrenDuration) {
-    this.childrenDuration = childrenDuration;
-  }
 }

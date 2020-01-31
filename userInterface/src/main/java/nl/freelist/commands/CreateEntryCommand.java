@@ -2,12 +2,11 @@ package nl.freelist.commands;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.data.Repository;
-import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
@@ -21,11 +20,21 @@ public class CreateEntryCommand extends Command {
   UUID parentUuid;
   UUID ownerUuid;
   Repository repository;
+  MySettings mySettings;
 
   public CreateEntryCommand(
+      //Todo: is validation logic in constructor OK to do? Or move to static Create method
       String ownerUuid, String parentUuid, String uuid, Repository repository) {
-    this.ownerUuid = UUID.fromString(ownerUuid);
-    this.parentUuid = UUID.fromString(parentUuid);
+    if (ownerUuid != null) {
+      this.ownerUuid = UUID.fromString(ownerUuid);
+    } else {
+      this.ownerUuid = UUID.fromString(mySettings.getResourceUuid());
+    }
+    if (parentUuid != null) {
+      this.parentUuid = UUID.fromString(parentUuid);
+    } else {
+      this.parentUuid = UUID.fromString(mySettings.getResourceUuid());
+    }
     this.uuid = UUID.fromString(uuid);
     this.repository = repository;
   }
@@ -43,9 +52,9 @@ public class CreateEntryCommand extends Command {
             uuid.toString()
         );
     entry.applyEvent(entryCreatedEvent);
+
     try {
-      List<sqlBundle> sqlBundleList = repository.insert(entry);
-      repository.executeSqlBundles(sqlBundleList);
+      repository.insert(entry);
     } catch (Exception e) {
       LOGGER.log(Level.WARNING, e.getMessage());
       return Result.Create(false, null, "", e.getMessage());

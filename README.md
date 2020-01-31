@@ -22,7 +22,7 @@ See https://github.com/tijlleenders/Freelist-android/wiki for some ideas.
 #### Free
 * F.1 100% financed by donations (except for corporations).
 * F.2 No ads. Not now, not ever - period.
-* F.3 Free as in zero cost to download and use in app stores*. 
+* F.3 Free as in zero cost to download and use in app stores*.
 * F.4 Free as in open source.
 ###### \* Freelist is not developed/published for iOS as they have a fundamental incompatibility with GPLv3. The Free Software Foundation doesn't want GPLv3 apps in Apple Store (as Apple adds additional restrictions), and vice-versa.
 

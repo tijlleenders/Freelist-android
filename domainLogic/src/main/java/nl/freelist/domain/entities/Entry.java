@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import nl.freelist.domain.events.EntryChildCountChangedEvent;
+import nl.freelist.domain.events.EntryChildDurationChangedEvent;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
 import nl.freelist.domain.events.EntryEndDateTimeChangedEvent;
@@ -27,8 +29,8 @@ public class Entry {
   private long duration = 0;
   private OffsetDateTime endDateTime;
   private String notes = "";
-  // Duration of sublists not included in entry
-  // as it is a projected attribute (depends on what subLists are visible to the specific user)
+  private long childCount; //are applied within same transaction that add descendants
+  private long childDuration; //are applied within same transaction that changes descendant duration
   private int lastAppliedEventSequenceNumber;
   private List<Event> eventList = new ArrayList<>();
 
@@ -130,13 +132,29 @@ public class Entry {
           lastAppliedEventSequenceNumber += 1;
         }
         break;
+      case "EntryChildDurationChangedEvent":
+        LOGGER.log(Level.INFO, "EntryChildDurationChangedEvent applied");
+        EntryChildDurationChangedEvent entryChildDurationChangedEvent = (EntryChildDurationChangedEvent) event;
+        if (entryChildDurationChangedEvent.getDurationDelta() != 0) {
+          this.childDuration += (entryChildDurationChangedEvent.getDurationDelta());
+          eventList.add(event);
+          lastAppliedEventSequenceNumber += 1;
+        }
+        break;
+      case "EntryChildCountChangedEvent":
+        LOGGER.log(Level.INFO, "EntryChildCountChangedEvent applied");
+        EntryChildCountChangedEvent entryChildCountChangedEvent = (EntryChildCountChangedEvent) event;
+        if (entryChildCountChangedEvent.getChildCountDelta() != 0) {
+          this.childCount += entryChildCountChangedEvent.getChildCountDelta();
+          eventList.add(event);
+          lastAppliedEventSequenceNumber += 1;
+        }
+        break;
       default:
         LOGGER.log(Level.WARNING,
             "Event can't be applied to entry " + uuid.toString() + " ; event type not recognized");
         break;
     }
-
-
   }
 
   public List<Event> getListOfEventsWithSequenceHigherThan(int fromEventSequenceNumber) {
@@ -184,5 +202,54 @@ public class Entry {
 
   public OffsetDateTime getEndDateTime() {
     return endDateTime;
+  }
+
+  public long getChildCount() {
+    return childCount;
+  }
+
+  public long getChildDuration() {
+    return childDuration;
+  }
+
+  public List<Event> getEventList() {
+    return eventList;
+  }
+
+  public Event getPreviousOf(Event event, int eventSequenceNumberToCountdownFrom) {
+    String eventTypeToFind = event.getClass().getSimpleName();
+
+    LOGGER.log(
+        Level.INFO,
+        "Asked for the previous event of " + eventTypeToFind
+            + " with eventSequenceNumberToCountdownFrom lower than "
+            + eventSequenceNumberToCountdownFrom
+    );
+    if (eventSequenceNumberToCountdownFrom > (eventList.size()
+        - 1)) { //eventSequenceNumbers start at 0 - just like List
+      LOGGER.log(
+          Level.WARNING,
+          "Asked to count down from " + eventSequenceNumberToCountdownFrom
+              + " but max eventSequenceNumber of eventList is " + (eventList.size() - 1)
+      );
+      return null;
+    }
+
+    for (int eventSequenceNumberCountdown =
+        eventSequenceNumberToCountdownFrom - 1; //Exclude the event to compare with
+        eventSequenceNumberCountdown >= 0;
+        eventSequenceNumberCountdown--) {
+      System.out.println(eventSequenceNumberCountdown);
+      Event eventToTest = eventList.get(eventSequenceNumberCountdown);
+      if (eventToTest.getClass().getSimpleName().equals(eventTypeToFind)) {
+        LOGGER.log(
+            Level.INFO,
+            "Returning Event with sequence number " + eventSequenceNumberToCountdownFrom
+                + " of type " + eventTypeToFind
+        );
+        return eventToTest;
+      }
+    }
+    return null;
   }
 }

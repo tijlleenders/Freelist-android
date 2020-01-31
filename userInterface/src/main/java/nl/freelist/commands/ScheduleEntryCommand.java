@@ -67,7 +67,8 @@ public class ScheduleEntryCommand extends Command {
             calendar
         );
 
-    //Todo: create second event for repository (events are about aggregate state changes, so same event can't be shared by two aggregates)
+    //Todo: create second event for entry (events are about aggregate state changes, so same event can't be shared by two aggregates)
+    // the resource state change triggers the entry state change (event added to list) in the same transaction
 
     //How to know if it fails?
     List<sqlBundle> sqlBundleList = new ArrayList<>();
@@ -75,26 +76,13 @@ public class ScheduleEntryCommand extends Command {
     eventsToAddList.add(entryScheduledEvent);
 
     resource.applyEvents(eventsToAddList);
-    List<sqlBundle> sqlBundleListResource = repository.insert(resource);
-    if (sqlBundleListResource != null) {
-      sqlBundleList.addAll(sqlBundleListResource);
-    }
 
-    entry.applyEvents(eventsToAddList);
-    List<sqlBundle> sqlBundleListEntry = new ArrayList<>();
     try {
-      sqlBundleListEntry.addAll(repository.insert(entry));
+      repository.insert(resource);
     } catch (Exception e) {
       LOGGER.log(Level.WARNING, e.getMessage());
       return Result.Create(false, null, "", e.getMessage());
     }
-    if (sqlBundleListEntry != null) {
-      sqlBundleList.addAll(sqlBundleListEntry);
-    }
-    if (sqlBundleList != null) {
-      repository.executeSqlBundles(sqlBundleList);
       return Result.Create(true, null, "", "");
-    }
-    return Result.Create(false, null, "", "");
   }
 }

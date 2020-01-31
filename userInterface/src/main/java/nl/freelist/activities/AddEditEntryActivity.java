@@ -40,7 +40,8 @@ public class AddEditEntryActivity extends AppCompatActivity
   private String uuid; // Todo: why ever store a UUID as a string, if not in data persistence layer?
   private String parentUuid;
   private String defaultUuid;
-  private int lastSavedEventSequenceNumber = 0;
+  private int lastSavedEventSequenceNumber;
+  private int saveCommandsInProgress = 0;
 
   private Repository repository;
 
@@ -87,6 +88,10 @@ public class AddEditEntryActivity extends AppCompatActivity
   }
 
   private void saveChangedFields() {
+    if (saveCommandsInProgress > 0) {
+      Log.d(TAG, "save Command already in progress! #:" + saveCommandsInProgress);
+      return;
+    }
     title = textInputEditTextTitle.getText().toString();
     notes = textInputEditTextNotes.getText().toString();
     Log.d(
@@ -104,6 +109,10 @@ public class AddEditEntryActivity extends AppCompatActivity
             notes,
             lastSavedEventSequenceNumber,
             repository);
+    saveCommandsInProgress += 1;
+    Toast.makeText(AddEditEntryActivity.this,
+        "SaveCommandsInProgress: " + saveCommandsInProgress, Toast.LENGTH_SHORT)
+        .show();
     AddEditEntryActivityViewModel.handle(saveEntryCommand)
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
@@ -117,7 +126,9 @@ public class AddEditEntryActivity extends AppCompatActivity
                     Toast.makeText(AddEditEntryActivity.this,
                         "Sorry! SaveEntry failed!", Toast.LENGTH_SHORT)
                         .show();
+                    saveCommandsInProgress -= 1;
                   } else {
+                    saveCommandsInProgress -= 1;
                     initializeForEditExisting(uuid);
                   }
                 }

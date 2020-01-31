@@ -2,12 +2,10 @@ package nl.freelist.commands;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.freelist.data.Repository;
-import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Resource;
@@ -57,8 +55,7 @@ public class CreateResourceCommand extends Command {
             0 //Todo: remove and add check in Resource.applyEvent
         );
     resource.applyEvent(resourceCreatedEvent);
-    List<sqlBundle> sqlBundleList = repository.insert(resource);
-    repository.executeSqlBundles(sqlBundleList);
+    repository.insert(resource);
     //Todo: log if not successful + return false Result object
     return Result.Create(true, null, "", "");
   }

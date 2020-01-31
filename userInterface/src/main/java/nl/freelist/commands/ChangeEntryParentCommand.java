@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.freelist.data.Repository;
-import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.entities.Entry;
@@ -69,8 +68,7 @@ public class ChangeEntryParentCommand extends Command {
     entry.applyEvents(eventsToAddList);
 
     try {
-      List<sqlBundle> sqlBundleList = repository.insert(entry);
-      repository.executeSqlBundles(sqlBundleList);
+      repository.insert(entry);
     } catch (Exception e) {
       LOGGER.log(Level.WARNING, e.getMessage());
       return Result.Create(false, null, "", e.getMessage());
