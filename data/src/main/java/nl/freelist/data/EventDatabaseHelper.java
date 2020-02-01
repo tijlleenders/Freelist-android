@@ -525,6 +525,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
                 .Create(
                     event.getOccurredDateTime(),
                     parentUid,
+                    entry.getUuid().toString(),
                     1
                 );
             parentEntry.applyEvent(entryChildCountChangedEvent);
@@ -555,6 +556,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
                 .Create(
                     event.getOccurredDateTime(),
                     parentUid,
+                    entryChildDurationChangedEvent.getOriginAggregateId(),
                     durationDelta
                 );
             parentEntry.applyEvent(entryChildDurationChangedEvent2);
@@ -581,6 +583,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
                 .Create(
                     event.getOccurredDateTime(),
                     parentUid,
+                    entryDurationChangedEvent.getAggregateId(),
                     durationDelta
                 );
             parentEntry.applyEvent(entryChildDurationChangedEvent);

@@ -135,7 +135,10 @@ public class Entry {
       case "EntryChildDurationChangedEvent":
         LOGGER.log(Level.INFO, "EntryChildDurationChangedEvent applied");
         EntryChildDurationChangedEvent entryChildDurationChangedEvent = (EntryChildDurationChangedEvent) event;
-        if (entryChildDurationChangedEvent.getDurationDelta() != 0) {
+        if (entryChildDurationChangedEvent.getDurationDelta() != 0
+            && !uuid.toString()
+            .equals(entryChildDurationChangedEvent.getOriginAggregateId()) //avoid circular effect
+        ) {
           this.childDuration += (entryChildDurationChangedEvent.getDurationDelta());
           eventList.add(event);
           lastAppliedEventSequenceNumber += 1;
@@ -144,7 +147,10 @@ public class Entry {
       case "EntryChildCountChangedEvent":
         LOGGER.log(Level.INFO, "EntryChildCountChangedEvent applied");
         EntryChildCountChangedEvent entryChildCountChangedEvent = (EntryChildCountChangedEvent) event;
-        if (entryChildCountChangedEvent.getChildCountDelta() != 0) {
+        if (entryChildCountChangedEvent.getChildCountDelta() != 0
+            && !uuid.toString()
+            .equals(entryChildCountChangedEvent.getOriginAggregateId()) //avoid circular effect
+        ) {
           this.childCount += entryChildCountChangedEvent.getChildCountDelta();
           eventList.add(event);
           lastAppliedEventSequenceNumber += 1;

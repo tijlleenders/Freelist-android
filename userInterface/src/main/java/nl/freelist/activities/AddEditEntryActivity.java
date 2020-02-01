@@ -360,10 +360,17 @@ public class AddEditEntryActivity extends AppCompatActivity
         if (textInputEditTextSchedule.hasFocus()) {
           Log.d(TAG, "schedule clicked");
           hideSoftKeyboard();
-          if (duration > 0
+          if ((duration > 0
               && startDateTime != null
               && endDateTime != null
-              && startDateTime.plusSeconds(duration).toEpochSecond() != endDateTime.toEpochSecond()
+              && startDateTime.plusSeconds(duration).toEpochSecond() != endDateTime.toEpochSecond())
+              || (
+              duration > 0
+                  && startDateTime == null
+                  && endDateTime != null
+                  && OffsetDateTime.now().plusSeconds(duration).toEpochSecond() != endDateTime
+                  .toEpochSecond()
+          )
           ) { //it only makes sense to add constraints when not already constrained to a fixed date-time
             ConstraintPickerDialog constraintPickerDialog = new ConstraintPickerDialog();
             constraintPickerDialog.show(getSupportFragmentManager(), "constraintPicker");
