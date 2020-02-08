@@ -3,12 +3,13 @@ package nl.freelist.domain.valueObjects;
 import static java.lang.System.exit;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 public final class DtrConstraint {
 
   private enum ConstraintType {
-    OPERATOROR,
-    OPERATORAND,
+    OR,
+    AND,
     OPENBRACKET,
     CLOSEBRACKET,
     DUEBEFORE,
@@ -17,10 +18,12 @@ public final class DtrConstraint {
     NOWEDNESDAYS,
     NOTHURSDAYS,
     NOFRIDAYS,
+    NOSATURDAYS,
     NOSUNDAYS,
     NOMORNINGS,
     NOAFTERNOONS,
-    NOEVENINGS
+    NOEVENINGS,
+    NONIGHTS
   }
 
   private ConstraintType constraintType;
@@ -38,6 +41,28 @@ public final class DtrConstraint {
       exit(-1);
     }
     return new DtrConstraint(dtrConstraint, offsetDateTime);
+  }
+
+  public static List<DtrConstraint> Simplify(List<DtrConstraint> toSimplify) {
+    if (!toSimplify.contains(DtrConstraint.Create("OR", null))) {
+      toSimplify.removeIf(n -> n.constraintType.equals(ConstraintType.OPENBRACKET));
+      toSimplify.removeIf(n -> n.constraintType.equals(ConstraintType.CLOSEBRACKET));
+    }
+    return toSimplify;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!o.getClass().getSimpleName().equals("DtrConstraint")) {
+      return false;
+    }
+    DtrConstraint other = (DtrConstraint) o;
+    if (this.constraintType.equals(other.constraintType)
+        && this.offsetDateTime == other.offsetDateTime
+    ) {
+      return true;
+    }
+    return super.equals(o);
   }
 
   @Override

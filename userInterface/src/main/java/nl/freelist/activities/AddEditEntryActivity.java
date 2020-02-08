@@ -15,6 +15,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import io.reactivex.schedulers.Schedulers;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.commands.CreateEntryCommand;
@@ -28,6 +29,7 @@ import nl.freelist.dialogs.FTimePickerDialog;
 import nl.freelist.dialogs.NoticeDialogListener;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
+import nl.freelist.domain.valueObjects.DtrConstraint;
 import nl.freelist.freelist.R;
 import nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel;
 
@@ -66,6 +68,8 @@ public class AddEditEntryActivity extends AppCompatActivity
   private TextInputEditText textInputEditTextEndDateTime;
   private TextInputEditText textInputEditTextSchedule;
   private TextInputEditText textInputEditTextNotes;
+
+  private List<DtrConstraint> dtrConstraints;
 
   private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel
       AddEditEntryActivityViewModel;
@@ -437,6 +441,11 @@ public class AddEditEntryActivity extends AppCompatActivity
     }
   }
 
+  @Override
+  public void onConstraintsAdded(List<DtrConstraint> dtrConstraints) {
+    this.dtrConstraints = dtrConstraints;
+    //Todo: try to schedule Entry to Resource given the constraints
+  }
 
   public void hideSoftKeyboard() {
     if (getCurrentFocus() != null) {
