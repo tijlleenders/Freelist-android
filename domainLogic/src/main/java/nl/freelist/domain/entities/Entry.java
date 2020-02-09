@@ -16,6 +16,7 @@ import nl.freelist.domain.events.EntryParentChangedEvent;
 import nl.freelist.domain.events.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
+import nl.freelist.domain.valueObjects.DtrConstraint;
 
 public class Entry {
 
@@ -32,6 +33,10 @@ public class Entry {
   private long childCount; //are applied within same transaction that add descendants
   private long childDuration; //are applied within same transaction that changes descendant duration
   private int lastAppliedEventSequenceNumber;
+  private List<DtrConstraint> startAndDueConstraints;
+  private List<DtrConstraint> preferredDaysConstraints;
+  private List<DtrConstraint> timeBudgetConstraints;
+  private List<DtrConstraint> repeatConstraints;
   private List<Event> eventList = new ArrayList<>();
 
   public Entry(

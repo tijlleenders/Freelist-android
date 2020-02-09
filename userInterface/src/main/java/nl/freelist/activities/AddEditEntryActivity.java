@@ -59,14 +59,22 @@ public class AddEditEntryActivity extends AppCompatActivity
   private TextInputLayout textInputLayoutStartDateTime;
   private TextInputLayout textInputLayoutDuration;
   private TextInputLayout textInputLayoutEndDateTime;
-  private TextInputLayout textInputLayoutSchedule;
+  private TextInputLayout textInputLayoutSchedulePrefs;
+  private TextInputLayout textInputLayoutTimeBudget;
+  private TextInputLayout textInputLayoutRepeat;
+  private TextInputLayout textInputLayoutStartsAfter;
+  private TextInputLayout textInputLayoutParent;
   private TextInputLayout textInputLayoutNotes;
 
   private TextInputEditText textInputEditTextTitle;
   private TextInputEditText textInputEditTextStartDateTime;
   private TextInputEditText textInputEditTextDuration;
   private TextInputEditText textInputEditTextEndDateTime;
-  private TextInputEditText textInputEditTextSchedule;
+  private TextInputEditText textInputEditTextSchedulePrefs;
+  private TextInputEditText textInputEditTextTimeBudget;
+  private TextInputEditText textInputEditTextRepeat;
+  private TextInputEditText textInputEditTextStartsAfter;
+  private TextInputEditText textInputEditTextParent;
   private TextInputEditText textInputEditTextNotes;
 
   private List<DtrConstraint> dtrConstraints;
@@ -126,13 +134,12 @@ public class AddEditEntryActivity extends AppCompatActivity
               new Runnable() {
                 @Override
                 public void run() {
+                  saveCommandsInProgress -= 1;
                   if (!result.isSuccess()) {
                     Toast.makeText(AddEditEntryActivity.this,
                         "Sorry! SaveEntry failed!", Toast.LENGTH_SHORT)
                         .show();
-                    saveCommandsInProgress -= 1;
                   } else {
-                    saveCommandsInProgress -= 1;
                     initializeForEditExisting(uuid);
                   }
                 }
@@ -227,7 +234,11 @@ public class AddEditEntryActivity extends AppCompatActivity
     textInputLayoutStartDateTime = findViewById(R.id.text_input_layout_start_date_time);
     textInputLayoutDuration = findViewById(R.id.text_input_layout_duration);
     textInputLayoutEndDateTime = findViewById(R.id.text_input_layout_end_date_time);
-    textInputLayoutSchedule = findViewById(R.id.text_input_layout_schedule);
+    textInputLayoutSchedulePrefs = findViewById(R.id.text_input_layout_schedule_prefs);
+    textInputLayoutTimeBudget = findViewById(R.id.text_input_layout_time_budget);
+    textInputLayoutRepeat = findViewById(R.id.text_input_layout_repeat);
+    textInputLayoutStartsAfter = findViewById(R.id.text_input_layout_starts_after);
+    textInputLayoutParent = findViewById(R.id.text_input_layout_parent);
     textInputLayoutNotes = findViewById(R.id.text_input_layout_notes);
 
     //Todo: Initialize via layout to pass along appropriate styling from layout
@@ -235,7 +246,11 @@ public class AddEditEntryActivity extends AppCompatActivity
     textInputEditTextStartDateTime = findViewById(R.id.edit_text_start_date_time);
     textInputEditTextDuration = findViewById(R.id.edit_text_duration);
     textInputEditTextEndDateTime = findViewById(R.id.edit_text_end_date_time);
-    textInputEditTextSchedule = findViewById(R.id.edit_text_schedule);
+    textInputEditTextSchedulePrefs = findViewById(R.id.edit_text_schedule_prefs);
+    textInputEditTextTimeBudget = findViewById(R.id.edit_text_time_budget);
+    textInputEditTextRepeat = findViewById(R.id.edit_text_repeat);
+    textInputEditTextStartsAfter = findViewById(R.id.edit_text_starts_after);
+    textInputEditTextParent = findViewById(R.id.edit_text_parent);
     textInputEditTextNotes = findViewById(R.id.edit_text_notes);
 
   }
@@ -245,7 +260,11 @@ public class AddEditEntryActivity extends AppCompatActivity
     textInputEditTextStartDateTime.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextDuration.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextEndDateTime.setOnFocusChangeListener(this::onFocusChange);
-    textInputEditTextSchedule.setOnFocusChangeListener(this::onFocusChange);
+    textInputEditTextSchedulePrefs.setOnFocusChangeListener(this::onFocusChange);
+    textInputEditTextTimeBudget.setOnFocusChangeListener(this::onFocusChange);
+    textInputEditTextRepeat.setOnFocusChangeListener(this::onFocusChange);
+    textInputEditTextStartsAfter.setOnFocusChangeListener(this::onFocusChange);
+    textInputEditTextParent.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextNotes.setOnFocusChangeListener(this::onFocusChange);
 
     textInputLayoutTitle.setEndIconOnClickListener(new View.OnClickListener() {
@@ -264,6 +283,14 @@ public class AddEditEntryActivity extends AppCompatActivity
         textInputEditTextStartDateTime.setText("");
       }
     });
+    textInputLayoutDuration.setEndIconOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Log.d(TAG, "endIcon clicked for duration");
+        duration = 0;
+        textInputEditTextDuration.setText("");
+      }
+    });
     textInputLayoutEndDateTime.setEndIconOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -272,12 +299,36 @@ public class AddEditEntryActivity extends AppCompatActivity
         textInputEditTextEndDateTime.setText("");
       }
     });
-    textInputLayoutDuration.setEndIconOnClickListener(new View.OnClickListener() {
+    textInputLayoutSchedulePrefs.setEndIconOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Log.d(TAG, "endIcon clicked for duration");
-        duration = 0;
-        textInputEditTextDuration.setText("");
+        Log.d(TAG, "endIcon clicked for schedule prefs");
+        //Todo: endDateTime = null;
+        textInputEditTextSchedulePrefs.setText("");
+      }
+    });
+    textInputLayoutTimeBudget.setEndIconOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Log.d(TAG, "endIcon clicked for time budget");
+        //Todo: endDateTime = null;
+        textInputEditTextTimeBudget.setText("");
+      }
+    });
+    textInputLayoutRepeat.setEndIconOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Log.d(TAG, "endIcon clicked for repeat");
+        //Todo: endDateTime = null;
+        textInputEditTextRepeat.setText("");
+      }
+    });
+    textInputLayoutParent.setEndIconOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Log.d(TAG, "endIcon clicked for parent");
+        //Todo: endDateTime = null;
+        textInputEditTextParent.setText("");
       }
     });
     textInputLayoutNotes.setEndIconOnClickListener(new View.OnClickListener() {
@@ -360,8 +411,8 @@ public class AddEditEntryActivity extends AppCompatActivity
           fDatePickerDialog.show(getSupportFragmentManager(), "datePicker");
         }
         break;
-      case R.id.edit_text_schedule:
-        if (textInputEditTextSchedule.hasFocus()) {
+      case R.id.edit_text_schedule_prefs:
+        if (textInputEditTextSchedulePrefs.hasFocus()) {
           Log.d(TAG, "schedule clicked");
           hideSoftKeyboard();
           if ((duration > 0
@@ -380,7 +431,7 @@ public class AddEditEntryActivity extends AppCompatActivity
             constraintPickerDialog.show(getSupportFragmentManager(), "constraintPicker");
           }
           //Todo: schedule entry
-          textInputEditTextSchedule.clearFocus();
+          textInputEditTextSchedulePrefs.clearFocus();
         }
         break;
       default:

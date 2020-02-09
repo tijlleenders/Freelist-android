@@ -41,7 +41,8 @@ public class ConstraintPickerDialog extends DialogFragment {
   public Dialog onCreateDialog(Bundle savedInstanceState) {
     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
     LayoutInflater inflater = requireActivity().getLayoutInflater();
-    builder.setView(inflater.inflate(R.layout.picker_constraints, null))
+    builder.setView(inflater.inflate(R.layout.picker_constraints,
+        null)) //Todo: Add min/max hours+mins /day+/week for splittable activities
         .setMessage("Schedule preference for")
         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int id) {

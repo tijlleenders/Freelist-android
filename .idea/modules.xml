@@ -3,6 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Freelist-android.iml" filepath="$PROJECT_DIR$/Freelist-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/data/Freelist-android-data.iml" filepath="$PROJECT_DIR$/data/Freelist-android-data.iml" group="Freelist-android/data" />
+      <module fileurl="file://$PROJECT_DIR$/domainLogic/Freelist-android-domainLogic.iml" filepath="$PROJECT_DIR$/domainLogic/Freelist-android-domainLogic.iml" group="Freelist-android/domainLogic" />
+      <module fileurl="file://$PROJECT_DIR$/userInterface/Freelist-android-userInterface.iml" filepath="$PROJECT_DIR$/userInterface/Freelist-android-userInterface.iml" group="Freelist-android/userInterface" />
+      <module fileurl="file://$PROJECT_DIR$/StudioProjects-Freelist-android.iml" filepath="$PROJECT_DIR$/StudioProjects-Freelist-android.iml" group="Freelist-android" />
       <module fileurl="file://$PROJECT_DIR$/data/data.iml" filepath="$PROJECT_DIR$/data/data.iml" />
       <module fileurl="file://$PROJECT_DIR$/domainLogic/domainLogic.iml" filepath="$PROJECT_DIR$/domainLogic/domainLogic.iml" />
       <module fileurl="file://$PROJECT_DIR$/userInterface/userInterface.iml" filepath="$PROJECT_DIR$/userInterface/userInterface.iml" />

@@ -12,6 +12,7 @@ public final class DtrConstraint {
     AND,
     OPENBRACKET,
     CLOSEBRACKET,
+    STARTSATORAFTER,
     DUEBEFORE,
     NOMONDAYS,
     NOTUESDAYS,
