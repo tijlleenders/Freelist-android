@@ -60,7 +60,6 @@ public class AddEditEntryActivity extends AppCompatActivity
   private TextInputLayout textInputLayoutDuration;
   private TextInputLayout textInputLayoutEndDateTime;
   private TextInputLayout textInputLayoutSchedulePrefs;
-  private TextInputLayout textInputLayoutTimeBudget;
   private TextInputLayout textInputLayoutRepeat;
   private TextInputLayout textInputLayoutStartsAfter;
   private TextInputLayout textInputLayoutParent;
@@ -71,7 +70,6 @@ public class AddEditEntryActivity extends AppCompatActivity
   private TextInputEditText textInputEditTextDuration;
   private TextInputEditText textInputEditTextEndDateTime;
   private TextInputEditText textInputEditTextSchedulePrefs;
-  private TextInputEditText textInputEditTextTimeBudget;
   private TextInputEditText textInputEditTextRepeat;
   private TextInputEditText textInputEditTextStartsAfter;
   private TextInputEditText textInputEditTextParent;
@@ -235,7 +233,6 @@ public class AddEditEntryActivity extends AppCompatActivity
     textInputLayoutDuration = findViewById(R.id.text_input_layout_duration);
     textInputLayoutEndDateTime = findViewById(R.id.text_input_layout_end_date_time);
     textInputLayoutSchedulePrefs = findViewById(R.id.text_input_layout_schedule_prefs);
-    textInputLayoutTimeBudget = findViewById(R.id.text_input_layout_time_budget);
     textInputLayoutRepeat = findViewById(R.id.text_input_layout_repeat);
     textInputLayoutStartsAfter = findViewById(R.id.text_input_layout_starts_after);
     textInputLayoutParent = findViewById(R.id.text_input_layout_parent);
@@ -247,7 +244,6 @@ public class AddEditEntryActivity extends AppCompatActivity
     textInputEditTextDuration = findViewById(R.id.edit_text_duration);
     textInputEditTextEndDateTime = findViewById(R.id.edit_text_end_date_time);
     textInputEditTextSchedulePrefs = findViewById(R.id.edit_text_schedule_prefs);
-    textInputEditTextTimeBudget = findViewById(R.id.edit_text_time_budget);
     textInputEditTextRepeat = findViewById(R.id.edit_text_repeat);
     textInputEditTextStartsAfter = findViewById(R.id.edit_text_starts_after);
     textInputEditTextParent = findViewById(R.id.edit_text_parent);
@@ -261,7 +257,6 @@ public class AddEditEntryActivity extends AppCompatActivity
     textInputEditTextDuration.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextEndDateTime.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextSchedulePrefs.setOnFocusChangeListener(this::onFocusChange);
-    textInputEditTextTimeBudget.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextRepeat.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextStartsAfter.setOnFocusChangeListener(this::onFocusChange);
     textInputEditTextParent.setOnFocusChangeListener(this::onFocusChange);
@@ -305,14 +300,6 @@ public class AddEditEntryActivity extends AppCompatActivity
         Log.d(TAG, "endIcon clicked for schedule prefs");
         //Todo: endDateTime = null;
         textInputEditTextSchedulePrefs.setText("");
-      }
-    });
-    textInputLayoutTimeBudget.setEndIconOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Log.d(TAG, "endIcon clicked for time budget");
-        //Todo: endDateTime = null;
-        textInputEditTextTimeBudget.setText("");
       }
     });
     textInputLayoutRepeat.setEndIconOnClickListener(new View.OnClickListener() {
