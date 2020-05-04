@@ -30,8 +30,9 @@ public class Entry {
   private long duration = 0;
   private OffsetDateTime endDateTime;
   private String notes = "";
-  private long childCount; //are applied within same transaction that add descendants
-  private long childDuration; //are applied within same transaction that changes descendant duration
+  private long childCount; // are applied within same transaction that add descendants
+  private long
+      childDuration; // are applied within same transaction that changes descendant duration
   private int lastAppliedEventSequenceNumber;
   private List<DtrConstraint> startAndDueConstraints;
   private List<DtrConstraint> preferredDaysConstraints;
@@ -40,14 +41,13 @@ public class Entry {
   private List<Event> eventList = new ArrayList<>();
 
   public Entry(
-      //Todo: make private and expose via public static method Entry.Create so validation can be included
-  ) {
+      // Todo: make private and expose via public static method Entry.Create so validation can be
+      // included
+      ) {
     lastAppliedEventSequenceNumber = -1;
     LOGGER.log(
         Level.INFO,
-        "Entry created with lastAppliedEventSequenceNumber "
-            + lastAppliedEventSequenceNumber
-    );
+        "Entry created with lastAppliedEventSequenceNumber " + lastAppliedEventSequenceNumber);
   }
 
   public void applyEvent(Event event) {
@@ -61,10 +61,7 @@ public class Entry {
       case "EntryCreatedEvent":
         LOGGER.log(Level.INFO, "EntryCreatedEvent applied");
         if (lastAppliedEventSequenceNumber != -1) {
-          LOGGER.log(
-              Level.WARNING,
-              "EntryCreatedEvent applied to entry that already exists!"
-          );
+          LOGGER.log(Level.WARNING, "EntryCreatedEvent applied to entry that already exists!");
           break;
         }
         EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
@@ -95,8 +92,8 @@ public class Entry {
       case "EntryParentChangedEvent":
         LOGGER.log(Level.INFO, "EntryParentChangedEvent applied");
         EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
-        if (this.parentUuid == null || !this.parentUuid
-            .equals(entryParentChangedEvent.getParentAfter())) {
+        if (this.parentUuid == null
+            || !this.parentUuid.equals(entryParentChangedEvent.getParentAfter())) {
           this.parentUuid = UUID.fromString(entryParentChangedEvent.getParentAfter());
           eventList.add(event);
           lastAppliedEventSequenceNumber += 1;
@@ -113,15 +110,19 @@ public class Entry {
         break;
       case "EntryScheduledEvent":
         LOGGER.log(Level.INFO, "EntryScheduledEvent applied");
-        //Do nothing
+        // Do nothing
         eventList.add(event);
         lastAppliedEventSequenceNumber += 1;
         break;
       case "EntryStartDateTimeChangedEvent":
         LOGGER.log(Level.INFO, "EntryStartDateTimeChangedEvent applied");
-        EntryStartDateTimeChangedEvent entryStartDateTimeChangedEvent = (EntryStartDateTimeChangedEvent) event;
-        if (entryStartDateTimeChangedEvent.getStartDateTimeAfter() != null
-            && !entryStartDateTimeChangedEvent.getStartDateTimeAfter().equals(this.startDateTime)) {
+        EntryStartDateTimeChangedEvent entryStartDateTimeChangedEvent =
+            (EntryStartDateTimeChangedEvent) event;
+        if (entryStartDateTimeChangedEvent.getStartDateTimeAfter() == null
+            || (entryStartDateTimeChangedEvent.getStartDateTimeAfter() != null
+                && !entryStartDateTimeChangedEvent
+                    .getStartDateTimeAfter()
+                    .equals(this.startDateTime))) {
           this.startDateTime = entryStartDateTimeChangedEvent.getStartDateTimeAfter();
           eventList.add(event);
           lastAppliedEventSequenceNumber += 1;
@@ -129,9 +130,11 @@ public class Entry {
         break;
       case "EntryEndDateTimeChangedEvent":
         LOGGER.log(Level.INFO, "EntryEndDateTimeChangedEvent applied");
-        EntryEndDateTimeChangedEvent entryEndDateTimeChangedEvent = (EntryEndDateTimeChangedEvent) event;
-        if (entryEndDateTimeChangedEvent.getEndDateTimeAfter() != null
-            && !entryEndDateTimeChangedEvent.getEndDateTimeAfter().equals(this.endDateTime)) {
+        EntryEndDateTimeChangedEvent entryEndDateTimeChangedEvent =
+            (EntryEndDateTimeChangedEvent) event;
+        if (entryEndDateTimeChangedEvent.getEndDateTimeAfter() == null
+            || (entryEndDateTimeChangedEvent.getEndDateTimeAfter() != null
+                && !entryEndDateTimeChangedEvent.getEndDateTimeAfter().equals(this.endDateTime))) {
           this.endDateTime = entryEndDateTimeChangedEvent.getEndDateTimeAfter();
           eventList.add(event);
           lastAppliedEventSequenceNumber += 1;
@@ -139,10 +142,12 @@ public class Entry {
         break;
       case "EntryChildDurationChangedEvent":
         LOGGER.log(Level.INFO, "EntryChildDurationChangedEvent applied");
-        EntryChildDurationChangedEvent entryChildDurationChangedEvent = (EntryChildDurationChangedEvent) event;
+        EntryChildDurationChangedEvent entryChildDurationChangedEvent =
+            (EntryChildDurationChangedEvent) event;
         if (entryChildDurationChangedEvent.getDurationDelta() != 0
             && !uuid.toString()
-            .equals(entryChildDurationChangedEvent.getOriginAggregateId()) //avoid circular effect
+                .equals(
+                    entryChildDurationChangedEvent.getOriginAggregateId()) // avoid circular effect
         ) {
           this.childDuration += (entryChildDurationChangedEvent.getDurationDelta());
           eventList.add(event);
@@ -151,10 +156,11 @@ public class Entry {
         break;
       case "EntryChildCountChangedEvent":
         LOGGER.log(Level.INFO, "EntryChildCountChangedEvent applied");
-        EntryChildCountChangedEvent entryChildCountChangedEvent = (EntryChildCountChangedEvent) event;
+        EntryChildCountChangedEvent entryChildCountChangedEvent =
+            (EntryChildCountChangedEvent) event;
         if (entryChildCountChangedEvent.getChildCountDelta() != 0
             && !uuid.toString()
-            .equals(entryChildCountChangedEvent.getOriginAggregateId()) //avoid circular effect
+                .equals(entryChildCountChangedEvent.getOriginAggregateId()) // avoid circular effect
         ) {
           this.childCount += entryChildCountChangedEvent.getChildCountDelta();
           eventList.add(event);
@@ -162,7 +168,8 @@ public class Entry {
         }
         break;
       default:
-        LOGGER.log(Level.WARNING,
+        LOGGER.log(
+            Level.WARNING,
             "Event can't be applied to entry " + uuid.toString() + " ; event type not recognized");
         break;
     }
@@ -232,22 +239,23 @@ public class Entry {
 
     LOGGER.log(
         Level.INFO,
-        "Asked for the previous event of " + eventTypeToFind
+        "Asked for the previous event of "
+            + eventTypeToFind
             + " with eventSequenceNumberToCountdownFrom lower than "
-            + eventSequenceNumberToCountdownFrom
-    );
-    if (eventSequenceNumberToCountdownFrom > (eventList.size()
-        - 1)) { //eventSequenceNumbers start at 0 - just like List
+            + eventSequenceNumberToCountdownFrom);
+    if (eventSequenceNumberToCountdownFrom
+        > (eventList.size() - 1)) { // eventSequenceNumbers start at 0 - just like List
       LOGGER.log(
           Level.WARNING,
-          "Asked to count down from " + eventSequenceNumberToCountdownFrom
-              + " but max eventSequenceNumber of eventList is " + (eventList.size() - 1)
-      );
+          "Asked to count down from "
+              + eventSequenceNumberToCountdownFrom
+              + " but max eventSequenceNumber of eventList is "
+              + (eventList.size() - 1));
       return null;
     }
 
     for (int eventSequenceNumberCountdown =
-        eventSequenceNumberToCountdownFrom - 1; //Exclude the event to compare with
+            eventSequenceNumberToCountdownFrom - 1; // Exclude the event to compare with
         eventSequenceNumberCountdown >= 0;
         eventSequenceNumberCountdown--) {
       System.out.println(eventSequenceNumberCountdown);
@@ -255,9 +263,10 @@ public class Entry {
       if (eventToTest.getClass().getSimpleName().equals(eventTypeToFind)) {
         LOGGER.log(
             Level.INFO,
-            "Returning Event with sequence number " + eventSequenceNumberToCountdownFrom
-                + " of type " + eventTypeToFind
-        );
+            "Returning Event with sequence number "
+                + eventSequenceNumberToCountdownFrom
+                + " of type "
+                + eventTypeToFind);
         return eventToTest;
       }
     }
