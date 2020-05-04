@@ -13,7 +13,7 @@
   <string name="schedule_prefs">Preferred days and times</string>
   <string name="notes_hint">Notes</string>
   <string name="title_hint">Title</string>
-  <string name="part_of">Part of</string>
+  <string name="part_of">Contributes to Freelist(s)</string>
   <string name="hint_hours">Hours</string>
   <string name="hint_minutes">Minutes</string>
   <string name="ok">Ok</string>
@@ -33,7 +33,6 @@
   <string name="afternoons">Afternoons</string>
   <string name="evenings">Evenings</string>
   <string name="at_night">At night</string>
-  <string name="time_budget">Time budget</string>
-  <string name="repeat">Repeat</string>
-  <string name="starts_after">Starts after</string>
+  <string name="repeat">Repeat every</string>
+  <string name="starts_after">Starts after completion of Freelist(s)</string>
 </resources>

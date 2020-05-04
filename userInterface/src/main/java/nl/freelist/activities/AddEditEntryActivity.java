@@ -268,6 +268,7 @@ public class AddEditEntryActivity extends AppCompatActivity
         Log.d(TAG, "endIcon clicked for title");
         title = "";
         textInputEditTextTitle.setText("");
+        saveChangedFields();
       }
     });
     textInputLayoutStartDateTime.setEndIconOnClickListener(new View.OnClickListener() {
@@ -276,6 +277,7 @@ public class AddEditEntryActivity extends AppCompatActivity
         Log.d(TAG, "endIcon clicked for startDateTime");
         startDateTime = null;
         textInputEditTextStartDateTime.setText("");
+        saveChangedFields();
       }
     });
     textInputLayoutDuration.setEndIconOnClickListener(new View.OnClickListener() {
@@ -284,6 +286,7 @@ public class AddEditEntryActivity extends AppCompatActivity
         Log.d(TAG, "endIcon clicked for duration");
         duration = 0;
         textInputEditTextDuration.setText("");
+        saveChangedFields();
       }
     });
     textInputLayoutEndDateTime.setEndIconOnClickListener(new View.OnClickListener() {
@@ -292,6 +295,7 @@ public class AddEditEntryActivity extends AppCompatActivity
         Log.d(TAG, "endIcon clicked for endDateTime");
         endDateTime = null;
         textInputEditTextEndDateTime.setText("");
+        saveChangedFields();
       }
     });
     textInputLayoutSchedulePrefs.setEndIconOnClickListener(new View.OnClickListener() {
@@ -300,6 +304,7 @@ public class AddEditEntryActivity extends AppCompatActivity
         Log.d(TAG, "endIcon clicked for schedule prefs");
         //Todo: endDateTime = null;
         textInputEditTextSchedulePrefs.setText("");
+        saveChangedFields();
       }
     });
     textInputLayoutRepeat.setEndIconOnClickListener(new View.OnClickListener() {
@@ -308,6 +313,7 @@ public class AddEditEntryActivity extends AppCompatActivity
         Log.d(TAG, "endIcon clicked for repeat");
         //Todo: endDateTime = null;
         textInputEditTextRepeat.setText("");
+        saveChangedFields();
       }
     });
     textInputLayoutParent.setEndIconOnClickListener(new View.OnClickListener() {
@@ -316,6 +322,7 @@ public class AddEditEntryActivity extends AppCompatActivity
         Log.d(TAG, "endIcon clicked for parent");
         //Todo: endDateTime = null;
         textInputEditTextParent.setText("");
+        saveChangedFields();
       }
     });
     textInputLayoutNotes.setEndIconOnClickListener(new View.OnClickListener() {
@@ -324,6 +331,7 @@ public class AddEditEntryActivity extends AppCompatActivity
         Log.d(TAG, "endIcon clicked for notes");
         notes = "";
         textInputEditTextNotes.setText("");
+        saveChangedFields();
       }
     });
   }
@@ -402,7 +410,7 @@ public class AddEditEntryActivity extends AppCompatActivity
         if (textInputEditTextSchedulePrefs.hasFocus()) {
           Log.d(TAG, "schedule clicked");
           hideSoftKeyboard();
-          if ((duration > 0
+          if ((duration > 0 //it only makes sense to add constraints when not already constrained to a fixed date-time
               && startDateTime != null
               && endDateTime != null
               && startDateTime.plusSeconds(duration).toEpochSecond() != endDateTime.toEpochSecond())
@@ -413,9 +421,11 @@ public class AddEditEntryActivity extends AppCompatActivity
                   && OffsetDateTime.now().plusSeconds(duration).toEpochSecond() != endDateTime
                   .toEpochSecond()
           )
-          ) { //it only makes sense to add constraints when not already constrained to a fixed date-time
+          ) {
             ConstraintPickerDialog constraintPickerDialog = new ConstraintPickerDialog();
             constraintPickerDialog.show(getSupportFragmentManager(), "constraintPicker");
+          } else {
+            Toast.makeText(AddEditEntryActivity.this, "Increase flexibility between start and end date-times.", Toast.LENGTH_LONG).show();
           }
           //Todo: schedule entry
           textInputEditTextSchedulePrefs.clearFocus();
@@ -472,7 +482,7 @@ public class AddEditEntryActivity extends AppCompatActivity
           textInputEditTextDuration.setText(TimeHelper.getDurationStringFrom(duration));
         }
         hideSoftKeyboard();
-        saveChangedFields();
+        saveChangedFields(); //Todo: when choosing date + time in two separate dialogs the date gets saved first with the old time => issue?
         break;
       default:
         break;
