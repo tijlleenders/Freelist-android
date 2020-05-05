@@ -33,20 +33,6 @@
       </com.google.android.material.textfield.TextInputLayout>
 
       <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/text_input_layout_start_date_time"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:hint="@string/starts_at_or_after_date"
-        app:endIconMode="clear_text">
-        <com.google.android.material.textfield.TextInputEditText
-          android:id="@+id/edit_text_start_date_time"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content" />
-      </com.google.android.material.textfield.TextInputLayout>
-
-      <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/text_input_layout_duration"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
@@ -60,6 +46,19 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:inputType="number" />
+      </com.google.android.material.textfield.TextInputLayout>
+      <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_input_layout_start_date_time"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:hint="@string/starts_at_or_after_date"
+        app:endIconMode="clear_text">
+        <com.google.android.material.textfield.TextInputEditText
+          android:id="@+id/edit_text_start_date_time"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content" />
       </com.google.android.material.textfield.TextInputLayout>
 
       <com.google.android.material.textfield.TextInputLayout
