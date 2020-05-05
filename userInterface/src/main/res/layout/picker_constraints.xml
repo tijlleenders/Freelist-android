@@ -14,35 +14,30 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:checked="true"
       android:text="@string/mondays" />
     <CheckBox
       android:id="@+id/checkTuesdays"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:checked="true"
       android:text="@string/tuesdays" />
     <CheckBox
       android:id="@+id/checkWednesdays"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:checked="true"
       android:text="@string/wednesdays" />
     <CheckBox
       android:id="@+id/checkThursdays"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:checked="true"
       android:text="@string/thursdays" />
     <CheckBox
       android:id="@+id/checkFridays"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:checked="true"
       android:text="@string/fridays" />
   </LinearLayout>
   <LinearLayout
@@ -120,7 +115,7 @@
       android:layout_height="match_parent"
       android:layout_weight="1" />
     <CheckBox
-      android:id="@+id/checkAtNight"
+      android:id="@+id/checkNights"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_weight="1"
