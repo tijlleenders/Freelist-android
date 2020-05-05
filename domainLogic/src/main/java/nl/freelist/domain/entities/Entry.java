@@ -118,7 +118,8 @@ public class Entry {
         LOGGER.log(Level.INFO, "EntryStartDateTimeChangedEvent applied");
         EntryStartDateTimeChangedEvent entryStartDateTimeChangedEvent =
             (EntryStartDateTimeChangedEvent) event;
-        if (entryStartDateTimeChangedEvent.getStartDateTimeAfter() == null
+        if ((entryStartDateTimeChangedEvent.getStartDateTimeAfter() == null
+                && this.startDateTime != null)
             || (entryStartDateTimeChangedEvent.getStartDateTimeAfter() != null
                 && !entryStartDateTimeChangedEvent
                     .getStartDateTimeAfter()
@@ -132,7 +133,7 @@ public class Entry {
         LOGGER.log(Level.INFO, "EntryEndDateTimeChangedEvent applied");
         EntryEndDateTimeChangedEvent entryEndDateTimeChangedEvent =
             (EntryEndDateTimeChangedEvent) event;
-        if (entryEndDateTimeChangedEvent.getEndDateTimeAfter() == null
+        if ((entryEndDateTimeChangedEvent.getEndDateTimeAfter() == null && this.endDateTime != null)
             || (entryEndDateTimeChangedEvent.getEndDateTimeAfter() != null
                 && !entryEndDateTimeChangedEvent.getEndDateTimeAfter().equals(this.endDateTime))) {
           this.endDateTime = entryEndDateTimeChangedEvent.getEndDateTimeAfter();
