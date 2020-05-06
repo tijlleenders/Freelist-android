@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +16,8 @@ import com.google.android.material.textfield.TextInputLayout;
 import io.reactivex.schedulers.Schedulers;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.commands.CreateEntryCommand;
@@ -113,6 +116,11 @@ public class AddEditEntryActivity extends AppCompatActivity
             repository);
     saveCommandsInProgress += 1;
     Toast.makeText(AddEditEntryActivity.this, "Saving...", Toast.LENGTH_SHORT).show();
+    Toast.makeText(
+            AddEditEntryActivity.this,
+            "Saving...",
+            Toast.LENGTH_SHORT)
+        .show();
     AddEditEntryActivityViewModel.handle(saveEntryCommand)
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
@@ -131,7 +139,10 @@ public class AddEditEntryActivity extends AppCompatActivity
                                 Toast.LENGTH_SHORT)
                             .show();
                       } else {
-                        Toast.makeText(AddEditEntryActivity.this, "Saved!", Toast.LENGTH_SHORT)
+                        Toast.makeText(
+                            AddEditEntryActivity.this,
+                            "Saved!",
+                            Toast.LENGTH_SHORT)
                             .show();
                         initializeForEditExisting(uuid);
                       }
