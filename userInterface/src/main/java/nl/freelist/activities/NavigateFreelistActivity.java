@@ -209,11 +209,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
                     @Override
                     public void run() {
                       adapter.setEntries(entries);
-                      Toast.makeText(
-                          NavigateFreelistActivity.this,
-                          "navigateEntriesViewModel recyclerView refreshed!",
-                          Toast.LENGTH_SHORT)
-                          .show();
+//                      Toast.makeText(
+//                          NavigateFreelistActivity.this,
+//                          "navigateEntriesViewModel recyclerView refreshed!",
+//                          Toast.LENGTH_SHORT)
+//                          .show();
                     }
                   });
             });

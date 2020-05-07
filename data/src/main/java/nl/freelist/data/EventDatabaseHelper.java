@@ -25,6 +25,7 @@ import nl.freelist.domain.events.EntryDurationChangedEvent;
 import nl.freelist.domain.events.EntryEndDateTimeChangedEvent;
 import nl.freelist.domain.events.EntryNotesChangedEvent;
 import nl.freelist.domain.events.EntryParentChangedEvent;
+import nl.freelist.domain.events.EntryPreferredDayConstraintsChangedEvent;
 import nl.freelist.domain.events.EntryScheduledEvent;
 import nl.freelist.domain.events.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
@@ -287,6 +288,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         return gson.toJson(event, EntryChildCountChangedEvent.class);
       case "EntryChildDurationChangedEvent":
         return gson.toJson(event, EntryChildDurationChangedEvent.class);
+      case "EntryPreferredDayConstraintsChangedEvent":
+        return gson.toJson(event, EntryPreferredDayConstraintsChangedEvent.class);
       default:
         return "Event class not found.";
     }
@@ -455,6 +458,10 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             case "EntryChildDurationChangedEvent":
               eventList.add(gson.fromJson(dataJson, EntryChildDurationChangedEvent.class));
               break;
+            case "EntryPreferredDayConstraintsChangedEvent":
+              eventList
+                  .add(gson.fromJson(dataJson, EntryPreferredDayConstraintsChangedEvent.class));
+              break;
             default:
               throw new Exception("ERROR: event gson not recognized!");
           }
@@ -543,6 +550,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       case "EntryStartDateTimeChangedEvent":
       case "EntryEndDateTimeChangedEvent":
       case "ResourceCreatedEvent":
+      case "EntryPreferredDayConstraintsChangedEvent":
       case "EntryChildCountChangedEvent":
         //Todo: implement
         break;
@@ -661,6 +669,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         entry.getStartDateTime(),
         entry.getDuration(),
         entry.getEndDateTime(),
+        entry.getPreferredDaysConstraints(),
         entry.getNotes(),
         entry.getChildCount(),
         entry.getChildDuration(),

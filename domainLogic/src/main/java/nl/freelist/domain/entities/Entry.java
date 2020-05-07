@@ -13,6 +13,7 @@ import nl.freelist.domain.events.EntryDurationChangedEvent;
 import nl.freelist.domain.events.EntryEndDateTimeChangedEvent;
 import nl.freelist.domain.events.EntryNotesChangedEvent;
 import nl.freelist.domain.events.EntryParentChangedEvent;
+import nl.freelist.domain.events.EntryPreferredDayConstraintsChangedEvent;
 import nl.freelist.domain.events.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
@@ -21,6 +22,15 @@ import nl.freelist.domain.valueObjects.DtrConstraint;
 public class Entry {
 
   private static final Logger LOGGER = Logger.getLogger(Entry.class.getName());
+  // Todo: When adding new event:
+  // Add to SaveEntryCommand
+  // Add to this.applyEvent(Event event)
+  // Add to EventDatabaseHelper.jsonOf(Event event)
+  // Add to EventDatabaseHelper.getEventsFor(String uuid)
+  // Possibly add to EventDatabaseHelper.getAdditionalQueriesForEvent(Event event, Entry entry,
+  //      int eventSequenceNumber)
+  // Add to ViewModelEntry dto
+  // Add to EventDatabaseHelper.getViewModelEntryFrom(Entry entry)
 
   private UUID ownerUuid;
   private UUID uuid;
@@ -29,15 +39,15 @@ public class Entry {
   private OffsetDateTime startDateTime;
   private long duration = 0;
   private OffsetDateTime endDateTime;
+  private List<DtrConstraint> preferredDaysConstraints = new ArrayList<>();
   private String notes = "";
   private long childCount; // are applied within same transaction that add descendants
   private long
       childDuration; // are applied within same transaction that changes descendant duration
   private int lastAppliedEventSequenceNumber;
-  private List<DtrConstraint> startAndDueConstraints;
-  private List<DtrConstraint> preferredDaysConstraints;
-  private List<DtrConstraint> timeBudgetConstraints;
-  private List<DtrConstraint> repeatConstraints;
+  private List<DtrConstraint> startAndDueConstraints = new ArrayList<>();
+  private List<DtrConstraint> timeBudgetConstraints = new ArrayList<>();
+  private List<DtrConstraint> repeatConstraints = new ArrayList<>();
   private List<Event> eventList = new ArrayList<>();
 
   public Entry(
@@ -168,6 +178,18 @@ public class Entry {
           lastAppliedEventSequenceNumber += 1;
         }
         break;
+      case "EntryPreferredDayConstraintsChangedEvent":
+        LOGGER.log(Level.INFO, "EntryPreferredDayConstraintsChangedEvent applied");
+        EntryPreferredDayConstraintsChangedEvent entryPreferredDaysConstraintsChangedEvent =
+            (EntryPreferredDayConstraintsChangedEvent) event;
+        if (entryPreferredDaysConstraintsChangedEvent.getPreferredDayConstraints().size()
+            != this.preferredDaysConstraints.size()) {
+          this.preferredDaysConstraints =
+              entryPreferredDaysConstraintsChangedEvent.getPreferredDayConstraints();
+          eventList.add(event);
+          lastAppliedEventSequenceNumber += 1;
+        }
+        break;
       default:
         LOGGER.log(
             Level.WARNING,
@@ -233,6 +255,10 @@ public class Entry {
 
   public List<Event> getEventList() {
     return eventList;
+  }
+
+  public List<DtrConstraint> getPreferredDaysConstraints() {
+    return preferredDaysConstraints;
   }
 
   public Event getPreviousOf(Event event, int eventSequenceNumberToCountdownFrom) {
