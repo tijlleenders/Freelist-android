@@ -51,10 +51,6 @@ public class ConstraintPickerDialog
     }
   }
 
-  @Override
-  public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-    super.onViewStateRestored(savedInstanceState);
-  }
 
   @Override
   public void onStart() { //  Tried putting below in onCreateView but didn't work
@@ -71,71 +67,71 @@ public class ConstraintPickerDialog
     checkEvenings = getDialog().findViewById(R.id.checkEvenings);
     checkNights = getDialog().findViewById(R.id.checkNights);
 
-    checkMondays.setChecked(getArguments().getBoolean("checkMondays"));
-    checkTuesdays.setChecked(getArguments().getBoolean("checkTuesdays"));
-    checkWednesdays.setChecked(getArguments().getBoolean("checkWednesdays"));
-    checkThursdays.setChecked(getArguments().getBoolean("checkThursdays"));
-    checkFridays.setChecked(getArguments().getBoolean("checkFridays"));
-    checkSaturdays.setChecked(getArguments().getBoolean("checkSaturdays"));
-    checkSundays.setChecked(getArguments().getBoolean("checkSundays"));
-    checkMornings.setChecked(getArguments().getBoolean("checkMornings"));
-    checkAfternoons.setChecked(getArguments().getBoolean("checkAfternoons"));
-    checkEvenings.setChecked(getArguments().getBoolean("checkEvenings"));
-    checkNights.setChecked(getArguments().getBoolean("checkNights"));
+    checkMondays.setChecked(getArguments().getBoolean("allowMondays"));
+    checkTuesdays.setChecked(getArguments().getBoolean("allowTuesdays"));
+    checkWednesdays.setChecked(getArguments().getBoolean("allowWednesdays"));
+    checkThursdays.setChecked(getArguments().getBoolean("allowThursdays"));
+    checkFridays.setChecked(getArguments().getBoolean("allowFridays"));
+    checkSaturdays.setChecked(getArguments().getBoolean("allowSaturdays"));
+    checkSundays.setChecked(getArguments().getBoolean("allowSundays"));
+    checkMornings.setChecked(getArguments().getBoolean("allowMornings"));
+    checkAfternoons.setChecked(getArguments().getBoolean("allowAfternoons"));
+    checkEvenings.setChecked(getArguments().getBoolean("allowEvenings"));
+    checkNights.setChecked(getArguments().getBoolean("allowNights"));
 
     checkMondays.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkMondays", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowMondays", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
     checkTuesdays.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkTuesdays", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowTuesdays", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
     checkWednesdays.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkWednesdays", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowWednesdays", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
     checkThursdays.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkThursdays", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowThursdays", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
     checkFridays.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkFridays", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowFridays", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
     checkSaturdays.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkSaturdays", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowSaturdays", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
     checkSundays.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkSundays", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowSundays", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
     checkMornings.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkMornings", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowMornings", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
     checkAfternoons.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkAfternoons", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowAfternoons", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
     checkEvenings.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkEvenings", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowEvenings", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
     checkNights.setOnClickListener(
         v -> {
-          getArguments().putBoolean("checkNights", ((CheckBox) v).isChecked());
+          getArguments().putBoolean("allowNights", ((CheckBox) v).isChecked());
           listener.onPreferredDaysChange(getArguments());
         });
   }

@@ -206,11 +206,12 @@ public class Repository {
     return viewModelEventListSorted;
   }
 
-  public ViewModelCalendarOption getViewModelCalendarOptionFrom(Calendar calendar) {
+  public ViewModelCalendarOption getViewModelCalendarOptionFrom(
+      Calendar calendar) { //Todo: refactor to go through aggregate root
     ViewModelCalendarOption viewModelCalendarOption = new ViewModelCalendarOption(
         calendar.getNumberOfProblems(),
         calendar.getNumberOfReschedules(),
-        calendar.getResourceUuid().toString(),
+        calendar.getCalendarUuid().toString(),
         calendar.getLastScheduledEntryUuidString(),
         calendar.getEntryLastScheduledDateTimeRange(),
         calendar.getResourceLastAppliedEventSequenceNumber(),

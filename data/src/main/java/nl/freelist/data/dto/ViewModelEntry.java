@@ -2,8 +2,10 @@ package nl.freelist.data.dto;
 
 import android.util.Log;
 import java.time.OffsetDateTime;
+import java.util.List;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
+import nl.freelist.domain.valueObjects.DtrConstraint;
 
 public final class ViewModelEntry {
 
@@ -16,6 +18,7 @@ public final class ViewModelEntry {
   private final OffsetDateTime startDateTime;
   private final String durationString;
   private final OffsetDateTime endDateTime;
+  private final List<DtrConstraint> preferredDaysConstraints;
   private final String notes;
   private final String childrenDurationString;
   private final long duration;
@@ -45,6 +48,7 @@ public final class ViewModelEntry {
       OffsetDateTime startDateTime,
       long duration,
       OffsetDateTime endDateTime,
+      List<DtrConstraint> preferredDaysConstraints,
       String notes,
       long childrenCount,
       long childrenDuration,
@@ -56,6 +60,7 @@ public final class ViewModelEntry {
     this.startDateTime = startDateTime;
     this.duration = duration;
     this.endDateTime = endDateTime;
+    this.preferredDaysConstraints = preferredDaysConstraints;
     this.notes = notes;
     this.childrenCount = childrenCount;
     this.childrenDuration = childrenDuration;
@@ -149,4 +154,7 @@ public final class ViewModelEntry {
     return lastSavedEventSequenceNumber;
   }
 
+  public List<DtrConstraint> getPreferredDaysConstraints() {
+    return preferredDaysConstraints;
+  }
 }
