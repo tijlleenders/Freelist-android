@@ -159,6 +159,7 @@ public class SaveEntryCommand extends Command {
       LOGGER.log(Level.WARNING, e.getMessage());
       return Result.Create(false, null, "", e.getMessage());
     }
+
     return Result.Create(true, null, "", "");
   }
 }

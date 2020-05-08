@@ -55,6 +55,6 @@ public class FDatePickerDialog extends DialogFragment
             + Integer.toString(month + 1)
             + "-"
             + Integer.toString(day);
-    listener.onDialogPositiveClick(dateSelected, inputType);
+    listener.onDialogFeedback(dateSelected, inputType);
   }
 }

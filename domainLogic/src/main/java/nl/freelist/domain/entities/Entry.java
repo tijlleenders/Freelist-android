@@ -31,6 +31,7 @@ public class Entry {
   //      int eventSequenceNumber)
   // Add to ViewModelEntry dto
   // Add to EventDatabaseHelper.getViewModelEntryFrom(Entry entry)
+  // Possibly List<ViewModelEvent> in Repository.getAllEventsForID(String uuid) (for UI history)
 
   private UUID ownerUuid;
   private UUID uuid;

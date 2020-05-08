@@ -49,6 +49,6 @@ public class FTimePickerDialog extends DialogFragment
   public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
     String selectedTime =
         Integer.toString(hourOfDay * 3600 + minute * 60);
-    listener.onDialogPositiveClick(selectedTime, inputType);
+    listener.onDialogFeedback(selectedTime, inputType);
   }
 }

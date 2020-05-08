@@ -45,7 +45,7 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
     return result;
   }
 
-  public Observable<List<ViewModelEvent>> getAllEventsFor(String uuid) {
+  public Observable<List<ViewModelEvent>> getAllEventsFor(String uuid) { //For Entry history page
     Observable<List<ViewModelEvent>> eventList = Observable
         .fromCallable(
             () -> repository.getAllEventsForId(uuid))
