@@ -97,6 +97,52 @@ public class AddEditEntryActivity extends AppCompatActivity
     super.onPause();
   }
 
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_add_edit_entry);
+
+    initializeViews();
+
+    repository = new Repository(this.getApplicationContext());
+
+    AddEditEntryActivityViewModel =
+        ViewModelProviders.of(this).get(AddEditEntryActivityViewModel.class);
+
+    Bundle bundle = getIntent().getExtras();
+
+    MySettings mySettings = new MySettings(this);
+    parentUuid = defaultUuid = mySettings.getUuid();
+
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowMondays", true);
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowTuesdays", true);
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowWednesdays", true);
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowThursdays", true);
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowFridays", true);
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowSaturdays", true);
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowSundays", true);
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowMornings", true);
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowAfternoons", true);
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowEvenings", true);
+    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowNights", true);
+
+    durationBundle.putLong("duration", duration);
+
+    if (bundle != null && bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
+      parentUuid = bundle.getString(Constants.EXTRA_ENTRY_PARENT_ID);
+    }
+
+    if (bundle != null && bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
+      uuid = bundle.getString(Constants.EXTRA_ENTRY_ID);
+      initializeForEditExisting(uuid);
+    } else if (bundle != null && bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) { // do add
+      // setup
+      initializeForAddNew(bundle);
+    }
+
+    attachViewListeners();
+  }
+
   private void saveChangedFields() {
     if (saveCommandsInProgress > 0) {
       Log.d(TAG, "Save already in progress! #:" + saveCommandsInProgress);
@@ -141,66 +187,19 @@ public class AddEditEntryActivity extends AppCompatActivity
                         Toast.makeText(
                                 AddEditEntryActivity.this,
                                 "Sorry! SaveEntry failed!",
-                                Toast.LENGTH_SHORT)
+                            Toast.LENGTH_LONG)
                             .show();
                       } else {
-                        Toast.makeText(
-                            AddEditEntryActivity.this,
-                            "Saved!",
-                            Toast.LENGTH_SHORT)
-                            .show();
+//                        Toast.makeText(
+//                            AddEditEntryActivity.this,
+//                            "Saved!",
+//                            Toast.LENGTH_SHORT)
+//                            .show();
                         initializeForEditExisting(uuid);
                       }
                     }
                   });
             }));
-  }
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_add_edit_entry);
-
-    initializeViews();
-
-    repository = new Repository(this.getApplicationContext());
-
-    AddEditEntryActivityViewModel =
-        ViewModelProviders.of(this).get(AddEditEntryActivityViewModel.class);
-
-    Bundle bundle = getIntent().getExtras();
-
-    MySettings mySettings = new MySettings(this);
-    parentUuid = defaultUuid = mySettings.getUuid();
-
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowMondays", true);
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowTuesdays", true);
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowWednesdays", true);
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowThursdays", true);
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowFridays", true);
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowSaturdays", true);
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowSundays", true);
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowMornings", true);
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowAfternoons", true);
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowEvenings", true);
-    preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowNights", true);
-
-    durationBundle.putLong("duration", duration);
-
-    if (bundle != null && bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
-      parentUuid = bundle.getString(Constants.EXTRA_ENTRY_PARENT_ID);
-    }
-
-
-    if (bundle != null && bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
-      uuid = bundle.getString(Constants.EXTRA_ENTRY_ID);
-      initializeForEditExisting(uuid);
-    } else if (bundle != null && bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) { // do add
-      // setup
-      initializeForAddNew(bundle);
-    }
-
-    attachViewListeners();
   }
 
   private void initializeForAddNew(Bundle bundle) {
@@ -212,7 +211,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     //Todo: preferredDaysConstraints from Settings
     preferredDaysConstraints.add(DtrConstraint.Create("NOEVENINGS", null));
     preferredDaysConstraints.add(DtrConstraint.Create("NONIGHTS", null));
-//    lastSavedEventSequenceNumber += 2; //Because two events are applied: EntryCreated + preferredDaysConstraintsChanged
+
   }
 
   private void initializeForEditExisting(String uuid) {
@@ -404,6 +403,7 @@ public class AddEditEntryActivity extends AppCompatActivity
           fTimePickerDialog.show(getSupportFragmentManager(), "timePicker");
           FDatePickerDialog fDatePickerDialog = new FDatePickerDialog("startDate");
           fDatePickerDialog.show(getSupportFragmentManager(), "datePicker");
+          saveChangedFields();
         }
         break;
       case R.id.edit_text_duration:
@@ -422,6 +422,7 @@ public class AddEditEntryActivity extends AppCompatActivity
           fTimePickerDialog.show(getSupportFragmentManager(), "timePicker");
           FDatePickerDialog fDatePickerDialog = new FDatePickerDialog("endDate");
           fDatePickerDialog.show(getSupportFragmentManager(), "datePicker");
+          saveChangedFields();
         }
         break;
       case R.id.edit_text_schedule_prefs:
@@ -448,11 +449,14 @@ public class AddEditEntryActivity extends AppCompatActivity
             // Todo: change as Toast is also not the preferred way of showing/telling the user
             // something?
             // Also, it doesn't show as it gets overridden by saveCommandInProgress Toast
-            Toast.makeText(
-                    AddEditEntryActivity.this.getBaseContext(),
-                    "Increase flexibility between start and end date-times.",
-                    Toast.LENGTH_SHORT)
-                .show();
+            ConstraintPickerDialog constraintPickerDialog = ConstraintPickerDialog.Create(
+                preferredDaysConstraintsCheckBoxStatesBundle);
+            constraintPickerDialog.show(getSupportFragmentManager(), "constraintPicker");
+//            Toast.makeText(
+//                    AddEditEntryActivity.this.getBaseContext(),
+//                    "Increase flexibility between start and end date-times.",
+//                    Toast.LENGTH_SHORT)
+//                .show();
           }
           // Todo: schedule entry
           textInputEditTextSchedulePrefs.clearFocus();
@@ -461,7 +465,6 @@ public class AddEditEntryActivity extends AppCompatActivity
       default:
         break;
     }
-    saveChangedFields();
   }
 
 
@@ -616,7 +619,7 @@ public class AddEditEntryActivity extends AppCompatActivity
   }
 
   @Override
-  public void onDialogPositiveClick(String input, String inputType) {
+  public void onDialogFeedback(String input, String inputType) {
     switch (inputType) {
       case "startDate":
         startDateTime = TimeHelper.getDateFromString(input);

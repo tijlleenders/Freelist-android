@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.WindowManager.LayoutParams;
 import android.widget.CheckBox;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -145,6 +146,12 @@ public class ConstraintPickerDialog
 
     // Todo: when retrieving view here I get null so I put it in onStart.
     //  Seems to work for now but probably not good.
+
+    // To keep sofinput from disappearing the second time the Dialog is invoked
+    getDialog()
+        .getWindow()
+        .setSoftInputMode(
+            LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
   }
 
