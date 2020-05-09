@@ -1,13 +1,14 @@
-package nl.freelist.domain.entities;
+package nl.freelist.domain.aggregates.person;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import nl.freelist.domain.events.EntryScheduledEvent;
+import nl.freelist.domain.aggregates.entry.Entry;
+import nl.freelist.domain.events.person.PersonCreatedEvent;
+import nl.freelist.domain.events.entry.EntryScheduledEvent;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.events.ResourceCreatedEvent;
 import nl.freelist.domain.valueObjects.Appointment;
 import nl.freelist.domain.valueObjects.DateTimeRange;
 import nl.freelist.domain.valueObjects.Email;
@@ -22,7 +23,7 @@ public class Person {
   private int lastAppliedEventSequenceNumber;
   private List<Event> eventList = new ArrayList<>();
   private DateTimeRange lifetimeDateTimeRange;
-  private Calendar calendar;
+  private nl.freelist.domain.aggregates.person.Calendar calendar;
 
   private Person(
   ) {
@@ -39,8 +40,8 @@ public class Person {
   }
 
 
-  public List<Calendar> getSchedulingOptions(Entry entry) {
-    List<Calendar> calendarOptionList = new ArrayList<>();
+  public List<nl.freelist.domain.aggregates.person.Calendar> getSchedulingOptions(Entry entry) {
+    List<nl.freelist.domain.aggregates.person.Calendar> calendarOptionList = new ArrayList<>();
     List<Appointment> currentAppointmentList = calendar.getAppointments();
     int currentAppointmentListSize;
     if (currentAppointmentList == null) {
@@ -60,8 +61,8 @@ public class Person {
         tempAppointmentList.addAll(currentAppointmentList);
       }
       tempAppointmentList.add(prio, appointmentToSchedule);
-      Calendar calendarOption;
-      calendarOption = Calendar.Create(
+      nl.freelist.domain.aggregates.person.Calendar calendarOption;
+      calendarOption = nl.freelist.domain.aggregates.person.Calendar.Create(
           tempAppointmentList,
           uuid,
           lastAppliedEventSequenceNumber,
@@ -90,15 +91,15 @@ public class Person {
     // Todo: maybe move every applyEvent to it's own function with subclass parameter?
     String eventClass = event.getClass().getSimpleName();
     switch (eventClass) {
-      case "ResourceCreatedEvent":
+      case "PersonCreatedEvent":
         LOGGER.log(Level.INFO,
-            "ResourceCreatedEvent applied to resource");
-        ResourceCreatedEvent resourceCreatedEvent = (ResourceCreatedEvent) event;
-        this.uuid = UUID.fromString(resourceCreatedEvent.getAggregateId());
-        this.ownerEmail = resourceCreatedEvent.getOwnerEmail();
-        this.resourceEmail = resourceCreatedEvent.getResourceEmail();
-        this.lifetimeDateTimeRange = resourceCreatedEvent.getLifetimeDateTimeRange();
-        calendar = Calendar
+            "PersonCreatedEvent applied to resource");
+        PersonCreatedEvent personCreatedEvent = (PersonCreatedEvent) event;
+        this.uuid = UUID.fromString(personCreatedEvent.getAggregateId());
+        this.ownerEmail = personCreatedEvent.getOwnerEmail();
+        this.resourceEmail = personCreatedEvent.getResourceEmail();
+        this.lifetimeDateTimeRange = personCreatedEvent.getLifetimeDateTimeRange();
+        calendar = nl.freelist.domain.aggregates.person.Calendar
             .Create(
                 null,
                 uuid,

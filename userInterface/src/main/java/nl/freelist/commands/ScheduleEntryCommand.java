@@ -8,8 +8,8 @@ import nl.freelist.data.Repository;
 import nl.freelist.data.sqlBundle;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
-import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.entities.Person;
+import nl.freelist.domain.aggregates.entry.Entry;
+import nl.freelist.domain.aggregates.person.Person;
 import nl.freelist.domain.events.Event;
 
 public class ScheduleEntryCommand extends Command {

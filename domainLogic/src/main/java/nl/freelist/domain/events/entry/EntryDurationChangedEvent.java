@@ -1,6 +1,7 @@
-package nl.freelist.domain.events;
+package nl.freelist.domain.events.entry;
 
 import java.time.OffsetDateTime;
+import nl.freelist.domain.events.Event;
 
 public class EntryDurationChangedEvent extends Event {
 

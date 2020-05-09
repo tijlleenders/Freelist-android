@@ -16,21 +16,21 @@ import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.gson.Converters;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
-import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.entities.Person;
-import nl.freelist.domain.events.EntryChildCountChangedEvent;
-import nl.freelist.domain.events.EntryChildDurationChangedEvent;
-import nl.freelist.domain.events.EntryCreatedEvent;
-import nl.freelist.domain.events.EntryDurationChangedEvent;
-import nl.freelist.domain.events.EntryEndDateTimeChangedEvent;
-import nl.freelist.domain.events.EntryNotesChangedEvent;
-import nl.freelist.domain.events.EntryParentChangedEvent;
-import nl.freelist.domain.events.EntryPreferredDayConstraintsChangedEvent;
-import nl.freelist.domain.events.EntryScheduledEvent;
-import nl.freelist.domain.events.EntryStartDateTimeChangedEvent;
-import nl.freelist.domain.events.EntryTitleChangedEvent;
+import nl.freelist.domain.aggregates.entry.Entry;
+import nl.freelist.domain.aggregates.person.Person;
+import nl.freelist.domain.events.entry.EntryChildCountChangedEvent;
+import nl.freelist.domain.events.entry.EntryChildDurationChangedEvent;
+import nl.freelist.domain.events.entry.EntryCreatedEvent;
+import nl.freelist.domain.events.entry.EntryDurationChangedEvent;
+import nl.freelist.domain.events.entry.EntryEndDateTimeChangedEvent;
+import nl.freelist.domain.events.entry.EntryNotesChangedEvent;
+import nl.freelist.domain.events.entry.EntryParentChangedEvent;
+import nl.freelist.domain.events.entry.EntryPreferredDayConstraintsChangedEvent;
+import nl.freelist.domain.events.entry.EntryScheduledEvent;
+import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
+import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.events.ResourceCreatedEvent;
+import nl.freelist.domain.events.person.PersonCreatedEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class EventDatabaseHelper extends SQLiteOpenHelper {
@@ -146,9 +146,9 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       case "EntryParentChangedEvent":
       case "EntryTitleChangedEvent":
         return null; //Todo: what entry events affect the calendar and should thus also be applied to the resource? ie duration changed
-      case "ResourceCreatedEvent":
-        ResourceCreatedEvent resourceCreatedEvent = (ResourceCreatedEvent) event;
-        resourceId = resourceCreatedEvent.getAggregateId();
+      case "PersonCreatedEvent":
+        PersonCreatedEvent personCreatedEvent = (PersonCreatedEvent) event;
+        resourceId = personCreatedEvent.getAggregateId();
         break;
       case "EntryScheduledEvent":
         EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
@@ -278,8 +278,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         return gson.toJson(event, EntryParentChangedEvent.class);
       case "EntryScheduledEvent":
         return gson.toJson(event, EntryScheduledEvent.class);
-      case "ResourceCreatedEvent":
-        return gson.toJson(event, ResourceCreatedEvent.class);
+      case "PersonCreatedEvent":
+        return gson.toJson(event, PersonCreatedEvent.class);
       case "EntryStartDateTimeChangedEvent":
         return gson.toJson(event, EntryStartDateTimeChangedEvent.class);
       case "EntryEndDateTimeChangedEvent":
@@ -443,8 +443,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             case "EntryScheduledEvent":
               eventList.add(gson.fromJson(dataJson, EntryScheduledEvent.class));
               break;
-            case "ResourceCreatedEvent":
-              eventList.add(gson.fromJson(dataJson, ResourceCreatedEvent.class));
+            case "PersonCreatedEvent":
+              eventList.add(gson.fromJson(dataJson, PersonCreatedEvent.class));
               break;
             case "EntryStartDateTimeChangedEvent":
               eventList.add(gson.fromJson(dataJson, EntryStartDateTimeChangedEvent.class));
@@ -549,7 +549,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
       case "EntryTitleChangedEvent":
       case "EntryStartDateTimeChangedEvent":
       case "EntryEndDateTimeChangedEvent":
-      case "ResourceCreatedEvent":
+      case "PersonCreatedEvent":
       case "EntryPreferredDayConstraintsChangedEvent":
       case "EntryChildCountChangedEvent":
         //Todo: implement

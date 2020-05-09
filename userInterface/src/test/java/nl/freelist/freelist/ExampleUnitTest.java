@@ -7,7 +7,7 @@ import com.google.gson.GsonBuilder;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import nl.freelist.domain.events.EntryCreatedEvent;
+import nl.freelist.domain.events.entry.EntryCreatedEvent;
 import org.junit.Test;
 /**
  * Example local unit test, which will execute on the development machine (host).

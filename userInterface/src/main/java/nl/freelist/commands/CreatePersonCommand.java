@@ -8,8 +8,8 @@ import java.util.logging.Logger;
 import nl.freelist.data.Repository;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
-import nl.freelist.domain.entities.Person;
-import nl.freelist.domain.events.ResourceCreatedEvent;
+import nl.freelist.domain.aggregates.person.Person;
+import nl.freelist.domain.events.person.PersonCreatedEvent;
 import nl.freelist.domain.valueObjects.DateTimeRange;
 import nl.freelist.domain.valueObjects.Email;
 
@@ -44,8 +44,8 @@ public class CreatePersonCommand extends Command {
     LOGGER.log(Level.INFO, "Executing CreatePersonCommand");
 //    Todo: make it possible to add resources from UI - for now only one default person anonymous@freelist.nl on initial startup
     Person person = Person.Create();
-    ResourceCreatedEvent resourceCreatedEvent =
-        ResourceCreatedEvent.Create(
+    PersonCreatedEvent personCreatedEvent =
+        PersonCreatedEvent.Create(
             OffsetDateTime.now(ZoneOffset.UTC),
             ownerEmail,
             resourceEmail,
@@ -54,7 +54,7 @@ public class CreatePersonCommand extends Command {
             lifetimeDateTimeRange,
             0 //Todo: remove and add check in Person.applyEvent
         );
-    person.applyEvent(resourceCreatedEvent);
+    person.applyEvent(personCreatedEvent);
     repository.insert(person);
     //Todo: log if not successful + return false Result object
     return Result.Create(true, null, "", "");

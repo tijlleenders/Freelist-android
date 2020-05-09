@@ -1,20 +1,21 @@
-package nl.freelist.domain.events;
+package nl.freelist.domain.events.person;
 
 import java.time.OffsetDateTime;
+import nl.freelist.domain.events.Event;
 import nl.freelist.domain.valueObjects.DateTimeRange;
 import nl.freelist.domain.valueObjects.Email;
 
-public class ResourceCreatedEvent extends Event {
+public class PersonCreatedEvent extends Event {
 
   private Email ownerEmail;
   private Email resourceEmail;
   private String ownerUuid;
   private DateTimeRange lifetimeDateTimeRange;
   private int eventSequenceNumber;
-  private String eventType = "ResourceCreatedEvent";
+  private String eventType = "PersonCreatedEvent";
 
 
-  private ResourceCreatedEvent(
+  private PersonCreatedEvent(
       OffsetDateTime occurredDateTime,
       Email ownerEmail,
       Email resourceEmail,
@@ -30,7 +31,7 @@ public class ResourceCreatedEvent extends Event {
     this.eventSequenceNumber = eventSequenceNumber;
   }
 
-  public static ResourceCreatedEvent Create(
+  public static PersonCreatedEvent Create(
       OffsetDateTime occurredDateTime,
       Email ownerEmail,
       Email resourceEmail,
@@ -38,14 +39,14 @@ public class ResourceCreatedEvent extends Event {
       String resourceUuid,
       DateTimeRange lifetimeDateTimeRange,
       int eventSequenceNumber) {
-    ResourceCreatedEvent resourceCreatedEvent = new ResourceCreatedEvent(occurredDateTime,
+    PersonCreatedEvent personCreatedEvent = new PersonCreatedEvent(occurredDateTime,
         ownerEmail,
         resourceEmail,
         ownerUuid,
         resourceUuid,
         lifetimeDateTimeRange,
         eventSequenceNumber);
-    return resourceCreatedEvent;
+    return personCreatedEvent;
   }
 
   public String getOwnerUuid() {

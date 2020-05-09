@@ -15,17 +15,17 @@ import nl.freelist.data.dto.ViewModelCalendarOption;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.dto.ViewModelEvent;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.entities.Calendar;
-import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.entities.Person;
-import nl.freelist.domain.events.EntryCreatedEvent;
-import nl.freelist.domain.events.EntryDurationChangedEvent;
-import nl.freelist.domain.events.EntryEndDateTimeChangedEvent;
-import nl.freelist.domain.events.EntryNotesChangedEvent;
-import nl.freelist.domain.events.EntryParentChangedEvent;
-import nl.freelist.domain.events.EntryScheduledEvent;
-import nl.freelist.domain.events.EntryStartDateTimeChangedEvent;
-import nl.freelist.domain.events.EntryTitleChangedEvent;
+import nl.freelist.domain.aggregates.person.Calendar;
+import nl.freelist.domain.aggregates.entry.Entry;
+import nl.freelist.domain.aggregates.person.Person;
+import nl.freelist.domain.events.entry.EntryCreatedEvent;
+import nl.freelist.domain.events.entry.EntryDurationChangedEvent;
+import nl.freelist.domain.events.entry.EntryEndDateTimeChangedEvent;
+import nl.freelist.domain.events.entry.EntryNotesChangedEvent;
+import nl.freelist.domain.events.entry.EntryParentChangedEvent;
+import nl.freelist.domain.events.entry.EntryScheduledEvent;
+import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
+import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
 import nl.freelist.domain.events.Event;
 
 public class Repository {

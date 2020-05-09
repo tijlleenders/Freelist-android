@@ -1,7 +1,8 @@
-package nl.freelist.domain.events;
+package nl.freelist.domain.events.entry;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import nl.freelist.domain.events.Event;
 import nl.freelist.domain.valueObjects.DtrConstraint;
 
 public class EntryPreferredDayConstraintsChangedEvent extends Event {

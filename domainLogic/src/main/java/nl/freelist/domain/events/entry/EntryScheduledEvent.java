@@ -1,7 +1,8 @@
-package nl.freelist.domain.events;
+package nl.freelist.domain.events.entry;
 
 import java.time.OffsetDateTime;
-import nl.freelist.domain.entities.Calendar;
+import nl.freelist.domain.aggregates.person.Calendar;
+import nl.freelist.domain.events.Event;
 
 public class EntryScheduledEvent extends Event {
 

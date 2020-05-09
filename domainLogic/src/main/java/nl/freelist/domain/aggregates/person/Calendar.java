@@ -1,4 +1,4 @@
-package nl.freelist.domain.entities;
+package nl.freelist.domain.aggregates.person;
 
 import java.util.ArrayList;
 import java.util.List;

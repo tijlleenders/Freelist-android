@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.data.dto.ViewModelCalendarOption;
-import nl.freelist.domain.entities.Calendar;
+import nl.freelist.domain.aggregates.person.Calendar;
 import nl.freelist.freelist.R;
 
 public class ChooseCalendarOptionAdapter extends
