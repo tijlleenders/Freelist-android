@@ -469,93 +469,62 @@ public class AddEditEntryActivity extends AppCompatActivity
 
 
   private void updatePreferredDaysConstraintsFromCheckBoxStatesBundle() {
+    preferredDaysConstraints.clear();
     for (String key : preferredDaysConstraintsCheckBoxStatesBundle.keySet()) {
       switch (key) {
         case "allowMondays":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NOMONDAYS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
+            // == false easier to read than !
             preferredDaysConstraints.add(DtrConstraint.Create("NOMONDAYS", null));
           }
           break;
         case "allowTuesdays":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NOTUESDAYS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             preferredDaysConstraints.add(DtrConstraint.Create("NOTUESDAYS", null));
           }
           break;
         case "allowWednesdays":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NOWEDNESDAYS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             preferredDaysConstraints.add(DtrConstraint.Create("NOWEDNESDAYS", null));
           }
           break;
         case "allowThursdays":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NOTHURSDAYS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             preferredDaysConstraints.add(DtrConstraint.Create("NOTHURSDAYS", null));
           }
           break;
         case "allowFridays":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NOFRIDAYS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             preferredDaysConstraints.add(DtrConstraint.Create("NOFRIDAYS", null));
           }
           break;
         case "allowSaturdays":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NOSATURDAYS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             preferredDaysConstraints.add(DtrConstraint.Create("NOSATURDAYS", null));
           }
           break;
         case "allowSundays":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NOSUNDAYS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             preferredDaysConstraints.add(DtrConstraint.Create("NOSUNDAYS", null));
           }
           break;
         case "allowMornings":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NOMORNINGS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             preferredDaysConstraints.add(DtrConstraint.Create("NOMORNINGS", null));
           }
           break;
         case "allowAfternoons":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NOAFTERNOONS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             preferredDaysConstraints.add(DtrConstraint.Create("NOAFTERNOONS", null));
           }
           break;
         case "allowEvenings":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NOEVENINGS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             preferredDaysConstraints.add(DtrConstraint.Create("NOEVENINGS", null));
           }
           break;
         case "allowNights":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key)) {
-            preferredDaysConstraints.removeIf(
-                dtrConstraint -> dtrConstraint.toString().equals("NONIGHTS"));
-          } else {
+          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             preferredDaysConstraints.add(DtrConstraint.Create("NONIGHTS", null));
           }
           break;

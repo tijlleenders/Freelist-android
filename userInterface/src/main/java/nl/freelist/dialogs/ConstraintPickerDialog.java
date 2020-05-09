@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.WindowManager.LayoutParams;
 import android.widget.CheckBox;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -80,61 +79,72 @@ public class ConstraintPickerDialog
     checkEvenings.setChecked(getArguments().getBoolean("allowEvenings"));
     checkNights.setChecked(getArguments().getBoolean("allowNights"));
 
-    checkMondays.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowMondays", ((CheckBox) v).isChecked());
+    checkMondays.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowMondays", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
-    checkTuesdays.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowTuesdays", ((CheckBox) v).isChecked());
+        }
+    );
+    checkTuesdays.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowTuesdays", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
-    checkWednesdays.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowWednesdays", ((CheckBox) v).isChecked());
+        }
+    );
+    checkWednesdays.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowWednesdays", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
-    checkThursdays.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowThursdays", ((CheckBox) v).isChecked());
+        }
+    );
+    checkThursdays.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowThursdays", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
-    checkFridays.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowFridays", ((CheckBox) v).isChecked());
+        }
+    );
+    checkFridays.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowFridays", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
-    checkSaturdays.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowSaturdays", ((CheckBox) v).isChecked());
+        }
+    );
+    checkSaturdays.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowSaturdays", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
-    checkSundays.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowSundays", ((CheckBox) v).isChecked());
+        }
+    );
+    checkSundays.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowSundays", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
-    checkMornings.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowMornings", ((CheckBox) v).isChecked());
+        }
+    );
+    checkMornings.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowMornings", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
-    checkAfternoons.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowAfternoons", ((CheckBox) v).isChecked());
+        }
+    );
+    checkAfternoons.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowAfternoons", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
-    checkEvenings.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowEvenings", ((CheckBox) v).isChecked());
+        }
+    );
+    checkEvenings.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowEvenings", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
-    checkNights.setOnClickListener(
-        v -> {
-          getArguments().putBoolean("allowNights", ((CheckBox) v).isChecked());
+        }
+    );
+    checkNights.setOnCheckedChangeListener(
+        (buttonView, isChecked) -> {
+          getArguments().putBoolean("allowNights", isChecked);
           listener.onPreferredDaysChange(getArguments());
-        });
+        }
+    );
   }
 
   @Override
@@ -146,12 +156,6 @@ public class ConstraintPickerDialog
 
     // Todo: when retrieving view here I get null so I put it in onStart.
     //  Seems to work for now but probably not good.
-
-    // To keep sofinput from disappearing the second time the Dialog is invoked
-    getDialog()
-        .getWindow()
-        .setSoftInputMode(
-            LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
   }
 
