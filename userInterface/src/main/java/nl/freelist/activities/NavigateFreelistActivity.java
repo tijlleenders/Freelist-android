@@ -100,7 +100,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     //Todo: possible to use MySetting without having to pass the application context to it?
     //use getSharedPreferences(String name, int mode) rather than getPreferences (int mode)
 
-    //If Resource not yet set, create (and persist) Resource with default anonymous@freelist.nl
+    //If Person not yet set, create (and persist) Person with default anonymous@freelist.nl
     if (mySettings.getResourceUuid() == null) {
       if (!sharedPreferences.contains(Constants.SETTINGS_USER_UUID)) {
         editor = sharedPreferences.edit();
@@ -115,11 +115,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
         editor.putString(
             Constants.SETTINGS_RESOURCE_UUID,
             UUID.nameUUIDFromBytes(email.getEmailString().getBytes()).toString());
-        //Make sure Resource is created + persisted before committing to SharedPreferences
+        //Make sure Person is created + persisted before committing to SharedPreferences
         //Not asynchronous as it is blocking for application to continue
         if (!navigateEntriesViewModel.createResource(email, email, lifetimeDateTimeRange)
             .isSuccess()) {
-          throw new Exception("Couldn't create a Resource");
+          throw new Exception("Couldn't create a Person");
         }
         editor.commit();
       }

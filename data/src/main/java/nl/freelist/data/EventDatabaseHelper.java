@@ -17,7 +17,7 @@ import nl.freelist.data.gson.Converters;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
 import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.entities.Resource;
+import nl.freelist.domain.entities.Person;
 import nl.freelist.domain.events.EntryChildCountChangedEvent;
 import nl.freelist.domain.events.EntryChildDurationChangedEvent;
 import nl.freelist.domain.events.EntryCreatedEvent;
@@ -206,11 +206,11 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return entry;
   }
 
-  public Resource getResourceWithSavedEventsById(String uuid) {
-    Resource resource = Resource.Create();
+  public Person getResourceWithSavedEventsById(String uuid) {
+    Person person = Person.Create();
     List<Event> eventList = getEventsFor(uuid);
-    resource.applyEvents(eventList);
-    return resource;
+    person.applyEvents(eventList);
+    return person;
   }
 
   public void executeSqlBundles(List<sqlBundle> sqlBundleList) {
@@ -545,7 +545,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         //Todo: add sqlBundles to update all new parents with newChildEntryAttachedEvent
         break;
       case "EntryNotesChangedEvent":
-      case "EntryScheduledEvent"://Calendar update is done when Event is applied to Resource
+      case "EntryScheduledEvent"://Calendar update is done when Event is applied to Person
       case "EntryTitleChangedEvent":
       case "EntryStartDateTimeChangedEvent":
       case "EntryEndDateTimeChangedEvent":

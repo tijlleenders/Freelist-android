@@ -12,9 +12,9 @@ import nl.freelist.domain.valueObjects.Appointment;
 import nl.freelist.domain.valueObjects.DateTimeRange;
 import nl.freelist.domain.valueObjects.Email;
 
-public class Resource {
+public class Person {
 
-  private static final Logger LOGGER = Logger.getLogger(Resource.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(Person.class.getName());
 
   private Email ownerEmail;
   private Email resourceEmail;
@@ -24,18 +24,18 @@ public class Resource {
   private DateTimeRange lifetimeDateTimeRange;
   private Calendar calendar;
 
-  private Resource(
+  private Person(
   ) {
     lastAppliedEventSequenceNumber = -1;
     LOGGER.log(Level.INFO,
-        "Resource created with lastAppliedEventSequenceNumber "
+        "Person created with lastAppliedEventSequenceNumber "
             + lastAppliedEventSequenceNumber);
   }
 
-  public static Resource Create(
+  public static Person Create(
   ) {
     //Todo: validation as static method?
-    return new Resource();
+    return new Person();
   }
 
 

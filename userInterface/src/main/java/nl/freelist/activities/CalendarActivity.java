@@ -93,11 +93,11 @@ public class CalendarActivity extends AppCompatActivity implements ItemClickList
                     @Override
                     public void run() {
                       adapter.setEntries(calendarEntries);
-                      Toast.makeText(
-                          CalendarActivity.this,
-                          "calendarEntriesViewModel recyclerView refreshed!",
-                          Toast.LENGTH_SHORT)
-                          .show();
+//                      Toast.makeText(
+//                          CalendarActivity.this,
+//                          "calendarEntriesViewModel recyclerView refreshed!",
+//                          Toast.LENGTH_SHORT)
+//                          .show();
                     }
                   });
             });

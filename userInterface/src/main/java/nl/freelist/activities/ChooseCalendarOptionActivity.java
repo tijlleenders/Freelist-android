@@ -144,8 +144,7 @@ public class ChooseCalendarOptionActivity extends AppCompatActivity implements I
                   + " lastSavedResourceSequenceNumber" + lastSavedResourceSequenceNumber
           );
           ScheduleEntryCommand scheduleEntryCommand =
-              new ScheduleEntryCommand(entryUuid, resourceUuid, lastSavedEventSequenceNumber,
-                  lastSavedResourceSequenceNumber, repository, calendar);
+              new ScheduleEntryCommand(entryUuid, repository);
           //Todo: check if the whole creation + asyncScheduling of command can't be executed by viewModel
           ChooseCalendarOptionViewModel.handle(scheduleEntryCommand)
               .subscribeOn(Schedulers.io())

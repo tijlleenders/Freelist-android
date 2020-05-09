@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,6 +51,7 @@ public class AddEditEntryActivity extends AppCompatActivity
   SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 
   private String title = "";
+  private String scheduledStatus = "";
   private OffsetDateTime startDateTime;
   private long duration = 0;
   private OffsetDateTime endDateTime;
@@ -66,6 +68,7 @@ public class AddEditEntryActivity extends AppCompatActivity
   private TextInputLayout textInputLayoutNotes;
 
   private TextInputEditText textInputEditTextTitle;
+  private TextView textViewScheduledStatus;
   private TextInputEditText textInputEditTextStartDateTime;
   private TextInputEditText textInputEditTextDuration;
   private TextInputEditText textInputEditTextEndDateTime;
@@ -255,6 +258,7 @@ public class AddEditEntryActivity extends AppCompatActivity
 
     // Todo: Initialize via layout to pass along appropriate styling from layout
     textInputEditTextTitle = findViewById(R.id.edit_text_title);
+    textViewScheduledStatus = findViewById(R.id.schedule_status);
     textInputEditTextStartDateTime = findViewById(R.id.edit_text_start_date_time);
     textInputEditTextDuration = findViewById(R.id.edit_text_duration);
     textInputEditTextEndDateTime = findViewById(R.id.edit_text_end_date_time);
@@ -385,6 +389,13 @@ public class AddEditEntryActivity extends AppCompatActivity
     startDateTime = viewModelEntry.getStartDateTime();
     endDateTime = viewModelEntry.getEndDateTime();
     notes = viewModelEntry.getNotes();
+//    scheduledStatus = viewModelEntry.getScheduledStatus();
+    if (duration == 0) {
+      textViewScheduledStatus.setText("Not scheduled yet... Please add a duration.");
+    } else {
+      textViewScheduledStatus.setText("Scheduling...");
+    }
+
     // Todo: implement schedule-text in viewModelEntry
 
     preferredDaysConstraints = viewModelEntry.getPreferredDaysConstraints();
