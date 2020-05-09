@@ -69,23 +69,8 @@ public class SaveEntryCommand extends Command {
     Entry entry = repository.getEntryWithSavedEventsById(aggregateUuid);
     List<Event> eventsToAddList = new ArrayList<>();
 
-    if (entry.getLastAppliedEventSequenceNumber() != lastSavedEventSequenceNumber) {
-      LOGGER.log(Level.WARNING, "Optimistic concurrency exception: "
-          + "Entry:"
-          + entry.getLastAppliedEventSequenceNumber()
-          + " UI:"
-          + lastSavedEventSequenceNumber);
-      return Result.Create(
-          false,
-          null,
-          "",
-          "Optimistic concurrency exception: "
-              + "Entry:"
-              + entry.getLastAppliedEventSequenceNumber()
-              + " UI:"
-              + lastSavedEventSequenceNumber
-      );
-    }
+    // Optimistic locking only necessary in multi-user environment or if commands out of order
+    // now only UI + all commands are scheduled sequentially on same thread
 
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
@@ -156,7 +141,9 @@ public class SaveEntryCommand extends Command {
     try {
       repository.insert(entry);
     } catch (Exception e) {
-      LOGGER.log(Level.WARNING, e.getMessage());
+      if (e.getMessage() != null) {
+        LOGGER.log(Level.WARNING, e.getMessage());
+      }
       return Result.Create(false, null, "", e.getMessage());
     }
 

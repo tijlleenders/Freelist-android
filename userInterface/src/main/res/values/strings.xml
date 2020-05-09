@@ -35,4 +35,5 @@
   <string name="at_night">At night</string>
   <string name="repeat">Repeat every</string>
   <string name="starts_after">Starts after completion of Freelist(s)</string>
+  <string name="schedule_status">Not schedulable without duration</string>
 </resources>

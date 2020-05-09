@@ -41,7 +41,8 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
     Single<Result> result = Single.fromCallable(
         () -> new CommandHandler()
             .execute(command))
-        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
+//        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io())
+        ;
     return result;
   }
 

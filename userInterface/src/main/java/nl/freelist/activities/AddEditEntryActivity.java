@@ -28,6 +28,7 @@ import nl.freelist.dialogs.FDatePickerDialog;
 import nl.freelist.dialogs.FTimePickerDialog;
 import nl.freelist.dialogs.NoticeDialogListener;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
+import nl.freelist.domain.crossCuttingConcerns.ThreadLogger;
 import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
 import nl.freelist.domain.valueObjects.DtrConstraint;
 import nl.freelist.freelist.R;
@@ -144,13 +145,15 @@ public class AddEditEntryActivity extends AppCompatActivity
   }
 
   private void saveChangedFields() {
-    if (saveCommandsInProgress > 0) {
-      Log.d(TAG, "Save already in progress! #:" + saveCommandsInProgress);
-      return;
-    }
+
     title = textInputEditTextTitle.getText().toString();
     notes = textInputEditTextNotes.getText().toString();
-    Log.d(TAG, "SaveEntryCommand" + " with eventSequenceNumber " + lastSavedEventSequenceNumber);
+    Log.d(
+        TAG,
+        "SaveEntryCommand"
+            + saveCommandsInProgress
+            + " with eventSequenceNumber "
+            + lastSavedEventSequenceNumber);
 
     SaveEntryCommand saveEntryCommand = // Todo: add parent
         new SaveEntryCommand(
@@ -167,21 +170,23 @@ public class AddEditEntryActivity extends AppCompatActivity
             repository);
     saveCommandsInProgress += 1;
     Toast.makeText(AddEditEntryActivity.this, "Saving...", Toast.LENGTH_SHORT).show();
-    Toast.makeText(
-            AddEditEntryActivity.this,
-            "Saving...",
-            Toast.LENGTH_SHORT)
-        .show();
+    Toast.makeText(AddEditEntryActivity.this, "Saving...", Toast.LENGTH_SHORT).show();
     AddEditEntryActivityViewModel.handle(saveEntryCommand)
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+        .subscribeOn(
+            Schedulers.single()) // schedules all save commands sequentially in a single thread
+        .observeOn(Schedulers.single())
         .subscribe(
             (result -> {
               // update View
+              ThreadLogger.logThreadSignature(
+                  "ThreadLogger: Inside saveEntryCommand observe " + lastSavedEventSequenceNumber);
               runOnUiThread(
                   new Runnable() {
                     @Override
                     public void run() {
+                      ThreadLogger.logThreadSignature(
+                          "ThreadLogger: Inside saveEntryCommand observe runOnUI. "
+                              + lastSavedEventSequenceNumber);
                       saveCommandsInProgress -= 1;
                       if (!result.isSuccess()) {
                         Toast.makeText(
@@ -190,11 +195,12 @@ public class AddEditEntryActivity extends AppCompatActivity
                             Toast.LENGTH_LONG)
                             .show();
                       } else {
-//                        Toast.makeText(
-//                            AddEditEntryActivity.this,
-//                            "Saved!",
-//                            Toast.LENGTH_SHORT)
-//                            .show();
+
+                        //                        Toast.makeText(
+                        //                            AddEditEntryActivity.this,
+                        //                            "Saved!",
+                        //                            Toast.LENGTH_SHORT)
+                        //                            .show();
                         initializeForEditExisting(uuid);
                       }
                     }
@@ -208,17 +214,16 @@ public class AddEditEntryActivity extends AppCompatActivity
     }
 
     setTitle("Add new Freelist");
-    //Todo: preferredDaysConstraints from Settings
+    // Todo: preferredDaysConstraints from Settings
     preferredDaysConstraints.add(DtrConstraint.Create("NOEVENINGS", null));
     preferredDaysConstraints.add(DtrConstraint.Create("NONIGHTS", null));
-
   }
 
   private void initializeForEditExisting(String uuid) {
 
     AddEditEntryActivityViewModel.getViewModelEntry(uuid)
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+        .subscribeOn(Schedulers.single())
+        .observeOn(Schedulers.single())
         .subscribe(
             (viewModelEntry -> {
               // update View
@@ -226,7 +231,9 @@ public class AddEditEntryActivity extends AppCompatActivity
                   new Runnable() {
                     @Override
                     public void run() {
-                      initializeEditActivityWith(viewModelEntry);
+                      ThreadLogger.logThreadSignature(
+                          "ThreadLogger: Inside refresh " + lastSavedEventSequenceNumber);
+                      updateAddEditEntryActivityWith(viewModelEntry);
                     }
                   });
               // Todo: setup action if fails
@@ -365,8 +372,13 @@ public class AddEditEntryActivity extends AppCompatActivity
     }
   }
 
-  private void initializeEditActivityWith(ViewModelEntry viewModelEntry) {
-    Log.d(TAG, "initializeEditActivityWith viewModelEntry " + viewModelEntry.getTitle() + "called");
+  private void updateAddEditEntryActivityWith(ViewModelEntry viewModelEntry) {
+    Log.d(
+        TAG,
+        "updateAddEditEntryActivityWith viewModelEntry "
+            + viewModelEntry.getTitle()
+            + " version "
+            + viewModelEntry.getLastSavedEventSequenceNumber());
     title = viewModelEntry.getTitle();
     duration = viewModelEntry.getDuration();
     durationBundle.putLong("duration", duration);
@@ -376,6 +388,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     // Todo: implement schedule-text in viewModelEntry
 
     preferredDaysConstraints = viewModelEntry.getPreferredDaysConstraints();
+    Log.d(TAG, "check: viewModel updated: " + preferredDaysConstraints.toString());
     updateCheckBoxStatesBundleFromPreferredDaysConstraints();
 
     textInputEditTextTitle.setText(title);
@@ -442,21 +455,21 @@ public class AddEditEntryActivity extends AppCompatActivity
                   && OffsetDateTime.now().plusSeconds(duration).toEpochSecond()
                       != endDateTime.toEpochSecond())
               || (duration > 0 && endDateTime == null)) {
-            ConstraintPickerDialog constraintPickerDialog = ConstraintPickerDialog.Create(
-                preferredDaysConstraintsCheckBoxStatesBundle);
+            ConstraintPickerDialog constraintPickerDialog =
+                ConstraintPickerDialog.Create(preferredDaysConstraintsCheckBoxStatesBundle);
             constraintPickerDialog.show(getSupportFragmentManager(), "constraintPicker");
           } else {
             // Todo: change as Toast is also not the preferred way of showing/telling the user
             // something?
             // Also, it doesn't show as it gets overridden by saveCommandInProgress Toast
-            ConstraintPickerDialog constraintPickerDialog = ConstraintPickerDialog.Create(
-                preferredDaysConstraintsCheckBoxStatesBundle);
+            ConstraintPickerDialog constraintPickerDialog =
+                ConstraintPickerDialog.Create(preferredDaysConstraintsCheckBoxStatesBundle);
             constraintPickerDialog.show(getSupportFragmentManager(), "constraintPicker");
-//            Toast.makeText(
-//                    AddEditEntryActivity.this.getBaseContext(),
-//                    "Increase flexibility between start and end date-times.",
-//                    Toast.LENGTH_SHORT)
-//                .show();
+            //            Toast.makeText(
+            //                    AddEditEntryActivity.this.getBaseContext(),
+            //                    "Increase flexibility between start and end date-times.",
+            //                    Toast.LENGTH_SHORT)
+            //                .show();
           }
           // Todo: schedule entry
           textInputEditTextSchedulePrefs.clearFocus();
@@ -466,7 +479,6 @@ public class AddEditEntryActivity extends AppCompatActivity
         break;
     }
   }
-
 
   private void updatePreferredDaysConstraintsFromCheckBoxStatesBundle() {
     preferredDaysConstraints.clear();
@@ -584,6 +596,7 @@ public class AddEditEntryActivity extends AppCompatActivity
   public void onPreferredDaysChange(Bundle checkBoxStates) {
     preferredDaysConstraintsCheckBoxStatesBundle = checkBoxStates;
     updatePreferredDaysConstraintsFromCheckBoxStatesBundle();
+    Log.d(TAG, "check: " + preferredDaysConstraints.toString());
     saveChangedFields();
   }
 
