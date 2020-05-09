@@ -8,12 +8,12 @@ import java.util.logging.Logger;
 import nl.freelist.data.Repository;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
-import nl.freelist.domain.entities.Resource;
+import nl.freelist.domain.entities.Person;
 import nl.freelist.domain.events.ResourceCreatedEvent;
 import nl.freelist.domain.valueObjects.DateTimeRange;
 import nl.freelist.domain.valueObjects.Email;
 
-public class CreateResourceCommand extends Command {
+public class CreatePersonCommand extends Command {
 
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
@@ -24,7 +24,7 @@ public class CreateResourceCommand extends Command {
   Repository repository;
   DateTimeRange lifetimeDateTimeRange;
 
-  public CreateResourceCommand(
+  public CreatePersonCommand(
       Email ownerEmail,
       Email resourceEmail,
       DateTimeRange lifetimeDateTimeRange,
@@ -41,9 +41,9 @@ public class CreateResourceCommand extends Command {
 
   @Override
   public Result execute() {
-    LOGGER.log(Level.INFO, "Executing CreateResourceCommand");
-//    Todo: make it possible to add resources from UI - for now only one default resource anonymous@freelist.nl on initial startup
-    Resource resource = Resource.Create();
+    LOGGER.log(Level.INFO, "Executing CreatePersonCommand");
+//    Todo: make it possible to add resources from UI - for now only one default person anonymous@freelist.nl on initial startup
+    Person person = Person.Create();
     ResourceCreatedEvent resourceCreatedEvent =
         ResourceCreatedEvent.Create(
             OffsetDateTime.now(ZoneOffset.UTC),
@@ -52,10 +52,10 @@ public class CreateResourceCommand extends Command {
             ownerUuid.toString(),
             resourceUuid.toString(),
             lifetimeDateTimeRange,
-            0 //Todo: remove and add check in Resource.applyEvent
+            0 //Todo: remove and add check in Person.applyEvent
         );
-    resource.applyEvent(resourceCreatedEvent);
-    repository.insert(resource);
+    person.applyEvent(resourceCreatedEvent);
+    repository.insert(person);
     //Todo: log if not successful + return false Result object
     return Result.Create(true, null, "", "");
   }

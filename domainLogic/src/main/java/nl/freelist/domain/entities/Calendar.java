@@ -7,7 +7,7 @@ import nl.freelist.domain.valueObjects.Appointment;
 import nl.freelist.domain.valueObjects.DateTimeRange;
 
 public class Calendar { // Calendar has a history you want to track so it can't be a value object
-  // , it's an entity (with no visibility on outside? Should it have events?) - or is it just internal part of Resource...?
+  // , it's an entity (with no visibility on outside? Should it have events?) - or is it just internal part of Person...?
 
   private final List<Appointment> appointmentList;
   private final UUID calendarUuid;
@@ -33,11 +33,11 @@ public class Calendar { // Calendar has a history you want to track so it can't 
     this.lastScheduledAppointmentPosition = lastScheduledAppointmentPosition;
     this.numberOfProblems = 0;
     this.numberOfReschedules = 0;
-    // Todo: move logic to method in Resource?
+    // Todo: move logic to method in Person?
     List<DateTimeRange> freeDateTimeRanges = new ArrayList<>();
     freeDateTimeRanges.add(resourceLifetimeDateTimeRange);
     int appointmentListSize;
-    if (appointmentList != null) { // To guard for first creation of the Calendar within Resource
+    if (appointmentList != null) { // To guard for first creation of the Calendar within Person
       appointmentListSize = appointmentList.size();
       int freeDateTimeRangesSize;
       if (freeDateTimeRanges == null) {

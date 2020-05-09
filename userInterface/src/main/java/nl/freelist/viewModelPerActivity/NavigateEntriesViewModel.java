@@ -7,7 +7,7 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
 import java.util.UUID;
-import nl.freelist.commands.CreateResourceCommand;
+import nl.freelist.commands.CreatePersonCommand;
 import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Result;
@@ -77,13 +77,13 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
       Email resourceEmail,
       DateTimeRange lifetimeDateTimeRange
   ) {
-    CreateResourceCommand createResourceCommand = new CreateResourceCommand(
+    CreatePersonCommand createPersonCommand = new CreatePersonCommand(
         ownerEmail,
         resourceEmail,
         lifetimeDateTimeRange,
         repository
     );
     CommandHandler commandHandler = new CommandHandler();
-    return commandHandler.execute(createResourceCommand);
+    return commandHandler.execute(createPersonCommand);
   }
 }

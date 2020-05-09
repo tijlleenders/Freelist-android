@@ -17,7 +17,7 @@ import nl.freelist.data.dto.ViewModelEvent;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.entities.Calendar;
 import nl.freelist.domain.entities.Entry;
-import nl.freelist.domain.entities.Resource;
+import nl.freelist.domain.entities.Person;
 import nl.freelist.domain.events.EntryCreatedEvent;
 import nl.freelist.domain.events.EntryDurationChangedEvent;
 import nl.freelist.domain.events.EntryEndDateTimeChangedEvent;
@@ -43,17 +43,17 @@ public class Repository {
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
   }
 
-  public List<sqlBundle> insert(Resource resource) { //Todo: fix like insert(entry)
-    Log.d(TAG, "Repository insert called with entry " + resource.getUuid());
+  public List<sqlBundle> insert(Person person) { //Todo: fix like insert(entry)
+    Log.d(TAG, "Repository insert called with entry " + person.getUuid());
 
     List<sqlBundle> sqlBundleList = new ArrayList<>();
 
     int lastSavedEventSequenceNumber =
-        eventDatabaseHelper.selectLastSavedEventSequenceNumber(resource.getUuid().toString());
+        eventDatabaseHelper.selectLastSavedEventSequenceNumber(person.getUuid().toString());
     Log.d(TAG, "lastSavedEventSequenceNumber = " + lastSavedEventSequenceNumber);
 
     List<Event> newEventsToSave =
-        resource.getListOfEventsWithSequenceHigherThan(lastSavedEventSequenceNumber);
+        person.getListOfEventsWithSequenceHigherThan(lastSavedEventSequenceNumber);
     Log.d(TAG, "newEventsToSave list with size " + newEventsToSave.size() + " retrieved.");
 
     int eventSequenceNumberForQuery = lastSavedEventSequenceNumber;
@@ -62,13 +62,13 @@ public class Repository {
       try {
         sqlBundleList.addAll(
             eventDatabaseHelper.getInitialQueriesForEvent(
-                "resource",
+                "person",
                 eventSequenceNumberForQuery,
                 event)
         );
         eventSequenceNumberForQuery += 1;
       } catch (Exception e) {
-        Log.d(TAG, "Error while executing insert(Resource resource):" + e.toString());
+        Log.d(TAG, "Error while executing insert(Person person):" + e.toString());
       }
     }
     return sqlBundleList;
@@ -84,7 +84,7 @@ public class Repository {
     return eventDatabaseHelper.getEntryWithSavedEventsById(uuid);
   }
 
-  public Resource getResourceWithSavedEventsById(String uuid) {
+  public Person getResourceWithSavedEventsById(String uuid) {
     return eventDatabaseHelper.getResourceWithSavedEventsById(uuid);
   }
 
@@ -222,9 +222,9 @@ public class Repository {
   }
 
   public List<ViewModelCalendarOption> getAllPrioOptions(String entryUuid, String resourceUuid) {
-    Resource resource = getResourceWithSavedEventsById(resourceUuid);
+    Person person = getResourceWithSavedEventsById(resourceUuid);
     Entry entry = getEntryWithSavedEventsById(entryUuid);
-    List<Calendar> allCalendars = resource.getSchedulingOptions(entry);
+    List<Calendar> allCalendars = person.getSchedulingOptions(entry);
     List<ViewModelCalendarOption> allPrioEntries = new ArrayList<>();
     for (Calendar calendar : allCalendars) {
       allPrioEntries.add(getViewModelCalendarOptionFrom(calendar));
