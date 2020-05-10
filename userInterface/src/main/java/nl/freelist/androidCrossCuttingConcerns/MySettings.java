@@ -3,6 +3,7 @@ package nl.freelist.androidCrossCuttingConcerns;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import java.util.UUID;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 
 public class MySettings {
@@ -13,11 +14,13 @@ public class MySettings {
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
   }
 
-  public String getUuid() {
-    return sharedPreferences.getString(Constants.SETTINGS_USER_UUID, null);
+  public String getId() {
+    return sharedPreferences.getString(Constants.SETTINGS_USER_UUID, UUID
+        .nameUUIDFromBytes("anonymous@freelist.nl".getBytes()).toString());
   }
 
-  public String getResourceUuid() {
-    return sharedPreferences.getString(Constants.SETTINGS_RESOURCE_UUID, null);
+  public String getPersonUuid() {
+    return sharedPreferences.getString(Constants.SETTINGS_PERSON_UUID, UUID
+        .nameUUIDFromBytes("anonymous@freelist.nl".getBytes()).toString());
   }
 }

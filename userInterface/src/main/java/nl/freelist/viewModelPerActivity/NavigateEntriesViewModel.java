@@ -7,19 +7,12 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
 import java.util.UUID;
-import nl.freelist.commands.CreatePersonCommand;
 import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
-import nl.freelist.domain.crossCuttingConcerns.Result;
-import nl.freelist.domain.useCases.CommandHandler;
-import nl.freelist.domain.valueObjects.DateTimeRange;
-import nl.freelist.domain.valueObjects.Email;
-
-// Todo: rename (parent)Uuid to (parent)entryId
 
 public class NavigateEntriesViewModel extends AndroidViewModel {
 
-  private String parentUuid;
+  private String parentId;
   private Repository repository;
 
   public NavigateEntriesViewModel(@NonNull Application application) {
@@ -27,13 +20,14 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
     repository = new Repository(getApplication().getApplicationContext());
   }
 
-  public void setParentUuid(String parentUuid) {
-    this.parentUuid = parentUuid;
+  public Observable<List<ViewModelEntry>> getAllChildrenEntries() {
+    Observable<List<ViewModelEntry>> viewModelEntryList = Observable
+        .fromCallable(
+            () -> repository.getAllViewModelEntriesForParent(UUID.fromString(parentId)))
+        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
+    return viewModelEntryList;
   }
 
-  public String getParentUuid() {
-    return parentUuid;
-  }
 
   @Override
   protected void onCleared() {
@@ -41,24 +35,16 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
     super.onCleared();
   }
 
-  public Observable<List<ViewModelEntry>> getAllChildrenEntries() {
-    Observable<List<ViewModelEntry>> viewModelEntryList = Observable
-        .fromCallable(
-            () -> repository.getAllViewModelEntriesForParent(UUID.fromString(parentUuid)))
-        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
-    return viewModelEntryList;
-  }
-
   public Observable<List<ViewModelEntry>> getBreadcrumbEntries() {
     Observable<List<ViewModelEntry>> viewModelEntryList = Observable
         .fromCallable(
-            () -> repository.getBreadcrumbViewModelEntries(UUID.fromString(parentUuid)))
+            () -> repository.getBreadcrumbViewModelEntries(UUID.fromString(parentId)))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return viewModelEntryList;
   }
 
-  public void updateParentUuid(String parentUuid) {
-    this.parentUuid = parentUuid;
+  public String getParentId() {
+    return parentId;
   }
 
   public Observable<Boolean> deleteAllEntriesFromRepository() {
@@ -72,18 +58,7 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
     // Todo: implement with UseCase
   }
 
-  public Result createResource(
-      Email ownerEmail,
-      Email resourceEmail,
-      DateTimeRange lifetimeDateTimeRange
-  ) {
-    CreatePersonCommand createPersonCommand = new CreatePersonCommand(
-        ownerEmail,
-        resourceEmail,
-        lifetimeDateTimeRange,
-        repository
-    );
-    CommandHandler commandHandler = new CommandHandler();
-    return commandHandler.execute(createPersonCommand);
-  }
+  public void setParentId(String parentId) {
+    this.parentId = parentId;
+  } // not in constructor as this changes while navigating and ViewModel does not have to be re-created
 }

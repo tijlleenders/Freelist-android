@@ -2,171 +2,79 @@ package nl.freelist.domain.aggregates.person;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import nl.freelist.domain.events.Event;
+import nl.freelist.domain.events.person.calendar.CalendarCreatedEvent;
 import nl.freelist.domain.valueObjects.Appointment;
 import nl.freelist.domain.valueObjects.DateTimeRange;
 
 public class Calendar { // Calendar has a history you want to track so it can't be a value object
-  // , it's an entity (with no visibility on outside? Should it have events?) - or is it just internal part of Person...?
 
-  private final List<Appointment> appointmentList;
-  private final UUID calendarUuid;
-  private final int resourceLastAppliedEventSequenceNumber;
-  private final int entryLastAppliedEventSequenceNumber;
-  private final int lastScheduledAppointmentPosition;
-  private final DateTimeRange entryLastScheduledDateTimeRange;
-  private final int numberOfProblems;
-  private final int numberOfReschedules;
+  // , it's an entity (with no visibility on outside? Should it have events?) - or is it just
+  // internal part of Person...?
+  private static final Logger LOGGER = Logger.getLogger(Calendar.class.getName());
 
-  private Calendar(
-      List<Appointment> appointmentList,
-      UUID calendarUuid,
-      int resourceLastAppliedEventSequenceNumber,
-      int entryLastAppliedEventSequenceNumber,
-      DateTimeRange resourceLifetimeDateTimeRange,
-      Calendar calendarToCompareWith,
-      int lastScheduledAppointmentPosition) {
-    this.appointmentList = appointmentList;
-    this.calendarUuid = calendarUuid;
-    this.resourceLastAppliedEventSequenceNumber = resourceLastAppliedEventSequenceNumber;
-    this.entryLastAppliedEventSequenceNumber = entryLastAppliedEventSequenceNumber;
-    this.lastScheduledAppointmentPosition = lastScheduledAppointmentPosition;
-    this.numberOfProblems = 0;
-    this.numberOfReschedules = 0;
+  private List<Event> eventList = new ArrayList<>();
+  private List<Appointment> appointmentList = new ArrayList<>();
+  private List<DateTimeRange> freeDateTimeRanges = new ArrayList<>();
+  private String calendarId;
+  private int lastAppliedEventSequenceNumber;
+
+  private Calendar() {
     // Todo: move logic to method in Person?
-    List<DateTimeRange> freeDateTimeRanges = new ArrayList<>();
-    freeDateTimeRanges.add(resourceLifetimeDateTimeRange);
-    int appointmentListSize;
-    if (appointmentList != null) { // To guard for first creation of the Calendar within Person
-      appointmentListSize = appointmentList.size();
-      int freeDateTimeRangesSize;
-      if (freeDateTimeRanges == null) {
-        freeDateTimeRangesSize = 0;
-      } else {
-        freeDateTimeRangesSize = freeDateTimeRanges.size();
-      }
-
-      for (int appointmentPosition = 0;
-          appointmentPosition < appointmentListSize;
-          appointmentPosition++) {
-        boolean noSlotFound = true;
-        for (int freeDateTimeRangePosition = 0;
-            freeDateTimeRangePosition < freeDateTimeRangesSize;
-            freeDateTimeRangePosition++) {
-          if (appointmentListSize == 0) {
-            // do nothing
-          } else {
-            if (freeDateTimeRanges.get(freeDateTimeRangePosition).getDuration()
-                > appointmentList.get(appointmentPosition).getDuration()) {
-              // Yes, it fits, so schedule it
-              DateTimeRange scheduledDateTimeRange =
-                  DateTimeRange.Create(
-                      freeDateTimeRanges.get(freeDateTimeRangePosition).getStartDateTime(),
-                      freeDateTimeRanges
-                          .get(freeDateTimeRangePosition)
-                          .getStartDateTime()
-                          .plusSeconds(appointmentList.get(appointmentPosition).getDuration()));
-              // replace Appointment with new one that has scheduledDTR
-              appointmentList.add(
-                  appointmentPosition,
-                  Appointment.Create(
-                      appointmentPosition,
-                      appointmentList.get(appointmentPosition).getEntryId(),
-                      appointmentList.get(appointmentPosition).getDuration(),
-                      false,
-                      scheduledDateTimeRange));
-              appointmentList.remove(appointmentPosition + 1);
-              // reduce freeTime ranges
-              freeDateTimeRanges.add( // Todo: replace instead of add+remove
-                  freeDateTimeRangePosition,
-                  DateTimeRange.Create(
-                      freeDateTimeRanges
-                          .get(freeDateTimeRangePosition)
-                          .getStartDateTime()
-                          .plusSeconds(appointmentList.get(appointmentPosition).getDuration()),
-                      freeDateTimeRanges.get(freeDateTimeRangePosition).getEndDateTime()));
-              freeDateTimeRanges.remove(freeDateTimeRangePosition + 1);
-              noSlotFound = false;
-            }
-          }
-        }
-        if (noSlotFound) {
-          appointmentList.add(
-              appointmentPosition,
-              Appointment.Create(
-                  appointmentPosition,
-                  appointmentList.get(appointmentPosition).getEntryId(),
-                  appointmentList.get(appointmentPosition).getDuration(),
-                  false,
-                  null));
-          appointmentList.remove(appointmentPosition + 1);
-        }
-      }
-    }
-    if (appointmentList != null
-        && appointmentList.get(lastScheduledAppointmentPosition).getScheduledDTR() != null) {
-      entryLastScheduledDateTimeRange =
-          appointmentList.get(lastScheduledAppointmentPosition).getScheduledDTR();
-    } else {
-      entryLastScheduledDateTimeRange = null;
-    }
+    lastAppliedEventSequenceNumber = -1;
+    LOGGER.log(
+        Level.INFO,
+        "Calendar initiated without CreateCalendar event.");
   }
 
-  public static Calendar Create(
-      List<Appointment> appointmentList,
-      UUID resourceUuid,
-      int resourceLastAppliedEventSequenceNumber,
-      int entryLastAppliedEventSequenceNumber,
-      DateTimeRange resourceLifetimeDateTimeRange,
-      Calendar calendarToCompareWith,
-      int lastScheduledAppointmentPosition) {
+  public static Calendar Create() {
     // Do checking
-    return new Calendar(
-        appointmentList,
-        resourceUuid,
-        resourceLastAppliedEventSequenceNumber,
-        entryLastAppliedEventSequenceNumber,
-        resourceLifetimeDateTimeRange,
-        calendarToCompareWith,
-        lastScheduledAppointmentPosition);
+    return new Calendar();
   }
 
-  public int getNumberOfProblems() {
-    return numberOfProblems;
-  }
+  public void applyEvent(Event event) {
+    // Todo: maybe move every applyEvent to it's own function with subclass parameter?
 
-  public int getNumberOfReschedules() {
-    return numberOfReschedules;
-  }
-
-  public UUID getCalendarUuid() {
-    return calendarUuid;
-  }
-
-  public int getNumberOfAppointments() {
-    if (appointmentList == null) {
-      return 0;
+    if (event == null) {
+      return;
     }
-    return appointmentList.size();
+    String eventClass = event.getClass().getSimpleName();
+    switch (eventClass) {
+      case "CalendarCreatedEvent":
+        if (lastAppliedEventSequenceNumber != -1) {
+          LOGGER
+              .log(Level.WARNING, "CalendarCreatedEvent applied to Calendar that already exists!");
+          break;
+        }
+        CalendarCreatedEvent calendarCreatedEvent = (CalendarCreatedEvent) event;
+        this.calendarId = calendarCreatedEvent.getAggregateId();
+        eventList.add(event);
+        lastAppliedEventSequenceNumber += 1;
+        LOGGER.log(Level.INFO, "CalendarCreatedEvent applied");
+        break;
+      default:
+        LOGGER.log(
+            Level.WARNING,
+            "Event can't be applied to calendar " + calendarId + " ; event type not recognized");
+        break;
+    }
   }
 
-  public List<Appointment> getAppointments() {
-    return appointmentList;
+  public List<Event> getListOfEventsWithSequenceHigherThan(int fromEventSequenceNumber) {
+    fromEventSequenceNumber += 1;
+    return eventList.subList(fromEventSequenceNumber, eventList.size());
   }
 
-  public int getResourceLastAppliedEventSequenceNumber() {
-    return resourceLastAppliedEventSequenceNumber;
+  public void applyEvents(List<Event> eventList) {
+    for (Event event : eventList) {
+      applyEvent(event);
+    }
   }
 
-  public String getLastScheduledEntryUuidString() {
-    return appointmentList.get(lastScheduledAppointmentPosition).getEntryId().toString();
+  public int getLastAppliedEventSequenceNumber() {
+    return lastAppliedEventSequenceNumber;
   }
 
-  public DateTimeRange getEntryLastScheduledDateTimeRange() {
-    return entryLastScheduledDateTimeRange;
-  }
-
-  public int getEntryLastAppliedEventSequenceNumber() {
-    return entryLastAppliedEventSequenceNumber;
-  }
 }

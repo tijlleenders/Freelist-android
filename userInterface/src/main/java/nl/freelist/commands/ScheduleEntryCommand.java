@@ -6,10 +6,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.freelist.data.Repository;
 import nl.freelist.data.sqlBundle;
-import nl.freelist.domain.commands.Command;
-import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.aggregates.entry.Entry;
 import nl.freelist.domain.aggregates.person.Person;
+import nl.freelist.domain.commands.Command;
+import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.events.Event;
 
 public class ScheduleEntryCommand extends Command {
@@ -17,7 +17,6 @@ public class ScheduleEntryCommand extends Command {
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
   String entryUuid;
-  String resourceUuid;
   Repository repository;
 
   public ScheduleEntryCommand(String entryUuid, Repository repository) {
@@ -31,7 +30,7 @@ public class ScheduleEntryCommand extends Command {
 
     Entry entry = repository.getEntryWithSavedEventsById(entryUuid);
 
-    Person person = repository.getResourceWithSavedEventsById(entry.getOwnerUuid().toString());
+    Person person = repository.getPersonWithSavedEventsById(entry.getOwnerUuid().toString());
 
 //    EntryScheduledEvent entryScheduledEvent = EntryScheduledEvent
 //        .Create(
@@ -42,7 +41,7 @@ public class ScheduleEntryCommand extends Command {
 //        );
 
     //Todo: create second event for entry (events are about aggregate state changes, so same event can't be shared by two aggregates)
-    // the person state change triggers the entry state change (event added to list) in the same transaction
+    // the person-calendar state change triggers the entry state change (event added to list) in the same transaction
 
     //How to know if it fails?
     List<sqlBundle> sqlBundleList = new ArrayList<>();

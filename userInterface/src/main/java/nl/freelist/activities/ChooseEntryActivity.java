@@ -52,7 +52,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
     initializeSharedPreferences();
 
     //always reset navigateEntriesViewModel at root to avoid choosing itself or descendants as a parent (infinite loop)
-    navigateEntriesViewModel.updateParentUuid(myUuid);
+    navigateEntriesViewModel.setParentId(myUuid);
 
     Bundle bundle = getIntent().getExtras();
     if (bundle != null) {
@@ -73,7 +73,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
 
   private void initializeSharedPreferences() {
     MySettings mySettings = new MySettings(this);
-    myUuid = mySettings.getUuid();
+    myUuid = mySettings.getId();
   }
 
   private void updateRecyclerView() {
@@ -141,7 +141,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
     Log.d(TAG, "onItemClick called.");
     int viewType = adapter.getItemViewType(position);
     String parentToSet = adapter.getEntryAt(position).getUuid();
-    navigateEntriesViewModel.updateParentUuid(parentToSet);
+    navigateEntriesViewModel.setParentId(parentToSet);
     updateRecyclerView();
     adapter.setCurrentUuid(parentToSet);
   }

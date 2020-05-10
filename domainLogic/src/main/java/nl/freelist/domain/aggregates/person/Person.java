@@ -5,75 +5,33 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import nl.freelist.domain.aggregates.entry.Entry;
-import nl.freelist.domain.events.person.PersonCreatedEvent;
-import nl.freelist.domain.events.entry.EntryScheduledEvent;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.valueObjects.Appointment;
-import nl.freelist.domain.valueObjects.DateTimeRange;
+import nl.freelist.domain.events.entry.EntryScheduledEvent;
+import nl.freelist.domain.events.person.PersonCreatedEvent;
 import nl.freelist.domain.valueObjects.Email;
 
 public class Person {
 
   private static final Logger LOGGER = Logger.getLogger(Person.class.getName());
 
-  private Email ownerEmail;
-  private Email resourceEmail;
+  private Email email;
   private UUID uuid;
   private int lastAppliedEventSequenceNumber;
   private List<Event> eventList = new ArrayList<>();
-  private DateTimeRange lifetimeDateTimeRange;
-  private nl.freelist.domain.aggregates.person.Calendar calendar;
+  private Calendar calendar;
 
-  private Person(
-  ) {
+  // Todo: add option for intelligent scheduling monte-carle reshuffle all prio positions
+
+  private Person() {
     lastAppliedEventSequenceNumber = -1;
-    LOGGER.log(Level.INFO,
-        "Person created with lastAppliedEventSequenceNumber "
-            + lastAppliedEventSequenceNumber);
+    LOGGER.log(
+        Level.INFO,
+        "Person initiated without any events applied.");
   }
 
-  public static Person Create(
-  ) {
-    //Todo: validation as static method?
+  public static Person Create() {
+    // Todo: validation as static method?
     return new Person();
-  }
-
-
-  public List<nl.freelist.domain.aggregates.person.Calendar> getSchedulingOptions(Entry entry) {
-    List<nl.freelist.domain.aggregates.person.Calendar> calendarOptionList = new ArrayList<>();
-    List<Appointment> currentAppointmentList = calendar.getAppointments();
-    int currentAppointmentListSize;
-    if (currentAppointmentList == null) {
-      currentAppointmentListSize = 0;
-    } else {
-      currentAppointmentListSize = currentAppointmentList.size();
-    }
-    //loop through all possible prio positions
-    for (int prio = 0; prio < currentAppointmentListSize + 1; prio++) {
-      LOGGER.log(Level.INFO, "prio loop:" + prio);
-      //Add appointment to prio position corresponding to loop
-      Appointment appointmentToSchedule;
-      appointmentToSchedule = Appointment
-          .Create(prio, entry.getUuid(), entry.getDuration(), false, null);
-      List<Appointment> tempAppointmentList = new ArrayList<>();
-      if (currentAppointmentList != null) {
-        tempAppointmentList.addAll(currentAppointmentList);
-      }
-      tempAppointmentList.add(prio, appointmentToSchedule);
-      nl.freelist.domain.aggregates.person.Calendar calendarOption;
-      calendarOption = nl.freelist.domain.aggregates.person.Calendar.Create(
-          tempAppointmentList,
-          uuid,
-          lastAppliedEventSequenceNumber,
-          entry.getLastAppliedEventSequenceNumber(),
-          lifetimeDateTimeRange,
-          calendar,
-          prio
-      );
-      calendarOptionList.add(calendarOption);
-    }
-    return calendarOptionList;
   }
 
   public void applyEvents(List<Event> eventList) {
@@ -92,54 +50,32 @@ public class Person {
     String eventClass = event.getClass().getSimpleName();
     switch (eventClass) {
       case "PersonCreatedEvent":
-        LOGGER.log(Level.INFO,
-            "PersonCreatedEvent applied to resource");
+        LOGGER.log(Level.INFO, "PersonCreatedEvent applied to person");
         PersonCreatedEvent personCreatedEvent = (PersonCreatedEvent) event;
         this.uuid = UUID.fromString(personCreatedEvent.getAggregateId());
-        this.ownerEmail = personCreatedEvent.getOwnerEmail();
-        this.resourceEmail = personCreatedEvent.getResourceEmail();
-        this.lifetimeDateTimeRange = personCreatedEvent.getLifetimeDateTimeRange();
-        calendar = nl.freelist.domain.aggregates.person.Calendar
-            .Create(
-                null,
-                uuid,
-                lastAppliedEventSequenceNumber,
-                -1,
-                lifetimeDateTimeRange,
-                null,
-                -1);
-
+        calendar = Calendar.Create();
         break;
       case "EntryScheduledEvent":
-        LOGGER.log(Level.INFO,
-            "EntryScheduledEvent applied to resource");
+        LOGGER.log(Level.INFO, "EntryScheduledEvent applied to person");
         EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
         if (!entryScheduledEvent.getResourceUuid().equals(uuid.toString())) {
-          LOGGER.log(Level.SEVERE, "EntryScheduledEvent can't be applied to resource.");
+          LOGGER.log(Level.SEVERE, "EntryScheduledEvent can't be applied to person.");
           break;
         }
         calendar = entryScheduledEvent.getCalendar();
         break;
       default:
-        LOGGER.log(Level.SEVERE,
-            "Event can't be applied to entry " + uuid.toString() + " ; event type not recognized");
+        LOGGER.log(
+            Level.SEVERE,
+            "Event can't be applied to person " + uuid.toString() + " ; event type not recognized");
         break;
     }
     eventList.add(event);
     lastAppliedEventSequenceNumber += 1;
-
   }
 
-  public DateTimeRange getLifetimeDateTimeRange() {
-    return lifetimeDateTimeRange;
-  }
-
-  public Email getOwnerEmail() {
-    return ownerEmail;
-  }
-
-  public Email getResourceEmail() {
-    return resourceEmail;
+  public Email getEmail() {
+    return email;
   }
 
   public UUID getUuid() {
@@ -154,7 +90,4 @@ public class Person {
     return eventList;
   }
 
-  public Calendar getCalendar() {
-    return calendar;
-  }
 }

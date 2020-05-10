@@ -50,7 +50,7 @@ public class SearchActivity extends AppCompatActivity {
 
   private void initializeSharedPreferences() {
     MySettings mySettings = new MySettings(this);
-    myUuid = mySettings.getUuid();
+    myUuid = mySettings.getId();
   }
 
   private void initializeViews() {

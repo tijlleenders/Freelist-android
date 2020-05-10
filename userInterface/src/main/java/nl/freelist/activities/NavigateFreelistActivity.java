@@ -1,12 +1,9 @@
 package nl.freelist.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,15 +20,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import io.reactivex.schedulers.Schedulers;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
-import java.util.UUID;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.valueObjects.DateTimeRange;
-import nl.freelist.domain.valueObjects.Email;
 import nl.freelist.freelist.R;
 import nl.freelist.recyclerviewHelpers.FreelistEntryAdapter;
 import nl.freelist.recyclerviewHelpers.ItemClickListener;
@@ -40,7 +32,7 @@ import nl.freelist.viewModelPerActivity.NavigateEntriesViewModel;
 public class NavigateFreelistActivity extends AppCompatActivity implements ItemClickListener {
 
   private static final String TAG = "NavigateFreelistActivity";
-  private String myUuid;
+  private String personUuid;
 
   private NavigateEntriesViewModel navigateEntriesViewModel;
   private FreelistEntryAdapter adapter;
@@ -72,14 +64,10 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     navigateEntriesViewModel = ViewModelProviders.of(this)
         .get(NavigateEntriesViewModel.class);
 
-    try {
-      initializeSharedPreferences();
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.exit(-1);
-    }
+    MySettings mySettings = new MySettings(this);
+    personUuid = mySettings.getId();
 
-    navigateEntriesViewModel.setParentUuid(myUuid);
+    navigateEntriesViewModel.setParentId(personUuid);
 
     initializeViews();
 
@@ -90,42 +78,6 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     setupSwipeActions();
   }
 
-  private void initializeSharedPreferences()
-      throws Exception {
-    MySettings mySettings = new MySettings(this);
-    SharedPreferences sharedPreferences;
-    Editor editor;
-    sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-    //Todo: possible to use MySetting without having to pass the application context to it?
-    //use getSharedPreferences(String name, int mode) rather than getPreferences (int mode)
-
-    //If Person not yet set, create (and persist) Person with default anonymous@freelist.nl
-    if (mySettings.getResourceUuid() == null) {
-      if (!sharedPreferences.contains(Constants.SETTINGS_USER_UUID)) {
-        editor = sharedPreferences.edit();
-        Email email = new Email("anonymous@freelist.nl");
-        DateTimeRange lifetimeDateTimeRange = DateTimeRange.Create(
-            OffsetDateTime.now(ZoneOffset.UTC),
-            OffsetDateTime.now(ZoneOffset.UTC).plusYears(1));
-
-        editor.putString(
-            Constants.SETTINGS_USER_UUID,
-            UUID.nameUUIDFromBytes(email.getEmailString().getBytes()).toString());
-        editor.putString(
-            Constants.SETTINGS_RESOURCE_UUID,
-            UUID.nameUUIDFromBytes(email.getEmailString().getBytes()).toString());
-        //Make sure Person is created + persisted before committing to SharedPreferences
-        //Not asynchronous as it is blocking for application to continue
-        if (!navigateEntriesViewModel.createResource(email, email, lifetimeDateTimeRange)
-            .isSuccess()) {
-          throw new Exception("Couldn't create a Person");
-        }
-        editor.commit();
-      }
-    }
-    myUuid = mySettings.getUuid();
-  }
 
   private void initializeViews() {
     Log.d(TAG, "initializeViews called.");
@@ -180,7 +132,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
             intent.putExtra(
                 Constants.EXTRA_REQUEST_TYPE_ADD, Constants.ADD_ENTRY_REQUEST);
             intent.putExtra(
-                Constants.EXTRA_ENTRY_PARENT_ID, navigateEntriesViewModel.getParentUuid());
+                Constants.EXTRA_ENTRY_PARENT_ID, navigateEntriesViewModel.getParentId());
             startActivityForResult(intent, Constants.ADD_ENTRY_REQUEST);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }
@@ -251,7 +203,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     switch (entriesSize) {
       case 1:
         breadcrumb0.setText("Home");
-        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(myUuid));
+        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(personUuid));
         breadcrumbDivider_0_1.setText(">");
         breadcrumb1.setText(entries.get(0).getTitle());
         breadcrumb1
@@ -260,7 +212,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
         breadcrumb2.setText("");
         break;
       case 2:
-        if (entries.get(0).getParentUuid().equals(myUuid)) {
+        if (entries.get(0).getParentUuid().equals(personUuid)) {
           breadcrumb0.setText("Home");
         } else {
           breadcrumb0.setText("...");
@@ -278,7 +230,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
         break;
       default:
         breadcrumb0.setText("Home");
-        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(myUuid));
+        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(personUuid));
         breadcrumbDivider_0_1.setText("");
         breadcrumb1.setText("");
         breadcrumbDivider_1_2.setText("");
@@ -395,7 +347,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   }
 
   public void updateRecyclerViewWithParentUuid(String parentToSet) {
-    navigateEntriesViewModel.updateParentUuid(parentToSet);
+    navigateEntriesViewModel.setParentId(parentToSet);
     updateView();
     adapter.setCurrentId(parentToSet);
   }
@@ -404,7 +356,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   public void onItemClick(View view, int position) {
     Log.d(TAG, "onItemClick called.");
     String parentToSet = adapter.getEntryAt(position).getUuid();
-    navigateEntriesViewModel.updateParentUuid(parentToSet);
+    navigateEntriesViewModel.setParentId(parentToSet);
     updateView();
     adapter.setCurrentId(parentToSet);
   }

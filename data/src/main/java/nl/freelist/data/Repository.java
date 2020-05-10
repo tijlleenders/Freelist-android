@@ -14,10 +14,10 @@ import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelCalendarOption;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.dto.ViewModelEvent;
-import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.aggregates.person.Calendar;
 import nl.freelist.domain.aggregates.entry.Entry;
 import nl.freelist.domain.aggregates.person.Person;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
+import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.entry.EntryCreatedEvent;
 import nl.freelist.domain.events.entry.EntryDurationChangedEvent;
 import nl.freelist.domain.events.entry.EntryEndDateTimeChangedEvent;
@@ -26,7 +26,6 @@ import nl.freelist.domain.events.entry.EntryParentChangedEvent;
 import nl.freelist.domain.events.entry.EntryScheduledEvent;
 import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
-import nl.freelist.domain.events.Event;
 
 public class Repository {
   //Todo: transform repository to an interface which EventDatabasehelper implements
@@ -84,8 +83,8 @@ public class Repository {
     return eventDatabaseHelper.getEntryWithSavedEventsById(uuid);
   }
 
-  public Person getResourceWithSavedEventsById(String uuid) {
-    return eventDatabaseHelper.getResourceWithSavedEventsById(uuid);
+  public Person getPersonWithSavedEventsById(String uuid) {
+    return eventDatabaseHelper.getPersonWithSavedEventsById(uuid);
   }
 
   public ViewModelEntry getViewModelEntryById(UUID uuid) {
@@ -206,29 +205,32 @@ public class Repository {
     return viewModelEventListSorted;
   }
 
-  public ViewModelCalendarOption getViewModelCalendarOptionFrom(
-      Calendar calendar) { //Todo: refactor to go through aggregate root
-    ViewModelCalendarOption viewModelCalendarOption = new ViewModelCalendarOption(
-        calendar.getNumberOfProblems(),
-        calendar.getNumberOfReschedules(),
-        calendar.getCalendarUuid().toString(),
-        calendar.getLastScheduledEntryUuidString(),
-        calendar.getEntryLastScheduledDateTimeRange(),
-        calendar.getResourceLastAppliedEventSequenceNumber(),
-        calendar.getEntryLastAppliedEventSequenceNumber(),
-        calendar
-    );
-    return viewModelCalendarOption;
-  }
+  // Todo: refactor later, options not in MVP
+//  public ViewModelCalendarOption getViewModelCalendarOptionFrom(
+//      Calendar calendar) { //Todo: refactor to go through aggregate root
+//    ViewModelCalendarOption viewModelCalendarOption = new ViewModelCalendarOption(
+//        calendar.getNumberOfProblems(),
+//        calendar.getNumberOfReschedules(),
+//        calendar.getCalendarUuid().toString(),
+//        calendar.getLastScheduledEntryUuidString(),
+//        calendar.getEntryLastScheduledDateTimeRange(),
+//        calendar.getResourceLastAppliedEventSequenceNumber(),
+//        calendar.getEntryLastAppliedEventSequenceNumber(),
+//        calendar
+//    );
+//    return viewModelCalendarOption;
+//  }
 
   public List<ViewModelCalendarOption> getAllPrioOptions(String entryUuid, String resourceUuid) {
-    Person person = getResourceWithSavedEventsById(resourceUuid);
+    Person person = getPersonWithSavedEventsById(resourceUuid);
     Entry entry = getEntryWithSavedEventsById(entryUuid);
-    List<Calendar> allCalendars = person.getSchedulingOptions(entry);
+//    List<Calendar> allCalendars = person.getSchedulingOptions(entry);
     List<ViewModelCalendarOption> allPrioEntries = new ArrayList<>();
-    for (Calendar calendar : allCalendars) {
-      allPrioEntries.add(getViewModelCalendarOptionFrom(calendar));
-    }
+//    for (Calendar calendar : allCalendars) {
+//      allPrioEntries.add(getViewModelCalendarOptionFrom(calendar));
+//    }
     return allPrioEntries;
   }
+
+
 }

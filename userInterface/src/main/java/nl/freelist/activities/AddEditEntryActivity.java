@@ -40,9 +40,9 @@ public class AddEditEntryActivity extends AppCompatActivity
 
   private static final String TAG = "AddEditEntryActivity";
 
-  private String uuid; // Todo: why ever store a UUID as a string, if not in data persistence layer?
-  private String parentUuid;
-  private String defaultUuid;
+  private String id; // Todo: make id a value object
+  private String parentId;
+  private String defaultId;
   private int lastSavedEventSequenceNumber = -1;
   private int saveCommandsInProgress = 0;
 
@@ -116,7 +116,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     Bundle bundle = getIntent().getExtras();
 
     MySettings mySettings = new MySettings(this);
-    parentUuid = defaultUuid = mySettings.getUuid();
+    parentId = defaultId = mySettings.getId();
 
     preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowMondays", true);
     preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowTuesdays", true);
@@ -133,12 +133,12 @@ public class AddEditEntryActivity extends AppCompatActivity
     durationBundle.putLong("duration", duration);
 
     if (bundle != null && bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
-      parentUuid = bundle.getString(Constants.EXTRA_ENTRY_PARENT_ID);
+      parentId = bundle.getString(Constants.EXTRA_ENTRY_PARENT_ID);
     }
 
     if (bundle != null && bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
-      uuid = bundle.getString(Constants.EXTRA_ENTRY_ID);
-      initializeForEditExisting(uuid);
+      id = bundle.getString(Constants.EXTRA_ENTRY_ID);
+      initializeForEditExisting(id);
     } else if (bundle != null && bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) { // do add
       // setup
       initializeForAddNew(bundle);
@@ -160,9 +160,9 @@ public class AddEditEntryActivity extends AppCompatActivity
 
     SaveEntryCommand saveEntryCommand = // Todo: add parent
         new SaveEntryCommand(
-            uuid,
-            parentUuid,
-            defaultUuid,
+            id,
+            parentId,
+            defaultId,
             title,
             startDateTime,
             duration,
@@ -204,7 +204,7 @@ public class AddEditEntryActivity extends AppCompatActivity
                         //                            "Saved!",
                         //                            Toast.LENGTH_SHORT)
                         //                            .show();
-                        initializeForEditExisting(uuid);
+                        initializeForEditExisting(id);
                       }
                     }
                   });
@@ -213,7 +213,7 @@ public class AddEditEntryActivity extends AppCompatActivity
 
   private void initializeForAddNew(Bundle bundle) {
     if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
-      uuid = UUID.randomUUID().toString();
+      id = UUID.randomUUID().toString();
     }
 
     setTitle("Add new Freelist");
@@ -369,8 +369,8 @@ public class AddEditEntryActivity extends AppCompatActivity
 
     if (requestCode == Constants.CHOOSE_PARENT_REQUEST && resultCode == RESULT_OK) {
       Bundle bundle = data.getExtras();
-      if (bundle != null && !parentUuid.equals(bundle.getString(Constants.EXTRA_ENTRY_ID))) {
-        parentUuid = bundle.getString(Constants.EXTRA_ENTRY_ID);
+      if (bundle != null && !parentId.equals(bundle.getString(Constants.EXTRA_ENTRY_ID))) {
+        parentId = bundle.getString(Constants.EXTRA_ENTRY_ID);
         saveChangedFields();
       }
     }

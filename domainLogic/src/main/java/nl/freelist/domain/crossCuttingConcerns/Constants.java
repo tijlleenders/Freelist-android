@@ -4,7 +4,7 @@ public class Constants {
 
   public static final String SETTINGS_USER_UUID = "nl.freelist.SETTINGS_USER_UUID";
 
-  public static final String SETTINGS_RESOURCE_UUID = "nl.freelist.SETTINGS_RESOURCE_UUID";
+  public static final String SETTINGS_PERSON_UUID = "nl.freelist.SETTINGS_RESOURCE_UUID";
 
   public static final String EXTRA_TITLE = "nl.freelist.EXTRA_TITLE";
 

@@ -8,16 +8,16 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.data.dto.CalendarEntry;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.gson.Converters;
-import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
 import nl.freelist.domain.aggregates.entry.Entry;
 import nl.freelist.domain.aggregates.person.Person;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
+import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
+import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.entry.EntryChildCountChangedEvent;
 import nl.freelist.domain.events.entry.EntryChildDurationChangedEvent;
 import nl.freelist.domain.events.entry.EntryCreatedEvent;
@@ -29,7 +29,6 @@ import nl.freelist.domain.events.entry.EntryPreferredDayConstraintsChangedEvent;
 import nl.freelist.domain.events.entry.EntryScheduledEvent;
 import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
-import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.person.PersonCreatedEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -156,22 +155,22 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         Entry entry = getEntryWithSavedEventsById(entryScheduledEvent.getAggregateId());
 
         ContentValues calendarContentValues2 = new ContentValues();
-        calendarContentValues2.put("entryUuid", entry.getUuid().toString());
-        calendarContentValues2.put("title", entry.getTitle());
-        calendarContentValues2.put("date", entryScheduledEvent.getCalendar()
-            .getEntryLastScheduledDateTimeRange()
-            .getStartDateTime()
-            .format(DateTimeFormatter.ISO_DATE));
-        calendarContentValues2.put("time", entryScheduledEvent.getCalendar()
-            .getEntryLastScheduledDateTimeRange()
-            .getStartDateTime()
-            .format(DateTimeFormatter.ISO_LOCAL_TIME));
-        calendarContentValues2.put("duration", entryScheduledEvent.getCalendar()
-            .getEntryLastScheduledDateTimeRange()
-            .getDuration());
-        calendarContentValues2.put("isDone", 0);
-        calendarContentValues2
-            .put("lastSavedEventSequenceNumber", eventSequenceNumberForQuery + 1);
+//        calendarContentValues2.put("entryUuid", entry.getUuid().toString());
+//        calendarContentValues2.put("title", entry.getTitle());
+//        calendarContentValues2.put("date", entryScheduledEvent.getCalendar()
+//            .getEntryLastScheduledDateTimeRange()
+//            .getStartDateTime()
+//            .format(DateTimeFormatter.ISO_DATE));
+//        calendarContentValues2.put("time", entryScheduledEvent.getCalendar()
+//            .getEntryLastScheduledDateTimeRange()
+//            .getStartDateTime()
+//            .format(DateTimeFormatter.ISO_LOCAL_TIME));
+//        calendarContentValues2.put("duration", entryScheduledEvent.getCalendar()
+//            .getEntryLastScheduledDateTimeRange()
+//            .getDuration());
+//        calendarContentValues2.put("isDone", 0);
+//        calendarContentValues2
+//            .put("lastSavedEventSequenceNumber", eventSequenceNumberForQuery + 1);
 
         sqlBundleList.add(new sqlBundle("viewModelCalendar", calendarContentValues2));
         break;
@@ -206,7 +205,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return entry;
   }
 
-  public Person getResourceWithSavedEventsById(String uuid) {
+  public Person getPersonWithSavedEventsById(String uuid) {
     Person person = Person.Create();
     List<Event> eventList = getEventsFor(uuid);
     person.applyEvents(eventList);

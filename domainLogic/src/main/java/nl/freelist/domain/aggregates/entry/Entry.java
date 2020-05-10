@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.entry.EntryChildCountChangedEvent;
 import nl.freelist.domain.events.entry.EntryChildDurationChangedEvent;
 import nl.freelist.domain.events.entry.EntryCreatedEvent;
@@ -16,7 +17,6 @@ import nl.freelist.domain.events.entry.EntryParentChangedEvent;
 import nl.freelist.domain.events.entry.EntryPreferredDayConstraintsChangedEvent;
 import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
-import nl.freelist.domain.events.Event;
 import nl.freelist.domain.valueObjects.DtrConstraint;
 
 public class Entry {
@@ -60,6 +60,7 @@ public class Entry {
         Level.INFO,
         "Entry created with lastAppliedEventSequenceNumber " + lastAppliedEventSequenceNumber);
   }
+
 
   public void applyEvent(Event event) {
     // Todo: maybe move every applyEvent to it's own function with subclass parameter?

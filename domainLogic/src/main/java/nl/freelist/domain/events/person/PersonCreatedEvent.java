@@ -2,71 +2,20 @@ package nl.freelist.domain.events.person;
 
 import java.time.OffsetDateTime;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.valueObjects.DateTimeRange;
-import nl.freelist.domain.valueObjects.Email;
 
 public class PersonCreatedEvent extends Event {
 
-  private Email ownerEmail;
-  private Email resourceEmail;
-  private String ownerUuid;
-  private DateTimeRange lifetimeDateTimeRange;
-  private int eventSequenceNumber;
   private String eventType = "PersonCreatedEvent";
-
 
   private PersonCreatedEvent(
       OffsetDateTime occurredDateTime,
-      Email ownerEmail,
-      Email resourceEmail,
-      String ownerUuid,
-      String resourceUuid,
-      DateTimeRange lifetimeDateTimeRange,
-      int eventSequenceNumber) {
-    super(occurredDateTime, resourceUuid);
-    this.ownerEmail = ownerEmail;
-    this.resourceEmail = resourceEmail;
-    this.ownerUuid = ownerUuid;
-    this.lifetimeDateTimeRange = lifetimeDateTimeRange;
-    this.eventSequenceNumber = eventSequenceNumber;
+      String personId) {
+    super(occurredDateTime, personId);
   }
 
-  public static PersonCreatedEvent Create(
-      OffsetDateTime occurredDateTime,
-      Email ownerEmail,
-      Email resourceEmail,
-      String ownerUuid,
-      String resourceUuid,
-      DateTimeRange lifetimeDateTimeRange,
-      int eventSequenceNumber) {
-    PersonCreatedEvent personCreatedEvent = new PersonCreatedEvent(occurredDateTime,
-        ownerEmail,
-        resourceEmail,
-        ownerUuid,
-        resourceUuid,
-        lifetimeDateTimeRange,
-        eventSequenceNumber);
+  public static PersonCreatedEvent Create(OffsetDateTime occurredDateTime, String personID) {
+    PersonCreatedEvent personCreatedEvent = new PersonCreatedEvent(occurredDateTime, personID);
     return personCreatedEvent;
-  }
-
-  public String getOwnerUuid() {
-    return ownerUuid;
-  }
-
-  public int getEventSequenceNumber() {
-    return eventSequenceNumber;
-  }
-
-  public Email getOwnerEmail() {
-    return ownerEmail;
-  }
-
-  public Email getResourceEmail() {
-    return resourceEmail;
-  }
-
-  public DateTimeRange getLifetimeDateTimeRange() {
-    return lifetimeDateTimeRange;
   }
 
   public String getEventType() {

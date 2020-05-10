@@ -61,7 +61,7 @@ public class CalendarActivity extends AppCompatActivity implements ItemClickList
 
   private void initializeSharedPreferences() {
     MySettings mySettings = new MySettings(this);
-    resourceUuid = mySettings.getUuid();
+    resourceUuid = mySettings.getId();
   }
 
   private void initializeViews() {
