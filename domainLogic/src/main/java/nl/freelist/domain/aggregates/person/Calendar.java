@@ -8,6 +8,7 @@ import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.person.calendar.CalendarCreatedEvent;
 import nl.freelist.domain.valueObjects.Appointment;
 import nl.freelist.domain.valueObjects.DateTimeRange;
+import nl.freelist.domain.valueObjects.Id;
 
 public class Calendar { // Calendar has a history you want to track so it can't be a value object
 
@@ -18,7 +19,7 @@ public class Calendar { // Calendar has a history you want to track so it can't 
   private List<Event> eventList = new ArrayList<>();
   private List<Appointment> appointmentList = new ArrayList<>();
   private List<DateTimeRange> freeDateTimeRanges = new ArrayList<>();
-  private String calendarId;
+  private Id calendarId;
   private int lastAppliedEventSequenceNumber;
 
   private Calendar() {

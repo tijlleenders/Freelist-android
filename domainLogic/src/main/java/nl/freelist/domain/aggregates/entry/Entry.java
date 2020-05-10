@@ -3,7 +3,6 @@ package nl.freelist.domain.aggregates.entry;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.freelist.domain.events.Event;
@@ -18,6 +17,7 @@ import nl.freelist.domain.events.entry.EntryPreferredDayConstraintsChangedEvent;
 import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
 import nl.freelist.domain.valueObjects.DtrConstraint;
+import nl.freelist.domain.valueObjects.Id;
 
 public class Entry {
 
@@ -33,9 +33,9 @@ public class Entry {
   // Add to EventDatabaseHelper.getViewModelEntryFrom(Entry entry)
   // Possibly List<ViewModelEvent> in Repository.getAllEventsForID(String uuid) (for UI history)
 
-  private UUID ownerUuid;
-  private UUID uuid;
-  private UUID parentUuid;
+  private Id ownerUuid;
+  private Id uuid;
+  private Id parentUuid;
   private String title = "";
   private OffsetDateTime startDateTime;
   private long duration = 0;
@@ -77,9 +77,9 @@ public class Entry {
           break;
         }
         EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
-        this.uuid = UUID.fromString(entryCreatedEvent.getAggregateId());
-        this.ownerUuid = UUID.fromString(entryCreatedEvent.getOwnerUuid());
-        this.parentUuid = UUID.fromString(entryCreatedEvent.getParentUuid());
+        this.uuid = entryCreatedEvent.getAggregateId();
+        this.ownerUuid = entryCreatedEvent.getOwnerUuid();
+        this.parentUuid = entryCreatedEvent.getParentUuid();
         eventList.add(event);
         lastAppliedEventSequenceNumber += 1;
         break;
@@ -106,7 +106,7 @@ public class Entry {
         EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
         if (this.parentUuid == null
             || !this.parentUuid.equals(entryParentChangedEvent.getParentAfter())) {
-          this.parentUuid = UUID.fromString(entryParentChangedEvent.getParentAfter());
+          this.parentUuid = entryParentChangedEvent.getParentAfter();
           eventList.add(event);
           lastAppliedEventSequenceNumber += 1;
         }
@@ -215,15 +215,15 @@ public class Entry {
     return lastAppliedEventSequenceNumber;
   }
 
-  public UUID getUuid() {
+  public Id getUuid() {
     return uuid;
   }
 
-  public UUID getOwnerUuid() {
+  public Id getOwnerUuid() {
     return ownerUuid;
   }
 
-  public UUID getParentUuid() {
+  public Id getParentUuid() {
     return parentUuid;
   }
 
