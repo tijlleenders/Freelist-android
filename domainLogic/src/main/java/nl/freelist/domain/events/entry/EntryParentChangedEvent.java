@@ -2,24 +2,25 @@ package nl.freelist.domain.events.entry;
 
 import java.time.OffsetDateTime;
 import nl.freelist.domain.events.Event;
+import nl.freelist.domain.valueObjects.Id;
 
 public class EntryParentChangedEvent extends Event {
 
-  private String parentAfter;
+  private Id parentAfter;
   private String eventType = "EntryParentChangedEvent";
 
   private EntryParentChangedEvent(
       OffsetDateTime occurredDateTime,
-      String entryId,
-      String parentAfter) {
+      Id entryId,
+      Id parentAfter) {
     super(occurredDateTime, entryId);
     this.parentAfter = parentAfter;
   }
 
   public static EntryParentChangedEvent Create(
       OffsetDateTime occurredDateTime,
-      String entryId,
-      String parentAfter) {
+      Id entryId,
+      Id parentAfter) {
 
     return new EntryParentChangedEvent(
         occurredDateTime,
@@ -28,7 +29,7 @@ public class EntryParentChangedEvent extends Event {
     );
   }
 
-  public String getParentAfter() {
+  public Id getParentAfter() {
     return parentAfter;
   }
 

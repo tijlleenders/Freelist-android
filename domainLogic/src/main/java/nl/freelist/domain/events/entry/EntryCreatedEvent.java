@@ -2,19 +2,20 @@ package nl.freelist.domain.events.entry;
 
 import java.time.OffsetDateTime;
 import nl.freelist.domain.events.Event;
+import nl.freelist.domain.valueObjects.Id;
 
 public class EntryCreatedEvent extends Event {
 
-  private String ownerUuid;
-  private String parentUuid;
-  private String eventType = "EntryCreatedEvent";
+  private Id ownerUuid;
+  private Id parentUuid;
+  private String eventType = "EntryCreatedEvent"; // Todo: refactor to constants or value object
 
 
   private EntryCreatedEvent(
       OffsetDateTime occurredDateTime,
-      String ownerUuid,
-      String parentUuid,
-      String aggregateId
+      Id ownerUuid,
+      Id parentUuid,
+      Id aggregateId
   ) {
     super(occurredDateTime, aggregateId);
     this.ownerUuid = ownerUuid;
@@ -23,9 +24,9 @@ public class EntryCreatedEvent extends Event {
 
   public static EntryCreatedEvent Create(
       OffsetDateTime occurredDateTime,
-      String ownerUuid,
-      String parentUuid,
-      String aggregateId
+      Id ownerUuid,
+      Id parentUuid,
+      Id aggregateId
   ) {
     EntryCreatedEvent entryCreatedEvent = new EntryCreatedEvent(
         occurredDateTime,
@@ -36,11 +37,11 @@ public class EntryCreatedEvent extends Event {
     return entryCreatedEvent;
   }
 
-  public String getOwnerUuid() {
+  public Id getOwnerUuid() {
     return ownerUuid;
   }
 
-  public String getParentUuid() {
+  public Id getParentUuid() {
     return parentUuid;
   }
 

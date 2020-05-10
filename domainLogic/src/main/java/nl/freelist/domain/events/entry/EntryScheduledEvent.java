@@ -1,48 +1,29 @@
 package nl.freelist.domain.events.entry;
 
 import java.time.OffsetDateTime;
-import nl.freelist.domain.aggregates.person.Calendar;
 import nl.freelist.domain.events.Event;
+import nl.freelist.domain.valueObjects.Id;
 
 public class EntryScheduledEvent extends Event {
 
-  private String resourceUuid;
-  private Calendar calendar;
+  private Id personId;
   private String eventType = "EntryScheduledEvent";
 
   private EntryScheduledEvent(
-      OffsetDateTime occurredDateTime,
-      String entryUuid,
-      String resourceUuid,
-      Calendar calendar
-  ) {
-    super(occurredDateTime, entryUuid);
-    this.resourceUuid = resourceUuid;
-    this.calendar = calendar;
+      OffsetDateTime occurredDateTime, Id entryId, Id personId) {
+    super(occurredDateTime, entryId);
+    this.personId = personId;
   }
 
-  public static EntryScheduledEvent Create(
-      OffsetDateTime occurredDateTime,
-      String entryUuid,
-      String resourceUuid,
-      Calendar calendar
-  ) {
-    EntryScheduledEvent entryDescriptionChangedEvent =
-        new EntryScheduledEvent(
-            occurredDateTime,
-            entryUuid,
-            resourceUuid,
-            calendar
-        );
-    return entryDescriptionChangedEvent;
+  public static EntryScheduledEvent Create(OffsetDateTime occurredDateTime, Id entryId,
+      Id personId) {
+    EntryScheduledEvent entryScheduledEvent =
+        new EntryScheduledEvent(occurredDateTime, entryId, personId);
+    return entryScheduledEvent;
   }
 
-  public String getResourceUuid() {
-    return resourceUuid;
-  }
-
-  public Calendar getCalendar() {
-    return calendar;
+  public Id getPersonId() {
+    return personId;
   }
 
   public String getEventType() {

@@ -6,6 +6,7 @@ import java.util.List;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
 import nl.freelist.domain.valueObjects.DtrConstraint;
+import nl.freelist.domain.valueObjects.Id;
 
 public final class ViewModelEntry {
 
@@ -41,9 +42,9 @@ public final class ViewModelEntry {
   }
 
   public ViewModelEntry(
-      String ownerUuid,
-      String parentUuid,
-      String uuid,
+      Id ownerUuid,
+      Id parentUuid,
+      Id uuid,
       String title,
       OffsetDateTime startDateTime,
       long duration,
@@ -53,9 +54,9 @@ public final class ViewModelEntry {
       long childrenCount,
       long childrenDuration,
       int lastSavedEventSequenceNumber) {
-    this.ownerUuid = ownerUuid;
-    this.parentUuid = parentUuid;
-    this.uuid = uuid;
+    this.ownerUuid = ownerUuid.toString();
+    this.parentUuid = parentUuid.toString();
+    this.uuid = uuid.toString();
     this.title = title;
     this.startDateTime = startDateTime;
     this.duration = duration;

@@ -26,6 +26,7 @@ import nl.freelist.domain.events.entry.EntryParentChangedEvent;
 import nl.freelist.domain.events.entry.EntryScheduledEvent;
 import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
+import nl.freelist.domain.valueObjects.Id;
 
 public class Repository {
   //Todo: transform repository to an interface which EventDatabasehelper implements
@@ -43,12 +44,12 @@ public class Repository {
   }
 
   public List<sqlBundle> insert(Person person) { //Todo: fix like insert(entry)
-    Log.d(TAG, "Repository insert called with entry " + person.getUuid());
+    Log.d(TAG, "Repository insert called with entry " + person.getPersonId());
 
     List<sqlBundle> sqlBundleList = new ArrayList<>();
 
     int lastSavedEventSequenceNumber =
-        eventDatabaseHelper.selectLastSavedEventSequenceNumber(person.getUuid().toString());
+        eventDatabaseHelper.selectLastSavedEventSequenceNumber(person.getPersonId());
     Log.d(TAG, "lastSavedEventSequenceNumber = " + lastSavedEventSequenceNumber);
 
     List<Event> newEventsToSave =
@@ -79,19 +80,19 @@ public class Repository {
     eventDatabaseHelper.insert(entry);
   }
 
-  public Entry getEntryWithSavedEventsById(String uuid) {
+  public Entry getEntryWithSavedEventsById(Id uuid) {
     return eventDatabaseHelper.getEntryWithSavedEventsById(uuid);
   }
 
-  public Person getPersonWithSavedEventsById(String uuid) {
+  public Person getPersonWithSavedEventsById(Id uuid) {
     return eventDatabaseHelper.getPersonWithSavedEventsById(uuid);
   }
 
-  public ViewModelEntry getViewModelEntryById(UUID uuid) {
+  public ViewModelEntry getViewModelEntryById(Id uuid) {
     return eventDatabaseHelper.viewModelEntryFor(uuid.toString());
   }
 
-  public List<ViewModelEntry> getBreadcrumbViewModelEntries(UUID parentUuid) {
+  public List<ViewModelEntry> getBreadcrumbViewModelEntries(Id parentUuid) {
     List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
     if (!parentUuid.equals(UUID.nameUUIDFromBytes(
         sharedPreferences.getString(Constants.SETTINGS_USER_UUID, null).getBytes()))) {
@@ -106,7 +107,7 @@ public class Repository {
           .equals(UUID.nameUUIDFromBytes(
               sharedPreferences.getString(Constants.SETTINGS_USER_UUID, null).getBytes()))) {
         ViewModelEntry parentOfParentViewModelEntry =
-            getViewModelEntryById(UUID.fromString(parentViewModelEntry.getParentUuid()));
+            getViewModelEntryById(Id.fromString(parentViewModelEntry.getParentUuid()));
         if (parentOfParentViewModelEntry == null) {
           return allViewModelEntries;
         } else {
@@ -153,14 +154,14 @@ public class Repository {
     return result;
   }
 
-  public List<ViewModelEvent> getAllEventsForId(String uuid) {
+  public List<ViewModelEvent> getAllEventsForId(Id uuid) {
     List<Event> eventList = eventDatabaseHelper.getEventsFor(uuid);
     Collections.sort(eventList, new EventComparator().reversed());
 
     List<ViewModelEvent> viewModelEventListSorted = new ArrayList<>();
     for (Event event : eventList) {
       String eventMessage;
-      String entryId = event.getAggregateId();
+      Id entryId = event.getAggregateId();
       switch (event.getClass().getSimpleName()) {
         case "EntryCreatedEvent":
           eventMessage = "Created";
@@ -199,7 +200,7 @@ public class Repository {
           break;
       }
       viewModelEventListSorted.add(
-          new ViewModelEvent(event.getOccurredDateTime().toString(), entryId,
+          new ViewModelEvent(event.getOccurredDateTime().toString(), entryId.toString(),
               eventMessage));
     }
     return viewModelEventListSorted;
@@ -221,7 +222,7 @@ public class Repository {
 //    return viewModelCalendarOption;
 //  }
 
-  public List<ViewModelCalendarOption> getAllPrioOptions(String entryUuid, String resourceUuid) {
+  public List<ViewModelCalendarOption> getAllPrioOptions(Id entryUuid, Id resourceUuid) {
     Person person = getPersonWithSavedEventsById(resourceUuid);
     Entry entry = getEntryWithSavedEventsById(entryUuid);
 //    List<Calendar> allCalendars = person.getSchedulingOptions(entry);

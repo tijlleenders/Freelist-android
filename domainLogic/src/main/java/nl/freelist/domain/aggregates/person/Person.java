@@ -2,20 +2,20 @@ package nl.freelist.domain.aggregates.person;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.entry.EntryScheduledEvent;
 import nl.freelist.domain.events.person.PersonCreatedEvent;
 import nl.freelist.domain.valueObjects.Email;
+import nl.freelist.domain.valueObjects.Id;
 
 public class Person {
 
   private static final Logger LOGGER = Logger.getLogger(Person.class.getName());
 
   private Email email;
-  private UUID uuid;
+  private Id personId;
   private int lastAppliedEventSequenceNumber;
   private List<Event> eventList = new ArrayList<>();
   private Calendar calendar;
@@ -52,22 +52,22 @@ public class Person {
       case "PersonCreatedEvent":
         LOGGER.log(Level.INFO, "PersonCreatedEvent applied to person");
         PersonCreatedEvent personCreatedEvent = (PersonCreatedEvent) event;
-        this.uuid = UUID.fromString(personCreatedEvent.getAggregateId());
+        this.personId = personCreatedEvent.getAggregateId();
         calendar = Calendar.Create();
         break;
-      case "EntryScheduledEvent":
+      case "EntryScheduledEvent": // Todo: one event can't be applied to two aggregates/entities
         LOGGER.log(Level.INFO, "EntryScheduledEvent applied to person");
         EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
-        if (!entryScheduledEvent.getResourceUuid().equals(uuid.toString())) {
+        if (!entryScheduledEvent.getPersonId().equals(personId.toString())) {
           LOGGER.log(Level.SEVERE, "EntryScheduledEvent can't be applied to person.");
           break;
         }
-        calendar = entryScheduledEvent.getCalendar();
         break;
       default:
         LOGGER.log(
             Level.SEVERE,
-            "Event can't be applied to person " + uuid.toString() + " ; event type not recognized");
+            "Event can't be applied to person " + personId.toString()
+                + " ; event type not recognized");
         break;
     }
     eventList.add(event);
@@ -78,8 +78,8 @@ public class Person {
     return email;
   }
 
-  public UUID getUuid() {
-    return uuid;
+  public Id getPersonId() {
+    return personId;
   }
 
   public int getLastAppliedEventSequenceNumber() {

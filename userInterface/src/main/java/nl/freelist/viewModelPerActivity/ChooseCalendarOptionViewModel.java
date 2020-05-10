@@ -12,6 +12,7 @@ import nl.freelist.data.dto.ViewModelCalendarOption;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.useCases.CommandHandler;
+import nl.freelist.domain.valueObjects.Id;
 
 // Todo: rename (parent)Uuid to (parent)entryId
 
@@ -45,7 +46,8 @@ public class ChooseCalendarOptionViewModel extends AndroidViewModel {
       String resourceUuid) {
     Observable<List<ViewModelCalendarOption>> prioEntryList = Observable
         .fromCallable(
-            () -> repository.getAllPrioOptions(entryUuid, resourceUuid))
+            () -> repository
+                .getAllPrioOptions(Id.fromString(entryUuid), Id.fromString(resourceUuid)))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return prioEntryList;
   }

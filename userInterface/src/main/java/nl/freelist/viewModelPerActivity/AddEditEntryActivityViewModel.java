@@ -9,13 +9,13 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
-import java.util.UUID;
 import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.dto.ViewModelEvent;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.useCases.CommandHandler;
+import nl.freelist.domain.valueObjects.Id;
 
 public class AddEditEntryActivityViewModel extends AndroidViewModel {
 
@@ -30,7 +30,7 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
 
   public Single<ViewModelEntry> getViewModelEntry(String uuid) {
     Single<ViewModelEntry> result = Single.fromCallable(
-        () -> repository.getViewModelEntryById(UUID.fromString(uuid)))
+        () -> repository.getViewModelEntryById(Id.fromString(uuid)))
         .observeOn(Schedulers.io())
         .subscribeOn(Schedulers.io());
     return result;
@@ -49,7 +49,7 @@ public class AddEditEntryActivityViewModel extends AndroidViewModel {
   public Observable<List<ViewModelEvent>> getAllEventsFor(String uuid) { //For Entry history page
     Observable<List<ViewModelEvent>> eventList = Observable
         .fromCallable(
-            () -> repository.getAllEventsForId(uuid))
+            () -> repository.getAllEventsForId(Id.fromString(uuid)))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return eventList;
   }

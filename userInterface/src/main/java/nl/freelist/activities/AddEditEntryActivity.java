@@ -173,7 +173,6 @@ public class AddEditEntryActivity extends AppCompatActivity
             repository);
     saveCommandsInProgress += 1;
     Toast.makeText(AddEditEntryActivity.this, "Saving...", Toast.LENGTH_SHORT).show();
-    Toast.makeText(AddEditEntryActivity.this, "Saving...", Toast.LENGTH_SHORT).show();
     AddEditEntryActivityViewModel.handle(saveEntryCommand)
         .subscribeOn(
             Schedulers.single()) // schedules all save commands sequentially in a single thread
@@ -191,19 +190,14 @@ public class AddEditEntryActivity extends AppCompatActivity
                           "ThreadLogger: Inside saveEntryCommand observe runOnUI. "
                               + lastSavedEventSequenceNumber);
                       saveCommandsInProgress -= 1;
-                      if (!result.isSuccess()) {
+                      if (result != null && !result.isSuccess()) {
                         Toast.makeText(
                                 AddEditEntryActivity.this,
                                 "Sorry! SaveEntry failed!",
                             Toast.LENGTH_LONG)
                             .show();
-                      } else {
-
-                        //                        Toast.makeText(
-                        //                            AddEditEntryActivity.this,
-                        //                            "Saved!",
-                        //                            Toast.LENGTH_SHORT)
-                        //                            .show();
+                      }
+                      if (result != null && result.isSuccess()) {
                         initializeForEditExisting(id);
                       }
                     }

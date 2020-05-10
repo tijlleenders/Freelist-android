@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntry;
+import nl.freelist.domain.valueObjects.Id;
 
 public class NavigateEntriesViewModel extends AndroidViewModel {
 
@@ -38,7 +39,7 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
   public Observable<List<ViewModelEntry>> getBreadcrumbEntries() {
     Observable<List<ViewModelEntry>> viewModelEntryList = Observable
         .fromCallable(
-            () -> repository.getBreadcrumbViewModelEntries(UUID.fromString(parentId)))
+            () -> repository.getBreadcrumbViewModelEntries(Id.fromString(parentId)))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return viewModelEntryList;
   }

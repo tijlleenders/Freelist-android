@@ -11,6 +11,7 @@ import nl.freelist.domain.aggregates.person.Person;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.events.Event;
+import nl.freelist.domain.valueObjects.Id;
 
 public class ScheduleEntryCommand extends Command {
 
@@ -28,9 +29,9 @@ public class ScheduleEntryCommand extends Command {
   public Result execute() {
     LOGGER.log(Level.INFO, "Executing ScheduleEntryCommand");
 
-    Entry entry = repository.getEntryWithSavedEventsById(entryUuid);
+    Entry entry = repository.getEntryWithSavedEventsById(Id.fromString(entryUuid));
 
-    Person person = repository.getPersonWithSavedEventsById(entry.getOwnerUuid().toString());
+    Person person = repository.getPersonWithSavedEventsById(entry.getOwnerUuid());
 
 //    EntryScheduledEvent entryScheduledEvent = EntryScheduledEvent
 //        .Create(

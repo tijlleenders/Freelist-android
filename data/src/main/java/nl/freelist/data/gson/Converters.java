@@ -33,6 +33,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZonedDateTime;
+import nl.freelist.domain.valueObjects.Id;
 
 /**
  * The {@code Converters} class contains static methods for registering Java Time converters.
@@ -82,6 +83,9 @@ public class Converters {
   public static final Type INSTANT_TYPE = new TypeToken<Instant>() {
   }.getType();
 
+  private static final Type ID_TYPE = new TypeToken<Id>() {
+  }.getType();
+
   /**
    * Registers all the Java Time converters.
    *
@@ -94,10 +98,10 @@ public class Converters {
     }
 
     registerOffsetDateTime(builder);
+    registerId(builder);
 
     return builder;
   }
-
 
   /**
    * Registers the {@link OffsetDateTimeConverter} converter.
@@ -107,6 +111,18 @@ public class Converters {
    */
   public static GsonBuilder registerOffsetDateTime(GsonBuilder builder) {
     builder.registerTypeAdapter(OFFSET_DATE_TIME_TYPE, new OffsetDateTimeConverter());
+
+    return builder;
+  }
+
+  /**
+   * Registers the {@link IdConverter} converter.
+   *
+   * @param builder The GSON builder to register the converter with.
+   * @return A reference to {@code builder}.
+   */
+  public static GsonBuilder registerId(GsonBuilder builder) {
+    builder.registerTypeAdapter(ID_TYPE, new IdConverter());
 
     return builder;
   }

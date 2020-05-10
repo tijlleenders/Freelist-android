@@ -2,6 +2,7 @@ package nl.freelist.domain.events.entry;
 
 import java.time.OffsetDateTime;
 import nl.freelist.domain.events.Event;
+import nl.freelist.domain.valueObjects.Id;
 
 public class EntryNotesChangedEvent extends Event {
 
@@ -10,7 +11,7 @@ public class EntryNotesChangedEvent extends Event {
 
   private EntryNotesChangedEvent(
       OffsetDateTime occurredDateTime,
-      String entryId,
+      Id entryId,
       String notesAfter
   ) {
     super(occurredDateTime, entryId);
@@ -19,7 +20,7 @@ public class EntryNotesChangedEvent extends Event {
 
   public static EntryNotesChangedEvent Create(
       OffsetDateTime occurredDateTime,
-      String entryId,
+      Id entryId,
       String descriptionAfter
   ) {
     return new EntryNotesChangedEvent(

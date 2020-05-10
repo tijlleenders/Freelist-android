@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.valueObjects.DtrConstraint;
+import nl.freelist.domain.valueObjects.Id;
 
 public class EntryPreferredDayConstraintsChangedEvent extends Event {
 
@@ -12,7 +13,7 @@ public class EntryPreferredDayConstraintsChangedEvent extends Event {
 
   private EntryPreferredDayConstraintsChangedEvent(
       OffsetDateTime occurredDateTime,
-      String entryId,
+      Id entryId,
       List<DtrConstraint> preferredDayConstraints) {
     super(occurredDateTime, entryId);
     this.preferredDayConstraints = preferredDayConstraints;
@@ -20,7 +21,7 @@ public class EntryPreferredDayConstraintsChangedEvent extends Event {
 
   public static EntryPreferredDayConstraintsChangedEvent Create(
       OffsetDateTime occurredDateTime,
-      String entryId,
+      Id entryId,
       List<DtrConstraint> preferredDayConstraints) {
 
     return new EntryPreferredDayConstraintsChangedEvent(

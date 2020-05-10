@@ -2,6 +2,7 @@ package nl.freelist.domain.events.person.calendar;
 
 import java.time.OffsetDateTime;
 import nl.freelist.domain.events.Event;
+import nl.freelist.domain.valueObjects.Id;
 
 public class CalendarCreatedEvent extends Event {
 
@@ -9,14 +10,14 @@ public class CalendarCreatedEvent extends Event {
 
   private CalendarCreatedEvent(
       OffsetDateTime occurredDateTime,
-      String calendarId
+      Id calendarId
   ) {
     super(occurredDateTime, calendarId);
   }
 
   public static CalendarCreatedEvent Create(
       OffsetDateTime occurredDateTime,
-      String calendarId
+      Id calendarId
   ) {
     CalendarCreatedEvent CalendarCreatedEvent = new CalendarCreatedEvent(
         occurredDateTime,

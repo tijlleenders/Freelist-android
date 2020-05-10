@@ -12,6 +12,7 @@ import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.person.PersonCreatedEvent;
+import nl.freelist.domain.valueObjects.Id;
 
 public class SavePersonCommand extends Command {
 
@@ -34,7 +35,7 @@ public class SavePersonCommand extends Command {
     LOGGER.log(Level.INFO, "Executing SavePersonCommand");
 //    Todo: make it possible to add resources from UI - for now only one default person anonymous@freelist.nl on initial startup
 
-    Person person = repository.getPersonWithSavedEventsById(personId);
+    Person person = repository.getPersonWithSavedEventsById(Id.fromString(personId));
 
     List<Event> eventsToAddList = new ArrayList<>();
 
@@ -45,7 +46,7 @@ public class SavePersonCommand extends Command {
 
     if (lastSavedEventSequenceNumber == -1) {
       PersonCreatedEvent personCreatedEvent =
-          PersonCreatedEvent.Create(now, personId);
+          PersonCreatedEvent.Create(now, Id.fromString(personId));
       eventsToAddList.add(personCreatedEvent);
     }
 

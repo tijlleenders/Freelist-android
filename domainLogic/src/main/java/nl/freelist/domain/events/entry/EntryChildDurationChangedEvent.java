@@ -2,17 +2,18 @@ package nl.freelist.domain.events.entry;
 
 import java.time.OffsetDateTime;
 import nl.freelist.domain.events.Event;
+import nl.freelist.domain.valueObjects.Id;
 
 public class EntryChildDurationChangedEvent extends Event {
 
   private long durationDelta;
   private String eventType = "EntryChildDurationChangedEvent";
-  private String originAggregateId;
+  private Id originAggregateId;
 
   private EntryChildDurationChangedEvent(
       OffsetDateTime occurredDateTime,
-      String entryId,
-      String originAggregateId,
+      Id entryId,
+      Id originAggregateId,
       long durationDelta
   ) {
     super(occurredDateTime, entryId);
@@ -22,8 +23,8 @@ public class EntryChildDurationChangedEvent extends Event {
 
   public static EntryChildDurationChangedEvent Create(
       OffsetDateTime occurredDateTime,
-      String entryId,
-      String originAggregateId,
+      Id entryId,
+      Id originAggregateId,
       long durationDelta
   ) {
 
@@ -43,7 +44,7 @@ public class EntryChildDurationChangedEvent extends Event {
     return eventType;
   }
 
-  public String getOriginAggregateId() {
+  public Id getOriginAggregateId() {
     return originAggregateId;
   }
 }

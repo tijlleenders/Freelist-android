@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.freelist.data.Repository;
+import nl.freelist.domain.aggregates.entry.Entry;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
-import nl.freelist.domain.aggregates.entry.Entry;
+import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.entry.EntryCreatedEvent;
 import nl.freelist.domain.events.entry.EntryDurationChangedEvent;
 import nl.freelist.domain.events.entry.EntryEndDateTimeChangedEvent;
@@ -17,8 +18,8 @@ import nl.freelist.domain.events.entry.EntryNotesChangedEvent;
 import nl.freelist.domain.events.entry.EntryPreferredDayConstraintsChangedEvent;
 import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
-import nl.freelist.domain.events.Event;
 import nl.freelist.domain.valueObjects.DtrConstraint;
+import nl.freelist.domain.valueObjects.Id;
 
 public class SaveEntryCommand extends Command {
 
@@ -66,7 +67,7 @@ public class SaveEntryCommand extends Command {
   public Result execute() {
     LOGGER.log(Level.INFO, "Executing SaveEntryCommand");
 
-    Entry entry = repository.getEntryWithSavedEventsById(aggregateUuid);
+    Entry entry = repository.getEntryWithSavedEventsById(Id.fromString(aggregateUuid));
     List<Event> eventsToAddList = new ArrayList<>();
 
     // Optimistic locking only necessary in multi-user environment or if commands out of order
@@ -77,9 +78,9 @@ public class SaveEntryCommand extends Command {
     if (lastSavedEventSequenceNumber == -1) {
       EntryCreatedEvent entryCreatedEvent = EntryCreatedEvent.Create(
           now,
-          ownerUuid,
-          parentUuid,
-          aggregateUuid
+          Id.fromString(ownerUuid),
+          Id.fromString(parentUuid),
+          Id.fromString(aggregateUuid)
       );
       eventsToAddList.add(entryCreatedEvent);
     }
@@ -88,38 +89,38 @@ public class SaveEntryCommand extends Command {
     EntryTitleChangedEvent entryTitleChangedEvent = EntryTitleChangedEvent
         .Create(
             now,
-            aggregateUuid,
+            Id.fromString(aggregateUuid),
             titleAfter);
 
     EntryStartDateTimeChangedEvent entryStartDateTimeChangedEvent = EntryStartDateTimeChangedEvent
         .Create(
             now,
-            aggregateUuid,
+            Id.fromString(aggregateUuid),
             startDateTimeAfter
         );
 
     EntryDurationChangedEvent entryDurationChangedEvent = EntryDurationChangedEvent.Create(
         OffsetDateTime.now(ZoneOffset.UTC),
-        aggregateUuid,
+        Id.fromString(aggregateUuid),
         durationAfter
     );
 
     EntryEndDateTimeChangedEvent entryEndDateTimeChangedEvent = EntryEndDateTimeChangedEvent.Create(
         now,
-        aggregateUuid,
+        Id.fromString(aggregateUuid),
         endDateTimeAfter
     );
 
     EntryNotesChangedEvent entryNotesChangedEvent = EntryNotesChangedEvent.Create(
         now,
-        aggregateUuid,
+        Id.fromString(aggregateUuid),
         notesAfter
     );
 
     EntryPreferredDayConstraintsChangedEvent entryPreferredDayConstraintsChangedEvent = EntryPreferredDayConstraintsChangedEvent
         .Create(
             now,
-            aggregateUuid,
+            Id.fromString(aggregateUuid),
             preferredDaysConstraintsAfter
         );
 
