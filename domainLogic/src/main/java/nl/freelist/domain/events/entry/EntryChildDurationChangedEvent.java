@@ -7,31 +7,31 @@ import nl.freelist.domain.valueObjects.Id;
 public class EntryChildDurationChangedEvent extends Event {
 
   private long durationDelta;
+  private Id entryId;
   private String eventType = "EntryChildDurationChangedEvent";
-  private Id originAggregateId;
 
   private EntryChildDurationChangedEvent(
       OffsetDateTime occurredDateTime,
       Id entryId,
-      Id originAggregateId,
+      Id personId,
       long durationDelta
   ) {
-    super(occurredDateTime, entryId);
+    super(occurredDateTime, personId);
     this.durationDelta = durationDelta;
-    this.originAggregateId = originAggregateId;
+    this.entryId = entryId;
   }
 
   public static EntryChildDurationChangedEvent Create(
       OffsetDateTime occurredDateTime,
       Id entryId,
-      Id originAggregateId,
+      Id personId,
       long durationDelta
   ) {
 
     return new EntryChildDurationChangedEvent(
         occurredDateTime,
         entryId,
-        originAggregateId,
+        personId,
         durationDelta
     );
   }
@@ -44,7 +44,8 @@ public class EntryChildDurationChangedEvent extends Event {
     return eventType;
   }
 
-  public Id getOriginAggregateId() {
-    return originAggregateId;
+  public Id getEntryId() {
+    return entryId;
   }
+
 }

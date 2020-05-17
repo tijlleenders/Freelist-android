@@ -6,13 +6,13 @@ import nl.freelist.domain.valueObjects.Id;
 
 public class EntryScheduledEvent extends Event {
 
-  private Id personId;
+  private Id entryId;
   private String eventType = "EntryScheduledEvent";
 
   private EntryScheduledEvent(
       OffsetDateTime occurredDateTime, Id entryId, Id personId) {
-    super(occurredDateTime, entryId);
-    this.personId = personId;
+    super(occurredDateTime, personId);
+    this.entryId = entryId;
   }
 
   public static EntryScheduledEvent Create(OffsetDateTime occurredDateTime, Id entryId,
@@ -22,8 +22,8 @@ public class EntryScheduledEvent extends Event {
     return entryScheduledEvent;
   }
 
-  public Id getPersonId() {
-    return personId;
+  public Id getEntryId() {
+    return entryId;
   }
 
   public String getEventType() {

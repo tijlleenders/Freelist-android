@@ -32,8 +32,8 @@ import nl.freelist.viewModelPerActivity.NavigateEntriesViewModel;
 public class NavigateFreelistActivity extends AppCompatActivity implements ItemClickListener {
 
   private static final String TAG = "NavigateFreelistActivity";
-  private String personUuid;
-
+  private String personId;
+  private int lastSavedEventSequenceNumber = -1;
   private NavigateEntriesViewModel navigateEntriesViewModel;
   private FreelistEntryAdapter adapter;
   private RecyclerView recyclerView;
@@ -65,9 +65,10 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
         .get(NavigateEntriesViewModel.class);
 
     MySettings mySettings = new MySettings(this);
-    personUuid = mySettings.getId();
+    personId = mySettings.getId();
 
-    navigateEntriesViewModel.setParentId(personUuid);
+    navigateEntriesViewModel.setParentId(personId);
+    navigateEntriesViewModel.setPersonId(personId);
 
     initializeViews();
 
@@ -133,6 +134,8 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
                 Constants.EXTRA_REQUEST_TYPE_ADD, Constants.ADD_ENTRY_REQUEST);
             intent.putExtra(
                 Constants.EXTRA_ENTRY_PARENT_ID, navigateEntriesViewModel.getParentId());
+            intent.putExtra(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER,
+                lastSavedEventSequenceNumber);
             startActivityForResult(intent, Constants.ADD_ENTRY_REQUEST);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }
@@ -150,17 +153,19 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   private void updateRecyclerView() {
     Log.d(TAG, "updateRecyclerView called.");
     navigateEntriesViewModel
-        .getAllChildrenEntries()
+        .getViewModelEntries()
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .subscribe(
-            entries -> {
+            viewModelEntries -> {
               // update RecyclerView
               runOnUiThread(
                   new Runnable() {
                     @Override
                     public void run() {
-                      adapter.setEntries(entries);
+                      adapter.setEntries(viewModelEntries.getViewModelEntryList());
+                      lastSavedEventSequenceNumber = viewModelEntries
+                          .getLastAppliedSchedulerSequenceNumber();
 //                      Toast.makeText(
 //                          NavigateFreelistActivity.this,
 //                          "navigateEntriesViewModel recyclerView refreshed!",
@@ -203,34 +208,37 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     switch (entriesSize) {
       case 1:
         breadcrumb0.setText("Home");
-        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(personUuid));
+        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(personId));
         breadcrumbDivider_0_1.setText(">");
         breadcrumb1.setText(entries.get(0).getTitle());
         breadcrumb1
-            .setOnClickListener(view -> updateRecyclerViewWithParentUuid(entries.get(0).getUuid()));
+            .setOnClickListener(
+                view -> updateRecyclerViewWithParentUuid(entries.get(0).getEntryId()));
         breadcrumbDivider_1_2.setText("");
         breadcrumb2.setText("");
         break;
       case 2:
-        if (entries.get(0).getParentUuid().equals(personUuid)) {
+        if (entries.get(0).getParentEntryId().equals(personId)) {
           breadcrumb0.setText("Home");
         } else {
           breadcrumb0.setText("...");
         }
         breadcrumb0.setOnClickListener(
-            view -> updateRecyclerViewWithParentUuid(entries.get(0).getParentUuid()));
+            view -> updateRecyclerViewWithParentUuid(entries.get(0).getParentEntryId()));
         breadcrumbDivider_0_1.setText(">");
         breadcrumb1.setText(entries.get(0).getTitle());
         breadcrumb1
-            .setOnClickListener(view -> updateRecyclerViewWithParentUuid(entries.get(0).getUuid()));
+            .setOnClickListener(
+                view -> updateRecyclerViewWithParentUuid(entries.get(0).getEntryId()));
         breadcrumbDivider_1_2.setText(">");
         breadcrumb2.setText(entries.get(1).getTitle());
         breadcrumb2
-            .setOnClickListener(view -> updateRecyclerViewWithParentUuid(entries.get(1).getUuid()));
+            .setOnClickListener(
+                view -> updateRecyclerViewWithParentUuid(entries.get(1).getEntryId()));
         break;
       default:
         breadcrumb0.setText("Home");
-        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(personUuid));
+        breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(personId));
         breadcrumbDivider_0_1.setText("");
         breadcrumb1.setText("");
         breadcrumbDivider_1_2.setText("");
@@ -251,11 +259,10 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     Log.d(TAG, "setupActionBars called.");
 
     //TopAppBar
-    getSupportActionBar()
-        .setHomeAsUpIndicator(R.drawable.ic_close);
-    setTitle("My Freelists");
-    //override onCreateOptionsMenu and onOptionsItemSelected for TopAppBar
+    getSupportActionBar().setTitle("My Freelists");
+    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+    //override onCreateOptionsMenu and onOptionsItemSelected for TopAppBar
     bottomAppBar.replaceMenu(R.menu.bottom_app_bar_menu);
     bottomAppBar.getMenu().findItem(R.id.bottom_app_bar_freelists).getIcon()
         .setColorFilter(Color.BLACK,
@@ -289,6 +296,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
       }
     });
   }
+
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -341,6 +349,9 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
       case R.id.undo:
         Toast.makeText(this, "Undo selected", Toast.LENGTH_SHORT).show();
         return true;
+      case android.R.id.home:
+        navigateEntriesViewModel.setParentId(personId);
+        updateView();
       default:
         return super.onOptionsItemSelected(item);
     }
@@ -349,16 +360,14 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   public void updateRecyclerViewWithParentUuid(String parentToSet) {
     navigateEntriesViewModel.setParentId(parentToSet);
     updateView();
-    adapter.setCurrentId(parentToSet);
   }
 
   @Override
   public void onItemClick(View view, int position) {
     Log.d(TAG, "onItemClick called.");
-    String parentToSet = adapter.getEntryAt(position).getUuid();
+    String parentToSet = adapter.getEntryAt(position).getEntryId();
     navigateEntriesViewModel.setParentId(parentToSet);
     updateView();
-    adapter.setCurrentId(parentToSet);
   }
 
 

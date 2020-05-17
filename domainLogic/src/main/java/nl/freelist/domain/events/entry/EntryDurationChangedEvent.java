@@ -6,29 +6,25 @@ import nl.freelist.domain.valueObjects.Id;
 
 public class EntryDurationChangedEvent extends Event {
 
+  private Id entryId;
   private long durationAfter;
   private String eventType = "EntryDurationChangedEvent";
 
   private EntryDurationChangedEvent(
-      OffsetDateTime occurredDateTime,
-      Id entryId,
-      long durationAfter
-  ) {
-    super(occurredDateTime, entryId);
+      OffsetDateTime occurredDateTime, Id personId, Id entryId, long durationAfter) {
+    super(occurredDateTime, personId);
     this.durationAfter = durationAfter;
+    this.entryId = entryId;
   }
 
   public static EntryDurationChangedEvent Create(
-      OffsetDateTime occurredDateTime,
-      Id entryId,
-      long durationAfter
-  ) {
+      OffsetDateTime occurredDateTime, Id personId, Id entryId, long durationAfter) {
 
-    return new EntryDurationChangedEvent(
-        occurredDateTime,
-        entryId,
-        durationAfter
-    );
+    return new EntryDurationChangedEvent(occurredDateTime, personId, entryId, durationAfter);
+  }
+
+  public Id getEntryId() {
+    return entryId;
   }
 
   public long getDurationAfter() {

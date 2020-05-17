@@ -6,13 +6,12 @@ import androidx.lifecycle.AndroidViewModel;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
-import java.util.UUID;
 import nl.freelist.data.Repository;
-import nl.freelist.data.dto.CalendarEntry;
+import nl.freelist.data.dto.ViewModelAppointment;
 
 public class CalendarViewModel extends AndroidViewModel {
 
-  private String ownerUuid;
+  private String personId;
   private Repository repository;
 
   public CalendarViewModel(@NonNull Application application) {
@@ -20,12 +19,12 @@ public class CalendarViewModel extends AndroidViewModel {
     repository = new Repository(getApplication().getApplicationContext());
   }
 
-  public void setOwnerUuid(String ownerUuid) {
-    this.ownerUuid = ownerUuid;
+  public String getPersonId() {
+    return personId;
   }
 
-  public String getOwnerUuid() {
-    return ownerUuid;
+  public void setPersonId(String personId) {
+    this.personId = personId;
   }
 
   @Override
@@ -34,16 +33,12 @@ public class CalendarViewModel extends AndroidViewModel {
     super.onCleared();
   }
 
-  public Observable<List<CalendarEntry>> getAllCalendarEntries() {
-    Observable<List<CalendarEntry>> calendarEntryList = Observable
+  public Observable<List<ViewModelAppointment>> getAllCalendarEntries() {
+    Observable<List<ViewModelAppointment>> calendarEntryList = Observable
         .fromCallable(
-            () -> repository.getAllCalendarEntriesForOwner(UUID.fromString(ownerUuid)))
+            () -> repository.getAllCalendarEntriesForOwner(personId))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
     return calendarEntryList;
-  }
-
-  public void updateOwnerUuid(String ownerUuid) {
-    this.ownerUuid = ownerUuid;
   }
 
 }

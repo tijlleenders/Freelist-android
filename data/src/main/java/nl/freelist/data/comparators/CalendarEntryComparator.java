@@ -1,18 +1,19 @@
 package nl.freelist.data.comparators;
 
 import java.util.Comparator;
-import nl.freelist.data.dto.CalendarEntry;
+import nl.freelist.data.dto.ViewModelAppointment;
 
-public class CalendarEntryComparator implements Comparator<CalendarEntry> {
+public class CalendarEntryComparator implements Comparator<ViewModelAppointment> {
 
   @Override
-  public int compare(CalendarEntry calendarEntry1, CalendarEntry calendarEntry2) {
+  public int compare(
+      ViewModelAppointment viewModelAppointment1, ViewModelAppointment viewModelAppointment2) {
     //sorts on date, then time
-    int dateComp = calendarEntry1.getDate().compareTo(calendarEntry2.getDate());
+    int dateComp = viewModelAppointment1.getDate().compareTo(viewModelAppointment2.getDate());
     if (dateComp != 0) {
       return dateComp;
     }
-    int timeComp = calendarEntry1.getTime().compareTo(calendarEntry2.getTime());
+    int timeComp = viewModelAppointment1.getTime().compareTo(viewModelAppointment2.getTime());
     return timeComp;
   }
 }

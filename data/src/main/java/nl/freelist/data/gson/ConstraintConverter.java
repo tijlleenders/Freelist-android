@@ -31,15 +31,15 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
-import nl.freelist.domain.valueObjects.Id;
+import nl.freelist.domain.valueObjects.constraints.Constraint;
 
 // implementing a .toString / .fromString method is not sufficient for Gson to understand
 
 /**
- * GSON serialiser/deserialiser for converting {@link Id} objects.
+ * GSON serialiser/deserialiser for converting {@link Constraint} objects.
  */
-public class IdConverter implements JsonSerializer<Id>,
-    JsonDeserializer<Id> {
+public class ConstraintConverter implements JsonSerializer<Constraint>,
+    JsonDeserializer<Constraint> {
 
 
   /**
@@ -57,7 +57,7 @@ public class IdConverter implements JsonSerializer<Id>,
    * @return a JsonElement corresponding to the specified object.
    */
   @Override
-  public JsonElement serialize(Id src, Type typeOfSrc,
+  public JsonElement serialize(Constraint src, Type typeOfSrc,
       JsonSerializationContext context) {
     String test = src.toString();
     return new JsonPrimitive(src.toString());
@@ -79,9 +79,9 @@ public class IdConverter implements JsonSerializer<Id>,
    * @throws JsonParseException if json is not in the expected format of {@code typeOfT}
    */
   @Override
-  public Id deserialize(JsonElement json, Type typeOfT,
+  public Constraint deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context)
       throws JsonParseException {
-    return Id.fromString(json.getAsString());
+    return Constraint.fromString(json.toString());
   }
 }

@@ -19,7 +19,6 @@ import nl.freelist.domain.valueObjects.Id;
 
 public class AddEditEntryActivityViewModel extends AndroidViewModel {
 
-
   private Repository repository;
 
   public AddEditEntryActivityViewModel(

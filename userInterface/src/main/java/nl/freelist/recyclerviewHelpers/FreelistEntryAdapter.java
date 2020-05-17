@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import nl.freelist.activities.AddEditEntryActivity;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
@@ -24,13 +23,6 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
 
   private List<ViewModelEntry> entries = new ArrayList<>();
   private ItemClickListener onItemClickListener;
-
-  public String getCurrentUuid() {
-    return currentUuid;
-  }
-
-  private String currentUuid = UUID.nameUUIDFromBytes("tijl.leenders@gmail.com".getBytes())
-      .toString();
 
   public FreelistEntryAdapter(ItemClickListener clickListener) {
     Log.d(TAG, "FreelistEntryAdapter called.");
@@ -91,12 +83,6 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
     notifyDataSetChanged(); // change later for onInsert onDelete (not efficient and no animations)
   }
 
-  public void setCurrentId(String uuid) {
-
-    Log.d(TAG, "setCurrentId called.");
-    this.currentUuid = uuid;
-  }
-
   public ViewModelEntry getEntryAt(int position) {
     Log.d(TAG, "getEntryAt called.");
     return entries.get(position);
@@ -130,7 +116,9 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
               ViewModelEntry entry =
                   getEntryAt(
                       position);
-              intent.putExtra(Constants.EXTRA_ENTRY_ID, entry.getUuid());
+              intent.putExtra(Constants.EXTRA_ENTRY_ID, entry.getEntryId());
+              intent.putExtra(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER,
+                  entry.getLastAppliedSchedulerSequenceNumber());
               ((Activity) v.getContext())
                   .startActivityForResult(intent, Constants.EDIT_ENTRY_REQUEST);
               ((Activity) v.getContext())

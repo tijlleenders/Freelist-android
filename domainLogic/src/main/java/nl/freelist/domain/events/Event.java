@@ -8,13 +8,13 @@ public abstract class Event {
   //Todo: should events get a guid?
   private OffsetDateTime occurredDateTime;
   private Id aggregateId;
-  private Id id;
+  private Id eventId;
 
   protected Event(OffsetDateTime occurredDateTime, Id aggregateId) {
     // Create/Validation logic in static Create method of subclasses (easier to test)
     this.occurredDateTime = occurredDateTime;
     this.aggregateId = aggregateId;
-    id = Id.Create();
+    eventId = Id.Create();
   }
 
   public OffsetDateTime getOccurredDateTime() {
@@ -25,7 +25,7 @@ public abstract class Event {
     return aggregateId;
   }
 
-  public Id getId() {
-    return id;
+  public Id getEventId() {
+    return eventId;
   }
 }

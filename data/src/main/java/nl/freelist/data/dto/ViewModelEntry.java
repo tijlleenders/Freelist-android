@@ -2,24 +2,25 @@ package nl.freelist.data.dto;
 
 import android.util.Log;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
-import nl.freelist.domain.valueObjects.DtrConstraint;
 import nl.freelist.domain.valueObjects.Id;
+import nl.freelist.domain.valueObjects.constraints.ImpossibleDaysConstraint;
 
 public final class ViewModelEntry {
 
   private static final String TAG = "ViewModelEntry dto";
 
-  private final String uuid;
-  private final String parentUuid;
-  private final String ownerUuid;
+  private final String entryId;
+  private final String parentEntryId;
+  private final String personId;
   private final String title;
   private final OffsetDateTime startDateTime;
   private final String durationString;
   private final OffsetDateTime endDateTime;
-  private final List<DtrConstraint> preferredDaysConstraints;
+  private final List<ImpossibleDaysConstraint> impossibleDaysConstraints;
   private final String notes;
   private final String childrenDurationString;
   private final long duration;
@@ -31,7 +32,7 @@ public final class ViewModelEntry {
   private final int seconds;
   private long childrenCount;
   private long childrenDuration;
-  private final int lastSavedEventSequenceNumber;
+  private final int lastAppliedSchedulerSequenceNumber;
 
   public OffsetDateTime getStartDateTime() {
     return startDateTime;
@@ -42,26 +43,30 @@ public final class ViewModelEntry {
   }
 
   public ViewModelEntry(
-      Id ownerUuid,
-      Id parentUuid,
-      Id uuid,
+      Id personId,
+      Id parentEntryId,
+      Id entryId,
       String title,
       OffsetDateTime startDateTime,
       long duration,
       OffsetDateTime endDateTime,
-      List<DtrConstraint> preferredDaysConstraints,
+      List<ImpossibleDaysConstraint> impossibleDaysConstraints,
       String notes,
       long childrenCount,
       long childrenDuration,
-      int lastSavedEventSequenceNumber) {
-    this.ownerUuid = ownerUuid.toString();
-    this.parentUuid = parentUuid.toString();
-    this.uuid = uuid.toString();
+      int lastAppliedSchedulerSequenceNumber) {
+    this.personId = personId.toString();
+    this.parentEntryId = parentEntryId.toString();
+    this.entryId = entryId.toString();
     this.title = title;
     this.startDateTime = startDateTime;
     this.duration = duration;
     this.endDateTime = endDateTime;
-    this.preferredDaysConstraints = preferredDaysConstraints;
+    if (impossibleDaysConstraints == null) {
+      this.impossibleDaysConstraints = new ArrayList<>();
+    } else {
+      this.impossibleDaysConstraints = impossibleDaysConstraints;
+    }
     this.notes = notes;
     this.childrenCount = childrenCount;
     this.childrenDuration = childrenDuration;
@@ -73,22 +78,23 @@ public final class ViewModelEntry {
     this.minutes = TimeHelper.getStandaloneMinutesFrom(duration);
     this.seconds = TimeHelper.getStandaloneSecondsFrom(duration);
     this.durationString = TimeHelper.getDurationStringFrom(duration);
-    this.lastSavedEventSequenceNumber = lastSavedEventSequenceNumber;
+    this.lastAppliedSchedulerSequenceNumber = lastAppliedSchedulerSequenceNumber;
 
-    Log.d(TAG,
-        "ViewModelEntry " + title + " (uuid:" + uuid + ")" + " parentUuid:" + parentUuid);
+    Log.d(
+        TAG,
+        "ViewModelEntry " + title + " (uuid:" + entryId + ")" + " parentUuid:" + parentEntryId);
   }
 
-  public String getUuid() {
-    return uuid;
+  public String getEntryId() {
+    return entryId;
   }
 
-  public String getParentUuid() {
-    return parentUuid;
+  public String getParentEntryId() {
+    return parentEntryId;
   }
 
-  public String getOwnerUuid() {
-    return ownerUuid;
+  public String getPersonId() {
+    return personId;
   }
 
   public int getType() {
@@ -105,6 +111,10 @@ public final class ViewModelEntry {
 
   public String getNotes() {
     return notes;
+  }
+
+  public List<ImpossibleDaysConstraint> getImpossibleDaysConstraints() {
+    return impossibleDaysConstraints;
   }
 
   public String getDurationString() {
@@ -151,11 +161,8 @@ public final class ViewModelEntry {
     return childrenDurationString;
   }
 
-  public int getLastSavedEventSequenceNumber() {
-    return lastSavedEventSequenceNumber;
+  public int getLastAppliedSchedulerSequenceNumber() {
+    return lastAppliedSchedulerSequenceNumber;
   }
 
-  public List<DtrConstraint> getPreferredDaysConstraints() {
-    return preferredDaysConstraints;
-  }
 }

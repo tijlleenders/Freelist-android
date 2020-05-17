@@ -2,7 +2,7 @@ package nl.freelist.domain.valueObjects;
 
 import java.time.OffsetDateTime;
 
-public class ScheduledDateTimeRange {
+public class ScheduledDateTimeRange { //Todo: delete
 
   private OffsetDateTime startDateTime;
   private OffsetDateTime endDateTime;

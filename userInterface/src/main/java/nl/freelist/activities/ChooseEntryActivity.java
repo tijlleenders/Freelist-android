@@ -14,7 +14,10 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.schedulers.Schedulers;
+import java.util.ArrayList;
+import java.util.List;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
+import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.freelist.R;
 import nl.freelist.recyclerviewHelpers.ChooseEntryAdapter;
@@ -27,7 +30,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
   private ChooseEntryAdapter adapter;
   private RecyclerView recyclerView;
   private static final String TAG = "ChooseEntryActivity";
-  private String uuidToExclude;
+  private String idToExclude;
   private String myUuid;
 
   public ChooseEntryActivity() {
@@ -56,7 +59,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
 
     Bundle bundle = getIntent().getExtras();
     if (bundle != null) {
-      uuidToExclude = bundle.getString(Constants.EXTRA_ENTRY_ID);
+      idToExclude = bundle.getString(Constants.EXTRA_ENTRY_ID);
     }
     recyclerView = findViewById(R.id.recycler_view);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -79,7 +82,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
   private void updateRecyclerView() {
     Log.d(TAG, "updateRecyclerView called.");
     navigateEntriesViewModel
-        .getAllChildrenEntries()
+        .getViewModelEntries()
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .subscribe(
@@ -89,10 +92,12 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
                   new Runnable() {
                     @Override
                     public void run() {
-                      viewModelEntries
+                      List<ViewModelEntry> customList = new ArrayList<>(
+                          viewModelEntries.getViewModelEntryList());
+                      customList
                           .removeIf(
-                              viewModelEntry -> viewModelEntry.getUuid().equals(uuidToExclude));
-                      adapter.setEntries(viewModelEntries);
+                              viewModelEntry -> viewModelEntry.getEntryId().equals(idToExclude));
+                      adapter.setEntries(customList);
                       Toast.makeText(
                           ChooseEntryActivity.this,
                           "ChooseParentActivityViewModel refreshed!",
@@ -140,7 +145,7 @@ public class ChooseEntryActivity extends AppCompatActivity implements ItemClickL
   public void onItemClick(View view, int position) {
     Log.d(TAG, "onItemClick called.");
     int viewType = adapter.getItemViewType(position);
-    String parentToSet = adapter.getEntryAt(position).getUuid();
+    String parentToSet = adapter.getEntryAt(position).getEntryId();
     navigateEntriesViewModel.setParentId(parentToSet);
     updateRecyclerView();
     adapter.setCurrentUuid(parentToSet);

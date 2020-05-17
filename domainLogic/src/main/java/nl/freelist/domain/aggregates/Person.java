@@ -1,4 +1,4 @@
-package nl.freelist.domain.aggregates.person;
+package nl.freelist.domain.aggregates;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +14,10 @@ public class Person {
 
   private static final Logger LOGGER = Logger.getLogger(Person.class.getName());
 
-  private Email email;
   private Id personId;
   private int lastAppliedEventSequenceNumber;
   private List<Event> eventList = new ArrayList<>();
-  private Calendar calendar;
-
-  // Todo: add option for intelligent scheduling monte-carle reshuffle all prio positions
+  private List<Email> emails;
 
   private Person() {
     lastAppliedEventSequenceNumber = -1;
@@ -53,12 +50,11 @@ public class Person {
         LOGGER.log(Level.INFO, "PersonCreatedEvent applied to person");
         PersonCreatedEvent personCreatedEvent = (PersonCreatedEvent) event;
         this.personId = personCreatedEvent.getAggregateId();
-        calendar = Calendar.Create();
         break;
       case "EntryScheduledEvent": // Todo: one event can't be applied to two aggregates/entities
         LOGGER.log(Level.INFO, "EntryScheduledEvent applied to person");
         EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
-        if (!entryScheduledEvent.getPersonId().equals(personId.toString())) {
+        if (!entryScheduledEvent.getAggregateId().equals(personId.toString())) {
           LOGGER.log(Level.SEVERE, "EntryScheduledEvent can't be applied to person.");
           break;
         }
@@ -72,10 +68,6 @@ public class Person {
     }
     eventList.add(event);
     lastAppliedEventSequenceNumber += 1;
-  }
-
-  public Email getEmail() {
-    return email;
   }
 
   public Id getPersonId() {

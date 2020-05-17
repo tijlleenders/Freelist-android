@@ -115,7 +115,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventHolder> {
 //              intent.putExtra(
 //                  Constants.EXTRA_REQUEST_TYPE_EDIT, Constants.EDIT_ENTRY_REQUEST);
 //              int position = getAdapterPosition();
-//              CalendarEntry calendarEntry =
+//              ViewModelAppointment calendarEntry =
 //                  getEntryAt(
 //                      position);
 //              intent.putExtra(Constants.EXTRA_ENTRY_ID, calendarEntry.getUuid());

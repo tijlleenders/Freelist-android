@@ -9,7 +9,6 @@ public final class Id {
   private Id() {
     // Todo: validation as static method?
     this.id = UUID.randomUUID().toString();
-    ;
   }
 
   public static Id Create() {
@@ -33,6 +32,26 @@ public final class Id {
     } catch (Exception e) {
       return false;
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null && this.id != null) {
+      return false;
+    }
+    if (this.id == null && o == null) {
+      return true;
+    }
+    if (this.id.equals(o.toString())) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return id.hashCode();
   }
 
   @Override

@@ -6,11 +6,13 @@ import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
-import nl.freelist.domain.valueObjects.DateTimeRange;
+import java.util.List;
+import nl.freelist.domain.valueObjects.TimeSlot;
+import nl.freelist.domain.valueObjects.constraints.Constraint;
 
-public class TimeHelper { //Todo: move to value object in domain model
-
+public class TimeHelper { // Todo: move to value object in domain model
 
   public static int getWholeYearsFrom(long duration) {
     return (int) ((duration) / (3600 * 24 * 365 + 3600 * 6));
@@ -35,7 +37,6 @@ public class TimeHelper { //Todo: move to value object in domain model
   public static int getStandaloneSecondsFrom(long duration) {
     return (int) (duration % 60);
   }
-
 
   public static String getDurationStringFrom(long duration) {
 
@@ -66,41 +67,51 @@ public class TimeHelper { //Todo: move to value object in domain model
     StringBuilder durationString = new StringBuilder();
 
     if (years != 0) {
-      durationString.append(years).append("y ");
       if (weeks != 0) {
+        durationString.append(years).append("y ");
         durationString.append(weeks).append("w");
+      } else {
+        durationString.append(years).append("y");
       }
       return durationString.toString();
     }
 
     if (weeks != 0) {
-      durationString.append(weeks).append("w ");
       if (days != 0) {
+        durationString.append(weeks).append("w ");
         durationString.append(days).append("d");
+      } else {
+        durationString.append(weeks).append("w");
       }
       return durationString.toString();
     }
 
     if (days != 0) {
-      durationString.append(days).append("d ");
       if (hours != 0) {
+        durationString.append(days).append("d ");
         durationString.append(hours).append("h");
+      } else {
+        durationString.append(days).append("d");
       }
       return durationString.toString();
     }
 
     if (hours != 0) {
-      durationString.append(hours).append("h ");
       if (minutes != 0) {
+        durationString.append(hours).append("h ");
         durationString.append(minutes).append("m");
+      } else {
+        durationString.append(hours).append("h");
       }
       return durationString.toString();
     }
 
     if (minutes != 0) {
-      durationString.append(minutes).append("m ");
       if (seconds != 0) {
+        durationString.append(minutes).append("m ");
         durationString.append(seconds).append("s");
+      } else {
+        durationString.append(minutes).append("m");
       }
       return durationString.toString();
     }
@@ -114,8 +125,8 @@ public class TimeHelper { //Todo: move to value object in domain model
   }
 
   public static OffsetDateTime getDateFromString(String stringToParse) {
-    DateFormat formatter = new SimpleDateFormat(
-        "yyyy-M-d"); //also works with leading zero in month or days field
+    DateFormat formatter =
+        new SimpleDateFormat("yyyy-M-d"); // also works with leading zero in month or days field
     try {
       Date convertedDate = formatter.parse(stringToParse);
       return OffsetDateTime.ofInstant(convertedDate.toInstant(), ZoneOffset.UTC);
@@ -129,13 +140,13 @@ public class TimeHelper { //Todo: move to value object in domain model
       }
       e.printStackTrace();
     }
-    return null; //can never be reached
+    return null; // can never be reached
   }
 
-  public static Result checkIfDayNotPresentInDtr(DateTimeRange dateTimeRange,
-      String dayThatShouldntBePresent) {
+  public static Result checkIfDayNotPresentInDtr(
+      TimeSlot timeSlot, String dayThatShouldntBePresent) {
     Boolean dayNotPresent = true;
-    OffsetDateTime testTime = dateTimeRange.getStartDateTime();
+    OffsetDateTime testTime = timeSlot.getStartDateTime();
 
     if (testTime.getDayOfWeek().toString().equals(dayThatShouldntBePresent)) {
       dayNotPresent = false;
@@ -146,9 +157,9 @@ public class TimeHelper { //Todo: move to value object in domain model
         dayNotPresent = false;
       }
       testTime = testTime.plusDays(1);
-    } while (testTime.toEpochSecond() < dateTimeRange.getEndDateTime().toEpochSecond());
+    } while (testTime.toEpochSecond() < timeSlot.getEndDateTime().toEpochSecond());
 
-    if (dateTimeRange.getEndDateTime().getDayOfWeek().toString().equals(dayThatShouldntBePresent)) {
+    if (timeSlot.getEndDateTime().getDayOfWeek().toString().equals(dayThatShouldntBePresent)) {
       dayNotPresent = false;
     }
 
@@ -159,12 +170,59 @@ public class TimeHelper { //Todo: move to value object in domain model
       Result result = Result.Create(false, null, "", "");
       return result;
     }
-
   }
 
   public static String format(OffsetDateTime offsetDateTime) {
-    //Todo: if within one week before after, format as yesterday/tomorrow at H:m, last/this Tuesday at H:m
-    //otherwise format as date something like Tue 8 Oct 2020 at H:m
+    // Todo: if within one week before after, format as yesterday/tomorrow at H:m, last/this Tuesday
+    // at H:m
+    // otherwise format as date something like Tue 8 Oct 2020 at H:m
     return offsetDateTime.format(DateTimeFormatter.ofPattern("EEE dd MMM yyyy 'at' H':'mm"));
+  }
+
+  public static Boolean slotListsEqual(List<TimeSlot> a, List<TimeSlot> b) {
+    if (a.size() == 0 && b.size() == 0) {
+      return true;
+    }
+
+    if (a.size() != b.size()) {
+      return false;
+    }
+
+    for (TimeSlot slot : a) {
+      if (!b.contains(slot)) {
+        return false;
+      }
+    }
+    for (TimeSlot slot : b) {
+      if (!a.contains(slot)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  public static List<TimeSlot> getCompatibleSlots(
+      List<TimeSlot> timeSlotList, List<Constraint> constraintList) {
+
+    if (timeSlotList.size() == 0) {
+      return new ArrayList<>(timeSlotList);
+    }
+
+    List<TimeSlot> timeSlotsToRemove = new ArrayList<>();
+
+    for (TimeSlot timeSlot : timeSlotList) {
+      if (constraintList.size() != 0) {
+        for (Constraint constraint : constraintList) {
+          if (!constraint.validate(timeSlot)) {
+            timeSlotsToRemove.add(timeSlot);
+          }
+        }
+      }
+    }
+
+    List<TimeSlot> result = new ArrayList<>(timeSlotList);
+    result.removeAll(timeSlotsToRemove);
+    return result;
   }
 }

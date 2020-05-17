@@ -6,14 +6,15 @@ import androidx.lifecycle.AndroidViewModel;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
-import java.util.UUID;
 import nl.freelist.data.Repository;
+import nl.freelist.data.dto.ViewModelEntries;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.domain.valueObjects.Id;
 
 public class NavigateEntriesViewModel extends AndroidViewModel {
 
   private String parentId;
+  private String personId;
   private Repository repository;
 
   public NavigateEntriesViewModel(@NonNull Application application) {
@@ -21,12 +22,12 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
     repository = new Repository(getApplication().getApplicationContext());
   }
 
-  public Observable<List<ViewModelEntry>> getAllChildrenEntries() {
-    Observable<List<ViewModelEntry>> viewModelEntryList = Observable
+  public Observable<ViewModelEntries> getViewModelEntries() {
+    Observable<ViewModelEntries> viewModelEntries = Observable
         .fromCallable(
-            () -> repository.getAllViewModelEntriesForParent(UUID.fromString(parentId)))
+            () -> repository.getViewModelEntriesForParent(parentId, personId))
         .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
-    return viewModelEntryList;
+    return viewModelEntries;
   }
 
 
@@ -62,4 +63,10 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
   public void setParentId(String parentId) {
     this.parentId = parentId;
   } // not in constructor as this changes while navigating and ViewModel does not have to be re-created
+
+  public void setPersonId(String personId) {
+    this.personId = personId;
+  } // not in constructor as this changes while navigating and ViewModel does not have to be re-created
+
+
 }

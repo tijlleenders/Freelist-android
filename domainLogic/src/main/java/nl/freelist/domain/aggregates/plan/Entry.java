@@ -1,4 +1,4 @@
-package nl.freelist.domain.aggregates.entry;
+package nl.freelist.domain.aggregates.plan;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -16,51 +16,48 @@ import nl.freelist.domain.events.entry.EntryParentChangedEvent;
 import nl.freelist.domain.events.entry.EntryPreferredDayConstraintsChangedEvent;
 import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
 import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
-import nl.freelist.domain.valueObjects.DtrConstraint;
 import nl.freelist.domain.valueObjects.Id;
+import nl.freelist.domain.valueObjects.constraints.Constraint;
+import nl.freelist.domain.valueObjects.constraints.ImpossibleDaysConstraint;
 
 public class Entry {
 
   private static final Logger LOGGER = Logger.getLogger(Entry.class.getName());
-  // Todo: When adding new event:
+  // Todo: When adding new event for Entry, or another aggregate/entitiy:
   // Add to SaveEntryCommand
   // Add to this.applyEvent(Event event)
   // Add to EventDatabaseHelper.jsonOf(Event event)
   // Add to EventDatabaseHelper.getEventsFor(String uuid)
-  // Possibly add to EventDatabaseHelper.getAdditionalQueriesForEvent(Event event, Entry entry,
-  //      int eventSequenceNumber)
-  // Add to ViewModelEntry dto
-  // Add to EventDatabaseHelper.getViewModelEntryFrom(Entry entry)
-  // Possibly List<ViewModelEvent> in Repository.getAllEventsForID(String uuid) (for UI history)
+  // Add to Entry ViewModelEntry dto - if applicable
+  // Add to EventDatabaseHelper.getViewModelEntryFrom(Entry entry) - if applicable
+  // List<ViewModelEvent> in Repository.getAllEventsForID(String uuid) (for UI history) - if
+  // applicable
 
-  private Id ownerUuid;
-  private Id uuid;
-  private Id parentUuid;
+  private Id personId;
+  private Id entryId;
+  private Id parentEntryId;
+  private List<Id> parents;
+  private List<Id> children;
   private String title = "";
   private OffsetDateTime startDateTime;
   private long duration = 0;
   private OffsetDateTime endDateTime;
-  private List<DtrConstraint> preferredDaysConstraints = new ArrayList<>();
+  private List<ImpossibleDaysConstraint> impossibleDaysConstraints = new ArrayList<>();
   private String notes = "";
   private long childCount; // are applied within same transaction that add descendants
   private long
       childDuration; // are applied within same transaction that changes descendant duration
-  private int lastAppliedEventSequenceNumber;
-  private List<DtrConstraint> startAndDueConstraints = new ArrayList<>();
-  private List<DtrConstraint> timeBudgetConstraints = new ArrayList<>();
-  private List<DtrConstraint> repeatConstraints = new ArrayList<>();
+  private List<Constraint> startAndDueConstraints = new ArrayList<>();
+  private List<Constraint> timeBudgetConstraints = new ArrayList<>();
+  private List<Constraint> repeatConstraints = new ArrayList<>();
   private List<Event> eventList = new ArrayList<>();
 
   public Entry(
-      // Todo: make private and expose via public static method Entry.Create so validation can be
-      // included
+      // Todo: make private and expose via public static method
+      //  Entry.Create so validation can be included
       ) {
-    lastAppliedEventSequenceNumber = -1;
-    LOGGER.log(
-        Level.INFO,
-        "Entry created with lastAppliedEventSequenceNumber " + lastAppliedEventSequenceNumber);
+    LOGGER.log(Level.INFO, "Entry initiated without events.");
   }
-
 
   public void applyEvent(Event event) {
     // Todo: maybe move every applyEvent to it's own function with subclass parameter?
@@ -71,138 +68,65 @@ public class Entry {
     String eventClass = event.getClass().getSimpleName();
     switch (eventClass) {
       case "EntryCreatedEvent":
-        LOGGER.log(Level.INFO, "EntryCreatedEvent applied");
-        if (lastAppliedEventSequenceNumber != -1) {
-          LOGGER.log(Level.WARNING, "EntryCreatedEvent applied to entry that already exists!");
-          break;
-        }
         EntryCreatedEvent entryCreatedEvent = (EntryCreatedEvent) event;
-        this.uuid = entryCreatedEvent.getAggregateId();
-        this.ownerUuid = entryCreatedEvent.getOwnerUuid();
-        this.parentUuid = entryCreatedEvent.getParentUuid();
-        eventList.add(event);
-        lastAppliedEventSequenceNumber += 1;
+        this.entryId = entryCreatedEvent.getEntryId();
+        this.personId = entryCreatedEvent.getAggregateId();
+        this.parentEntryId = entryCreatedEvent.getParentEntryId();
         break;
       case "EntryTitleChangedEvent":
-        LOGGER.log(Level.INFO, "EntryTitleChangedEvent applied");
         EntryTitleChangedEvent entryTitleChangedEvent = (EntryTitleChangedEvent) event;
-        if (this.title == null || !this.title.equals(entryTitleChangedEvent.getTitleAfter())) {
-          this.title = entryTitleChangedEvent.getTitleAfter();
-          eventList.add(event);
-          lastAppliedEventSequenceNumber += 1;
-        }
+        this.title = entryTitleChangedEvent.getTitleAfter();
         break;
       case "EntryNotesChangedEvent":
-        LOGGER.log(Level.INFO, "EntryNotesChangedEvent applied");
         EntryNotesChangedEvent entryNotesChangedEvent = (EntryNotesChangedEvent) event;
-        if (this.notes == null || !this.notes.equals(entryNotesChangedEvent.getNotesAfter())) {
-          this.notes = entryNotesChangedEvent.getNotesAfter();
-          eventList.add(event);
-          lastAppliedEventSequenceNumber += 1;
-        }
+        this.notes = entryNotesChangedEvent.getNotesAfter();
         break;
       case "EntryParentChangedEvent":
-        LOGGER.log(Level.INFO, "EntryParentChangedEvent applied");
         EntryParentChangedEvent entryParentChangedEvent = (EntryParentChangedEvent) event;
-        if (this.parentUuid == null
-            || !this.parentUuid.equals(entryParentChangedEvent.getParentAfter())) {
-          this.parentUuid = entryParentChangedEvent.getParentAfter();
-          eventList.add(event);
-          lastAppliedEventSequenceNumber += 1;
-        }
+        this.parentEntryId = entryParentChangedEvent.getParentAfter();
         break;
       case "EntryDurationChangedEvent":
-        LOGGER.log(Level.INFO, "EntryDurationChangedEvent applied");
         EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
-        if (this.duration != entryDurationChangedEvent.getDurationAfter()) {
           this.duration = entryDurationChangedEvent.getDurationAfter();
-          eventList.add(event);
-          lastAppliedEventSequenceNumber += 1;
-        }
         break;
       case "EntryScheduledEvent":
-        LOGGER.log(Level.INFO, "EntryScheduledEvent applied");
         // Do nothing
-        eventList.add(event);
-        lastAppliedEventSequenceNumber += 1;
         break;
       case "EntryStartDateTimeChangedEvent":
-        LOGGER.log(Level.INFO, "EntryStartDateTimeChangedEvent applied");
         EntryStartDateTimeChangedEvent entryStartDateTimeChangedEvent =
             (EntryStartDateTimeChangedEvent) event;
-        if ((entryStartDateTimeChangedEvent.getStartDateTimeAfter() == null
-                && this.startDateTime != null)
-            || (entryStartDateTimeChangedEvent.getStartDateTimeAfter() != null
-                && !entryStartDateTimeChangedEvent
-                    .getStartDateTimeAfter()
-                    .equals(this.startDateTime))) {
           this.startDateTime = entryStartDateTimeChangedEvent.getStartDateTimeAfter();
-          eventList.add(event);
-          lastAppliedEventSequenceNumber += 1;
-        }
         break;
       case "EntryEndDateTimeChangedEvent":
-        LOGGER.log(Level.INFO, "EntryEndDateTimeChangedEvent applied");
         EntryEndDateTimeChangedEvent entryEndDateTimeChangedEvent =
             (EntryEndDateTimeChangedEvent) event;
-        if ((entryEndDateTimeChangedEvent.getEndDateTimeAfter() == null && this.endDateTime != null)
-            || (entryEndDateTimeChangedEvent.getEndDateTimeAfter() != null
-                && !entryEndDateTimeChangedEvent.getEndDateTimeAfter().equals(this.endDateTime))) {
           this.endDateTime = entryEndDateTimeChangedEvent.getEndDateTimeAfter();
-          eventList.add(event);
-          lastAppliedEventSequenceNumber += 1;
-        }
         break;
       case "EntryChildDurationChangedEvent":
-        LOGGER.log(Level.INFO, "EntryChildDurationChangedEvent applied");
         EntryChildDurationChangedEvent entryChildDurationChangedEvent =
             (EntryChildDurationChangedEvent) event;
-        if (entryChildDurationChangedEvent.getDurationDelta() != 0
-            && !uuid.toString()
-                .equals(
-                    entryChildDurationChangedEvent.getOriginAggregateId()) // avoid circular effect
-        ) {
           this.childDuration += (entryChildDurationChangedEvent.getDurationDelta());
-          eventList.add(event);
-          lastAppliedEventSequenceNumber += 1;
-        }
         break;
       case "EntryChildCountChangedEvent":
-        LOGGER.log(Level.INFO, "EntryChildCountChangedEvent applied");
         EntryChildCountChangedEvent entryChildCountChangedEvent =
             (EntryChildCountChangedEvent) event;
-        if (entryChildCountChangedEvent.getChildCountDelta() != 0
-            && !uuid.toString()
-                .equals(entryChildCountChangedEvent.getOriginAggregateId()) // avoid circular effect
-        ) {
           this.childCount += entryChildCountChangedEvent.getChildCountDelta();
-          eventList.add(event);
-          lastAppliedEventSequenceNumber += 1;
-        }
         break;
       case "EntryPreferredDayConstraintsChangedEvent":
-        LOGGER.log(Level.INFO, "EntryPreferredDayConstraintsChangedEvent applied");
         EntryPreferredDayConstraintsChangedEvent entryPreferredDaysConstraintsChangedEvent =
             (EntryPreferredDayConstraintsChangedEvent) event;
-        if (entryPreferredDaysConstraintsChangedEvent.getPreferredDayConstraints().size()
-            != this.preferredDaysConstraints.size()) {
-          this.preferredDaysConstraints =
+        this.impossibleDaysConstraints =
               entryPreferredDaysConstraintsChangedEvent.getPreferredDayConstraints();
-          eventList.add(event);
-          lastAppliedEventSequenceNumber += 1;
-        }
         break;
       default:
         LOGGER.log(
-            Level.WARNING,
-            "Event can't be applied to entry " + uuid.toString() + " ; event type not recognized");
+            Level.SEVERE,
+            "Event can't be applied to entry "
+                + entryId.toString()
+                + " ; event type not recognized");
         break;
     }
-  }
-
-  public List<Event> getListOfEventsWithSequenceHigherThan(int fromEventSequenceNumber) {
-    fromEventSequenceNumber += 1;
-    return eventList.subList(fromEventSequenceNumber, eventList.size());
+    eventList.add(event);
   }
 
   public void applyEvents(List<Event> eventList) {
@@ -211,20 +135,16 @@ public class Entry {
     }
   }
 
-  public int getLastAppliedEventSequenceNumber() {
-    return lastAppliedEventSequenceNumber;
+  public Id getEntryId() {
+    return entryId;
   }
 
-  public Id getUuid() {
-    return uuid;
+  public Id getPersonId() {
+    return personId;
   }
 
-  public Id getOwnerUuid() {
-    return ownerUuid;
-  }
-
-  public Id getParentUuid() {
-    return parentUuid;
+  public Id getParentEntryId() {
+    return parentEntryId;
   }
 
   public String getTitle() {
@@ -255,12 +175,8 @@ public class Entry {
     return childDuration;
   }
 
-  public List<Event> getEventList() {
-    return eventList;
-  }
-
-  public List<DtrConstraint> getPreferredDaysConstraints() {
-    return preferredDaysConstraints;
+  public List<ImpossibleDaysConstraint> getImpossibleDaysConstraints() {
+    return impossibleDaysConstraints;
   }
 
   public Event getPreviousOf(Event event, int eventSequenceNumberToCountdownFrom) {

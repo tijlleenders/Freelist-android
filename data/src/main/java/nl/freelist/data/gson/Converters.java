@@ -34,6 +34,8 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 import nl.freelist.domain.valueObjects.Id;
+import nl.freelist.domain.valueObjects.constraints.Constraint;
+
 
 /**
  * The {@code Converters} class contains static methods for registering Java Time converters.
@@ -83,8 +85,18 @@ public class Converters {
   public static final Type INSTANT_TYPE = new TypeToken<Instant>() {
   }.getType();
 
+  /**
+   * The specific genericized type for {@code Id}.
+   */
   private static final Type ID_TYPE = new TypeToken<Id>() {
   }.getType();
+
+  /**
+   * The specific genericized type for {@code Constraint}.
+   */
+  private static final Type CONSTRAINT_TYPE = new TypeToken<Constraint>() {
+  }.getType();
+
 
   /**
    * Registers all the Java Time converters.
@@ -99,7 +111,7 @@ public class Converters {
 
     registerOffsetDateTime(builder);
     registerId(builder);
-
+    registerConstraint(builder);
     return builder;
   }
 
@@ -123,7 +135,17 @@ public class Converters {
    */
   public static GsonBuilder registerId(GsonBuilder builder) {
     builder.registerTypeAdapter(ID_TYPE, new IdConverter());
+    return builder;
+  }
 
+  /**
+   * Registers the {@link ConstraintConverter} converter.
+   *
+   * @param builder The GSON builder to register the converter with.
+   * @return A reference to {@code builder}.
+   */
+  public static GsonBuilder registerConstraint(GsonBuilder builder) {
+    builder.registerTypeAdapter(CONSTRAINT_TYPE, new ConstraintConverter());
     return builder;
   }
 }

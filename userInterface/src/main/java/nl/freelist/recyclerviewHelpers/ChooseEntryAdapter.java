@@ -114,7 +114,7 @@ public class ChooseEntryAdapter extends RecyclerView.Adapter<ChooseEntryAdapter.
               ViewModelEntry entry =
                   getEntryAt(
                       position);
-              intent.putExtra(Constants.EXTRA_ENTRY_ID, entry.getUuid());
+              intent.putExtra(Constants.EXTRA_ENTRY_ID, entry.getEntryId());
               ((Activity) v.getContext())
                   .startActivityForResult(intent, Constants.EDIT_ENTRY_REQUEST);
               ((Activity) v.getContext())

@@ -2,27 +2,30 @@ package nl.freelist.data.dto;
 
 import android.util.Log;
 
-public final class CalendarEntry {
+public final class ViewModelAppointment {
 
-  private static final String TAG = "CalendarEntry dto";
+  private static final String TAG = "ViewModelAppointment dto";
 
-  private final String entryUuid;
+  private final String entryId;
+  private final String personId;
   private final String title;
   private final int type;
   private final String date;
   private final String time;
   private final String durationString;
 
-  public CalendarEntry(String entryUuid, String title, int type, String date, String time,
+  public ViewModelAppointment(String personId, String entryId, String title, int type, String date,
+      String time,
       String durationString) {
-    this.entryUuid = entryUuid;
+    this.personId = personId;
+    this.entryId = entryId;
     this.title = title;
     this.type = type;
     this.date = date;
     this.time = time;
     this.durationString = durationString;
 
-    Log.d(TAG, "CalendarEntry created");
+    Log.d(TAG, "ViewModelAppointment created");
   }
 
   public String getTitle() {
@@ -45,7 +48,11 @@ public final class CalendarEntry {
     return date;
   }
 
-  public String getEntryUuid() {
-    return entryUuid;
+  public String getPersonId() {
+    return personId;
+  }
+
+  public String getEntryId() {
+    return entryId;
   }
 }

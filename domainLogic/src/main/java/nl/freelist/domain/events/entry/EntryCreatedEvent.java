@@ -6,43 +6,30 @@ import nl.freelist.domain.valueObjects.Id;
 
 public class EntryCreatedEvent extends Event {
 
-  private Id ownerUuid;
-  private Id parentUuid;
+  private Id entryId;
+  private Id parentEntryId;
   private String eventType = "EntryCreatedEvent"; // Todo: refactor to constants or value object
 
-
-  private EntryCreatedEvent(
-      OffsetDateTime occurredDateTime,
-      Id ownerUuid,
-      Id parentUuid,
-      Id aggregateId
-  ) {
-    super(occurredDateTime, aggregateId);
-    this.ownerUuid = ownerUuid;
-    this.parentUuid = parentUuid;
+  private EntryCreatedEvent(OffsetDateTime occurredDateTime, Id personId, Id parentEntryId,
+      Id entryId) {
+    super(occurredDateTime, personId);
+    this.entryId = entryId;
+    this.parentEntryId = parentEntryId;
   }
 
   public static EntryCreatedEvent Create(
-      OffsetDateTime occurredDateTime,
-      Id ownerUuid,
-      Id parentUuid,
-      Id aggregateId
-  ) {
-    EntryCreatedEvent entryCreatedEvent = new EntryCreatedEvent(
-        occurredDateTime,
-        ownerUuid,
-        parentUuid,
-        aggregateId
-    );
+      OffsetDateTime occurredDateTime, Id personId, Id parentEntryId, Id entryId) {
+    EntryCreatedEvent entryCreatedEvent =
+        new EntryCreatedEvent(occurredDateTime, personId, parentEntryId, entryId);
     return entryCreatedEvent;
   }
 
-  public Id getOwnerUuid() {
-    return ownerUuid;
+  public Id getEntryId() {
+    return entryId;
   }
 
-  public Id getParentUuid() {
-    return parentUuid;
+  public Id getParentEntryId() {
+    return parentEntryId;
   }
 
   public String getEventType() {

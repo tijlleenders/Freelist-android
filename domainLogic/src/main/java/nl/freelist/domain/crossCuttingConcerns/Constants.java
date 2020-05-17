@@ -19,11 +19,15 @@ public class Constants {
   // constant strings right? StartActivityForResult requires an int requestCode....
   public static final String EXTRA_REQUEST_TYPE_ADD = "nl.freelist.REQUEST_TYPE_ADD";
 
+  public static final String EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER =
+      "nl.freelist.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER";
+
   public static final int EDIT_ENTRY_REQUEST = 2;
   public static final String EXTRA_REQUEST_TYPE_EDIT = "nl.freelist.REQUEST_TYPE_EDIT";
 
   public static final int CHOOSE_PARENT_REQUEST = 3;
-  public static final String EXTRA_REQUEST_TYPE_CHOOSE_PARENT = "nl.freelist.REQUEST_TYPE_CHOOSE_PARENT";
+  public static final String EXTRA_REQUEST_TYPE_CHOOSE_PARENT =
+      "nl.freelist.REQUEST_TYPE_CHOOSE_PARENT";
 
   public static final String EXTRA_PRIO_CHOSEN = "nl.freelist.PRIO_CHOSEN";
 

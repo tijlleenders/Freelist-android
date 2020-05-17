@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 import nl.freelist.data.dto.ViewModelCalendarOption;
-import nl.freelist.domain.aggregates.person.Calendar;
 import nl.freelist.freelist.R;
 
 public class ChooseCalendarOptionAdapter extends
@@ -96,10 +95,6 @@ public class ChooseCalendarOptionAdapter extends
     return currentEntry.getResourceLastAppliedEventSequenceNumber();
   }
 
-  public Calendar getCalendarFor(int calendarOptionSelected) {
-    ViewModelCalendarOption currentEntry = entries.get(calendarOptionSelected);
-    return currentEntry.getCalendar();
-  }
 
   class EntryHolder extends RecyclerView.ViewHolder {
 

@@ -15,9 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.schedulers.Schedulers;
 import nl.freelist.androidCrossCuttingConcerns.MySettings;
-import nl.freelist.commands.ScheduleEntryCommand;
 import nl.freelist.data.Repository;
-import nl.freelist.domain.aggregates.person.Calendar;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.freelist.R;
 import nl.freelist.recyclerviewHelpers.ChooseCalendarOptionAdapter;
@@ -133,8 +131,8 @@ public class ChooseCalendarOptionActivity extends AppCompatActivity implements I
           int lastSavedResourceSequenceNumber;
           lastSavedResourceSequenceNumber = adapter.lastSavedResourceSequenceNumberFor(
               calendarOptionSelected);
-          Calendar calendar;
-          calendar = adapter.getCalendarFor(calendarOptionSelected);
+//          Calendar calendar;
+//          calendar = adapter.getCalendarFor(calendarOptionSelected);
           Log.d(
               TAG,
               "calendar option "
@@ -143,25 +141,25 @@ public class ChooseCalendarOptionActivity extends AppCompatActivity implements I
                   + " lastSavedEventSequenceNumber " + lastSavedEventSequenceNumber
                   + " lastSavedResourceSequenceNumber" + lastSavedResourceSequenceNumber
           );
-          ScheduleEntryCommand scheduleEntryCommand =
-              new ScheduleEntryCommand(entryUuid, repository);
-          //Todo: check if the whole creation + asyncScheduling of command can't be executed by viewModel
-          ChooseCalendarOptionViewModel.handle(scheduleEntryCommand)
-              .subscribeOn(Schedulers.io())
-              .observeOn(Schedulers.io())
-              .subscribe(
-                  (result -> {
-                    // update View
-                    runOnUiThread(
-                        new Runnable() {
-                          @Override
-                          public void run() {
-                            if (result.isSuccess()) {
-                              updateRecyclerView();
-                            }
-                          }
-                        });
-                  }));
+//          ScheduleEntryCommand scheduleEntryCommand =
+//              new ScheduleEntryCommand(entryUuid, repository);
+//          //Todo: check if the whole creation + asyncScheduling of command can't be executed by viewModel
+//          ChooseCalendarOptionViewModel.handle(scheduleEntryCommand)
+//              .subscribeOn(Schedulers.io())
+//              .observeOn(Schedulers.io())
+//              .subscribe(
+//                  (result -> {
+//                    // update View
+//                    runOnUiThread(
+//                        new Runnable() {
+//                          @Override
+//                          public void run() {
+//                            if (result.isSuccess()) {
+//                              updateRecyclerView();
+//                            }
+//                          }
+//                        });
+//                  }));
         }
         setResult(RESULT_OK, data);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);

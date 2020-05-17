@@ -15,6 +15,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import io.reactivex.schedulers.Schedulers;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,8 @@ import nl.freelist.dialogs.NoticeDialogListener;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.ThreadLogger;
 import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
-import nl.freelist.domain.valueObjects.DtrConstraint;
+import nl.freelist.domain.valueObjects.constraints.Constraint;
+import nl.freelist.domain.valueObjects.constraints.ImpossibleDaysConstraint;
 import nl.freelist.freelist.R;
 import nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel;
 
@@ -80,7 +82,7 @@ public class AddEditEntryActivity extends AppCompatActivity
 
   private Bundle preferredDaysConstraintsCheckBoxStatesBundle = new Bundle();
   private Bundle durationBundle = new Bundle();
-  private List<DtrConstraint> preferredDaysConstraints = new ArrayList<>();
+  private List<ImpossibleDaysConstraint> impossibleDaysConstraints = new ArrayList<>();
 
   private nl.freelist.viewModelPerActivity.AddEditEntryActivityViewModel
       AddEditEntryActivityViewModel;
@@ -168,7 +170,7 @@ public class AddEditEntryActivity extends AppCompatActivity
             duration,
             endDateTime,
             notes,
-            preferredDaysConstraints,
+            impossibleDaysConstraints,
             lastSavedEventSequenceNumber,
             repository);
     saveCommandsInProgress += 1;
@@ -208,12 +210,16 @@ public class AddEditEntryActivity extends AppCompatActivity
   private void initializeForAddNew(Bundle bundle) {
     if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
       id = UUID.randomUUID().toString();
+      if (bundle.containsKey(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER)) {
+        lastSavedEventSequenceNumber = bundle
+            .getInt(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER);
+      }
     }
 
     setTitle("Add new Freelist");
-    // Todo: preferredDaysConstraints from Settings
-    preferredDaysConstraints.add(DtrConstraint.Create("NOEVENINGS", null));
-    preferredDaysConstraints.add(DtrConstraint.Create("NONIGHTS", null));
+    // Todo: impossibleDaysConstraints from Settings
+//    impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOEVENINGS"));
+//    impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NONIGHTS"));
   }
 
   private void initializeForEditExisting(String uuid) {
@@ -371,19 +377,14 @@ public class AddEditEntryActivity extends AppCompatActivity
   }
 
   private void updateAddEditEntryActivityWith(ViewModelEntry viewModelEntry) {
-    Log.d(
-        TAG,
-        "updateAddEditEntryActivityWith viewModelEntry "
-            + viewModelEntry.getTitle()
-            + " version "
-            + viewModelEntry.getLastSavedEventSequenceNumber());
+    Log.d(TAG, "updateAddEditEntryActivityWith viewModelEntry " + viewModelEntry.getTitle());
     title = viewModelEntry.getTitle();
     duration = viewModelEntry.getDuration();
     durationBundle.putLong("duration", duration);
     startDateTime = viewModelEntry.getStartDateTime();
     endDateTime = viewModelEntry.getEndDateTime();
     notes = viewModelEntry.getNotes();
-//    scheduledStatus = viewModelEntry.getScheduledStatus();
+    //    scheduledStatus = viewModelEntry.getScheduledStatus();
     if (duration == 0) {
       textViewScheduledStatus.setText("Not scheduled yet... Please add a duration.");
     } else {
@@ -392,9 +393,14 @@ public class AddEditEntryActivity extends AppCompatActivity
 
     // Todo: implement schedule-text in viewModelEntry
 
-    preferredDaysConstraints = viewModelEntry.getPreferredDaysConstraints();
-    Log.d(TAG, "check: viewModel updated: " + preferredDaysConstraints.toString());
-    updateCheckBoxStatesBundleFromPreferredDaysConstraints();
+    impossibleDaysConstraints = viewModelEntry.getImpossibleDaysConstraints();
+
+    if (impossibleDaysConstraints != null) {
+      Log.d(TAG, "check: viewModel updated: " + impossibleDaysConstraints.toString());
+      updateCheckBoxStatesBundleFromPreferredDaysConstraints();
+    } else {
+      Log.d(TAG, "check: viewModel updated: impossibleDaysConstraints null");
+    }
 
     textInputEditTextTitle.setText(title);
     if (startDateTime != null) {
@@ -406,7 +412,8 @@ public class AddEditEntryActivity extends AppCompatActivity
     }
     textInputEditTextNotes.setText(notes);
 
-    lastSavedEventSequenceNumber = viewModelEntry.getLastSavedEventSequenceNumber();
+    lastSavedEventSequenceNumber = viewModelEntry.getLastAppliedSchedulerSequenceNumber();
+
     return;
   }
 
@@ -486,65 +493,65 @@ public class AddEditEntryActivity extends AppCompatActivity
   }
 
   private void updatePreferredDaysConstraintsFromCheckBoxStatesBundle() {
-    preferredDaysConstraints.clear();
+    impossibleDaysConstraints.clear();
     for (String key : preferredDaysConstraintsCheckBoxStatesBundle.keySet()) {
       switch (key) {
         case "allowMondays":
           if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
             // == false easier to read than !
-            preferredDaysConstraints.add(DtrConstraint.Create("NOMONDAYS", null));
+            impossibleDaysConstraints.add(ImpossibleDaysConstraint.Create(DayOfWeek.MONDAY));
           }
           break;
         case "allowTuesdays":
           if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-            preferredDaysConstraints.add(DtrConstraint.Create("NOTUESDAYS", null));
+            impossibleDaysConstraints.add(ImpossibleDaysConstraint.Create(DayOfWeek.TUESDAY));
           }
           break;
         case "allowWednesdays":
           if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-            preferredDaysConstraints.add(DtrConstraint.Create("NOWEDNESDAYS", null));
+            impossibleDaysConstraints.add(ImpossibleDaysConstraint.Create(DayOfWeek.WEDNESDAY));
           }
           break;
         case "allowThursdays":
           if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-            preferredDaysConstraints.add(DtrConstraint.Create("NOTHURSDAYS", null));
+            impossibleDaysConstraints.add(ImpossibleDaysConstraint.Create(DayOfWeek.THURSDAY));
           }
           break;
         case "allowFridays":
           if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-            preferredDaysConstraints.add(DtrConstraint.Create("NOFRIDAYS", null));
+            impossibleDaysConstraints.add(ImpossibleDaysConstraint.Create(DayOfWeek.FRIDAY));
           }
           break;
         case "allowSaturdays":
           if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-            preferredDaysConstraints.add(DtrConstraint.Create("NOSATURDAYS", null));
+            impossibleDaysConstraints.add(ImpossibleDaysConstraint.Create(DayOfWeek.SATURDAY));
           }
           break;
         case "allowSundays":
           if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-            preferredDaysConstraints.add(DtrConstraint.Create("NOSUNDAYS", null));
+            impossibleDaysConstraints.add(ImpossibleDaysConstraint.Create(DayOfWeek.SUNDAY));
           }
           break;
-        case "allowMornings":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-            preferredDaysConstraints.add(DtrConstraint.Create("NOMORNINGS", null));
-          }
-          break;
-        case "allowAfternoons":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-            preferredDaysConstraints.add(DtrConstraint.Create("NOAFTERNOONS", null));
-          }
-          break;
-        case "allowEvenings":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-            preferredDaysConstraints.add(DtrConstraint.Create("NOEVENINGS", null));
-          }
-          break;
-        case "allowNights":
-          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-            preferredDaysConstraints.add(DtrConstraint.Create("NONIGHTS", null));
-          }
-          break;
+//        case "allowMornings":
+//          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
+//            impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOMORNINGS"));
+//          }
+//          break;
+//        case "allowAfternoons":
+//          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
+//            impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOAFTERNOONS"));
+//          }
+//          break;
+//        case "allowEvenings":
+//          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
+//            impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOEVENINGS"));
+//          }
+//          break;
+//        case "allowNights":
+//          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
+//            impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NONIGHTS"));
+//          }
+//          break;
 
         default:
           break;
@@ -554,9 +561,9 @@ public class AddEditEntryActivity extends AppCompatActivity
   }
 
   private void updateCheckBoxStatesBundleFromPreferredDaysConstraints() {
-    for (DtrConstraint dtrConstraint : preferredDaysConstraints) {
+    for (Constraint impossibleDaysConstraint : impossibleDaysConstraints) {
 
-      switch (dtrConstraint.toString()) {
+      switch (impossibleDaysConstraint.toString()) {
         case "NOMONDAYS":
           preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowMondays", false);
           break;
@@ -601,7 +608,7 @@ public class AddEditEntryActivity extends AppCompatActivity
   public void onPreferredDaysChange(Bundle checkBoxStates) {
     preferredDaysConstraintsCheckBoxStatesBundle = checkBoxStates;
     updatePreferredDaysConstraintsFromCheckBoxStatesBundle();
-    Log.d(TAG, "check: " + preferredDaysConstraints.toString());
+    Log.d(TAG, "check: " + impossibleDaysConstraints.toString());
     saveChangedFields();
   }
 

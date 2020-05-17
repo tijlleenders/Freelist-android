@@ -51,7 +51,7 @@ public class CalendarActivity extends AppCompatActivity implements ItemClickList
 
     calendarViewModel = ViewModelProviders.of(this)
         .get(CalendarViewModel.class);
-    calendarViewModel.setOwnerUuid(resourceUuid);
+    calendarViewModel.setPersonId(resourceUuid);
 
     initializeViews();
 

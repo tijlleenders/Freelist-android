@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import nl.freelist.data.dto.CalendarEntry;
+import nl.freelist.data.dto.ViewModelAppointment;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.freelist.R;
 
@@ -19,7 +19,7 @@ public class CalendarEntryAdapter extends RecyclerView.Adapter<CalendarEntryAdap
 
   private static final String TAG = "CalendarEntryAdapter";
 
-  private List<CalendarEntry> entries = new ArrayList<>();
+  private List<ViewModelAppointment> entries = new ArrayList<>();
   private ItemClickListener onItemClickListener;
 
   public String getCurrentUuid() {
@@ -54,15 +54,15 @@ public class CalendarEntryAdapter extends RecyclerView.Adapter<CalendarEntryAdap
   @Override
   public int getItemViewType(int position) {
     Log.d(TAG, "getItemViewType called.");
-    CalendarEntry calendarEntry = getEntryAt(position);
-    int type = calendarEntry.getType();
+    ViewModelAppointment viewModelAppointment = getEntryAt(position);
+    int type = viewModelAppointment.getType();
     return type;
   }
 
   @Override
   public void onBindViewHolder(@NonNull EntryHolder entryHolder, int position) {
     Log.d(TAG, "onBindViewHolder called.");
-    CalendarEntry currentEntry = entries.get(position);
+    ViewModelAppointment currentEntry = entries.get(position);
     entryHolder.textViewTitle.setText(currentEntry.getTitle());
     if (currentEntry.getType() == Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE) {
       entryHolder.textViewDuration.setText(currentEntry.getDurationString());
@@ -76,7 +76,7 @@ public class CalendarEntryAdapter extends RecyclerView.Adapter<CalendarEntryAdap
     return entries.size();
   }
 
-  public void setEntries(List<CalendarEntry> entries) {
+  public void setEntries(List<ViewModelAppointment> entries) {
     Log.d(TAG, "setEntries called.");
     this.entries = entries;
     notifyDataSetChanged(); // change later for onInsert onDelete (not efficient and no animations)
@@ -88,7 +88,7 @@ public class CalendarEntryAdapter extends RecyclerView.Adapter<CalendarEntryAdap
     this.currentUuid = uuid;
   }
 
-  public CalendarEntry getEntryAt(int position) {
+  public ViewModelAppointment getEntryAt(int position) {
     Log.d(TAG, "getEntryAt called.");
     return entries.get(position);
   }
@@ -118,7 +118,7 @@ public class CalendarEntryAdapter extends RecyclerView.Adapter<CalendarEntryAdap
 //              intent.putExtra(
 //                  Constants.EXTRA_REQUEST_TYPE_EDIT, Constants.EDIT_ENTRY_REQUEST);
 //              int position = getAdapterPosition();
-//              CalendarEntry calendarEntry =
+//              ViewModelAppointment calendarEntry =
 //                  getEntryAt(
 //                      position);
 //              intent.putExtra(Constants.EXTRA_ENTRY_ID, calendarEntry.getUuid());

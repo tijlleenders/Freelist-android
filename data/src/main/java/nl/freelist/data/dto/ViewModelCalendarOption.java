@@ -3,8 +3,7 @@ package nl.freelist.data.dto;
 import android.util.Log;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
-import nl.freelist.domain.aggregates.person.Calendar;
-import nl.freelist.domain.valueObjects.DateTimeRange;
+import nl.freelist.domain.valueObjects.TimeSlot;
 
 public class ViewModelCalendarOption {
 
@@ -12,30 +11,29 @@ public class ViewModelCalendarOption {
 
   private int numberOfProblems;
   private int numberOfReschedules;
-  private String resourceUuid;
-  private String entryUuid;
-  private DateTimeRange scheduledDateTimeRange;
+  private String personId;
+  private String entryId;
+  private TimeSlot scheduledTimeSlot;
   private int resourceLastAppliedEventSequenceNumber;
   private int entryLastAppliedEventSequenceNumber;
-  private Calendar calendar;
+
 
   public ViewModelCalendarOption(
       int numberOfProblems,
       int numberOfReschedules,
-      String resourceUuid,
-      String entryUuid,
-      DateTimeRange scheduledDateTimeRange,
+      String personId,
+      String entryId,
+      TimeSlot scheduledTimeSlot,
       int resourceLastAppliedEventSequenceNumber,
-      int entryLastAppliedEventSequenceNumber,
-      Calendar calendar) {
+      int entryLastAppliedEventSequenceNumber) {
     this.numberOfProblems = numberOfProblems;
     this.numberOfReschedules = numberOfReschedules;
-    this.resourceUuid = resourceUuid;
-    this.entryUuid = entryUuid;
-    this.scheduledDateTimeRange = scheduledDateTimeRange;
+    this.personId = personId;
+    this.entryId = entryId;
+    this.scheduledTimeSlot = scheduledTimeSlot;
     this.resourceLastAppliedEventSequenceNumber = resourceLastAppliedEventSequenceNumber;
     this.entryLastAppliedEventSequenceNumber = entryLastAppliedEventSequenceNumber;
-    this.calendar = calendar;
+    ;
 
     Log.d(TAG,
         "ViewModelCalendarOption created");
@@ -45,28 +43,28 @@ public class ViewModelCalendarOption {
     return resourceLastAppliedEventSequenceNumber;
   }
 
-  public String getEntryUuid() {
-    return entryUuid;
+  public String getEntryId() {
+    return entryId;
   }
 
-  public DateTimeRange getScheduledDateTimeRange() {
-    return scheduledDateTimeRange;
+  public TimeSlot getScheduledTimeSlot() {
+    return scheduledTimeSlot;
   }
 
   public String getScheduledDate() {
-    return scheduledDateTimeRange.getStartDateTime().toLocalDate().toString();
+    return scheduledTimeSlot.getStartDateTime().toLocalDate().toString();
   }
 
   public String getScheduledTime() {
-    return scheduledDateTimeRange.getStartDateTime().toLocalTime().toString();
+    return scheduledTimeSlot.getStartDateTime().toLocalTime().toString();
   }
 
   public String getDurationString() {
-    return TimeHelper.getDurationStringFrom(scheduledDateTimeRange.getDuration());
+    return TimeHelper.getDurationStringFrom(scheduledTimeSlot.getDuration());
   }
 
-  public String getResourceUuid() {
-    return resourceUuid;
+  public String getPersonId() {
+    return personId;
   }
 
   public int getType() {
@@ -101,7 +99,4 @@ public class ViewModelCalendarOption {
     return entryLastAppliedEventSequenceNumber;
   }
 
-  public Calendar getCalendar() {
-    return calendar;
-  }
 }
