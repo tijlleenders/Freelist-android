@@ -17,6 +17,8 @@ import io.reactivex.schedulers.Schedulers;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -54,9 +56,11 @@ public class AddEditEntryActivity extends AppCompatActivity
 
   private String title = "";
   private String scheduledStatus = "";
-  private OffsetDateTime startDateTime;
+  private OffsetDateTime startAtOrAfterDateTime;
+  private OffsetDateTime scheduledStartDateTime = null;
   private long duration = 0;
-  private OffsetDateTime endDateTime;
+  private OffsetDateTime finishAtOrBeforeDateTime;
+  private OffsetDateTime scheduledEndDateTime = null;
   private String notes = "";
 
   private TextInputLayout textInputLayoutTitle;
@@ -166,9 +170,9 @@ public class AddEditEntryActivity extends AppCompatActivity
             parentId,
             defaultId,
             title,
-            startDateTime,
+            startAtOrAfterDateTime,
             duration,
-            endDateTime,
+            finishAtOrBeforeDateTime,
             notes,
             impossibleDaysConstraints,
             lastSavedEventSequenceNumber,
@@ -211,15 +215,15 @@ public class AddEditEntryActivity extends AppCompatActivity
     if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
       id = UUID.randomUUID().toString();
       if (bundle.containsKey(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER)) {
-        lastSavedEventSequenceNumber = bundle
-            .getInt(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER);
+        lastSavedEventSequenceNumber =
+            bundle.getInt(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER);
       }
     }
 
     setTitle("Add new Freelist");
     // Todo: impossibleDaysConstraints from Settings
-//    impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOEVENINGS"));
-//    impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NONIGHTS"));
+    //    impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOEVENINGS"));
+    //    impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NONIGHTS"));
   }
 
   private void initializeForEditExisting(String uuid) {
@@ -295,7 +299,7 @@ public class AddEditEntryActivity extends AppCompatActivity
           @Override
           public void onClick(View v) {
             Log.d(TAG, "endIcon clicked for startDateTime");
-            startDateTime = null;
+            startAtOrAfterDateTime = null;
             textInputEditTextStartDateTime.setText("");
             saveChangedFields();
           }
@@ -315,7 +319,7 @@ public class AddEditEntryActivity extends AppCompatActivity
           @Override
           public void onClick(View v) {
             Log.d(TAG, "endIcon clicked for endDateTime");
-            endDateTime = null;
+            finishAtOrBeforeDateTime = null;
             textInputEditTextEndDateTime.setText("");
             saveChangedFields();
           }
@@ -381,17 +385,23 @@ public class AddEditEntryActivity extends AppCompatActivity
     title = viewModelEntry.getTitle();
     duration = viewModelEntry.getDuration();
     durationBundle.putLong("duration", duration);
-    startDateTime = viewModelEntry.getStartDateTime();
-    endDateTime = viewModelEntry.getEndDateTime();
+    startAtOrAfterDateTime = viewModelEntry.getStartAtOrAfterDateTime();
+    scheduledStartDateTime = viewModelEntry.getScheduledStartDateTime();
+    finishAtOrBeforeDateTime = viewModelEntry.getFinishAtOrBeforeDateTime();
+    scheduledEndDateTime = viewModelEntry.getScheduledEndDateTime();
     notes = viewModelEntry.getNotes();
     //    scheduledStatus = viewModelEntry.getScheduledStatus();
     if (duration == 0) {
       textViewScheduledStatus.setText("Not scheduled yet... Please add a duration.");
-    } else {
+    }
+
+    if (duration > 0 && scheduledStartDateTime == null) {
       textViewScheduledStatus.setText("Scheduling...");
     }
 
-    // Todo: implement schedule-text in viewModelEntry
+    if (duration > 0 && scheduledStartDateTime != null) {
+      textViewScheduledStatus.setText("Scheduled to start " + scheduledStartDateTime.toString());
+    }
 
     impossibleDaysConstraints = viewModelEntry.getImpossibleDaysConstraints();
 
@@ -403,12 +413,12 @@ public class AddEditEntryActivity extends AppCompatActivity
     }
 
     textInputEditTextTitle.setText(title);
-    if (startDateTime != null) {
-      textInputEditTextStartDateTime.setText(TimeHelper.format(startDateTime));
+    if (startAtOrAfterDateTime != null) {
+      textInputEditTextStartDateTime.setText(TimeHelper.format(startAtOrAfterDateTime));
     }
     textInputEditTextDuration.setText(TimeHelper.getDurationStringFrom(duration));
-    if (endDateTime != null) {
-      textInputEditTextEndDateTime.setText(TimeHelper.format(endDateTime));
+    if (finishAtOrBeforeDateTime != null) {
+      textInputEditTextEndDateTime.setText(TimeHelper.format(finishAtOrBeforeDateTime));
     }
     textInputEditTextNotes.setText(notes);
 
@@ -457,16 +467,19 @@ public class AddEditEntryActivity extends AppCompatActivity
           if ((duration
                       > 0 // it only makes sense to add constraints when not already constrained to
                   // a fixed date-time
-                  && startDateTime != null
-                  && endDateTime != null
-                  && startDateTime.plusSeconds(duration).toEpochSecond()
-                      != endDateTime.toEpochSecond())
+              && startAtOrAfterDateTime != null
+              && finishAtOrBeforeDateTime != null
+              && startAtOrAfterDateTime.plusSeconds(duration).toEpochSecond()
+              != finishAtOrBeforeDateTime.toEpochSecond())
               || (duration > 0
-                  && startDateTime == null
-                  && endDateTime != null
-                  && OffsetDateTime.now().plusSeconds(duration).toEpochSecond()
-                      != endDateTime.toEpochSecond())
-              || (duration > 0 && endDateTime == null)) {
+              && startAtOrAfterDateTime == null
+              && finishAtOrBeforeDateTime != null
+              && OffsetDateTime.now(ZoneOffset.UTC)
+              .truncatedTo(ChronoUnit.SECONDS)
+              .plusSeconds(duration)
+              .toEpochSecond()
+              != finishAtOrBeforeDateTime.toEpochSecond())
+              || (duration > 0 && finishAtOrBeforeDateTime == null)) {
             ConstraintPickerDialog constraintPickerDialog =
                 ConstraintPickerDialog.Create(preferredDaysConstraintsCheckBoxStatesBundle);
             constraintPickerDialog.show(getSupportFragmentManager(), "constraintPicker");
@@ -532,26 +545,30 @@ public class AddEditEntryActivity extends AppCompatActivity
             impossibleDaysConstraints.add(ImpossibleDaysConstraint.Create(DayOfWeek.SUNDAY));
           }
           break;
-//        case "allowMornings":
-//          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-//            impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOMORNINGS"));
-//          }
-//          break;
-//        case "allowAfternoons":
-//          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-//            impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOAFTERNOONS"));
-//          }
-//          break;
-//        case "allowEvenings":
-//          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-//            impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOEVENINGS"));
-//          }
-//          break;
-//        case "allowNights":
-//          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
-//            impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NONIGHTS"));
-//          }
-//          break;
+        //        case "allowMornings":
+        //          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
+        //
+        // impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOMORNINGS"));
+        //          }
+        //          break;
+        //        case "allowAfternoons":
+        //          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
+        //
+        // impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOAFTERNOONS"));
+        //          }
+        //          break;
+        //        case "allowEvenings":
+        //          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
+        //
+        // impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NOEVENINGS"));
+        //          }
+        //          break;
+        //        case "allowNights":
+        //          if (preferredDaysConstraintsCheckBoxStatesBundle.getBoolean(key) == false) {
+        //
+        // impossibleDaysConstraints.add(ImpossibleTimeOfDayConstraint.Create("NONIGHTS"));
+        //          }
+        //          break;
 
         default:
           break;
@@ -616,26 +633,28 @@ public class AddEditEntryActivity extends AppCompatActivity
   public void onDialogFeedback(String input, String inputType) {
     switch (inputType) {
       case "startDate":
-        startDateTime = TimeHelper.getDateFromString(input);
-        textInputEditTextStartDateTime.setText(TimeHelper.format(startDateTime));
+        startAtOrAfterDateTime = TimeHelper.getDateFromString(input);
+        textInputEditTextStartDateTime.setText(TimeHelper.format(startAtOrAfterDateTime));
         hideSoftKeyboard();
         textInputEditTextStartDateTime.clearFocus();
         break;
       case "startTime":
-        startDateTime = startDateTime.plusSeconds(Integer.valueOf(input));
-        textInputEditTextStartDateTime.setText(TimeHelper.format(startDateTime));
+        startAtOrAfterDateTime = startAtOrAfterDateTime.plusSeconds(Integer.valueOf(input));
+        textInputEditTextStartDateTime.setText(TimeHelper.format(startAtOrAfterDateTime));
         hideSoftKeyboard();
         saveChangedFields();
         break;
       case "duration":
         duration = Long.valueOf(input);
         textInputEditTextDuration.setText(TimeHelper.getDurationStringFrom(duration));
-        if (duration != 0 && startDateTime != null) {
-          if (endDateTime == null
-              || (endDateTime != null
-                  && duration > (endDateTime.toEpochSecond() - startDateTime.toEpochSecond()))) {
-            endDateTime = startDateTime.plusSeconds(duration);
-            textInputEditTextEndDateTime.setText(TimeHelper.format(endDateTime));
+        if (duration != 0 && startAtOrAfterDateTime != null) {
+          if (finishAtOrBeforeDateTime == null
+              || (finishAtOrBeforeDateTime != null
+              && duration
+              > (finishAtOrBeforeDateTime.toEpochSecond()
+              - startAtOrAfterDateTime.toEpochSecond()))) {
+            finishAtOrBeforeDateTime = startAtOrAfterDateTime.plusSeconds(duration);
+            textInputEditTextEndDateTime.setText(TimeHelper.format(finishAtOrBeforeDateTime));
           }
         }
         textInputLayoutDuration.setEndIconVisible(false);
@@ -643,16 +662,17 @@ public class AddEditEntryActivity extends AppCompatActivity
         saveChangedFields();
         break;
       case "endDate":
-        endDateTime = TimeHelper.getDateFromString(input);
-        textInputEditTextEndDateTime.setText(TimeHelper.format(endDateTime));
+        finishAtOrBeforeDateTime = TimeHelper.getDateFromString(input);
+        textInputEditTextEndDateTime.setText(TimeHelper.format(finishAtOrBeforeDateTime));
         hideSoftKeyboard();
         textInputEditTextEndDateTime.clearFocus();
         break;
       case "endTime":
-        endDateTime = endDateTime.plusSeconds(Integer.valueOf(input));
-        textInputEditTextEndDateTime.setText(TimeHelper.format(endDateTime));
-        if (startDateTime != null && duration == 0) {
-          duration = endDateTime.toEpochSecond() - startDateTime.toEpochSecond();
+        finishAtOrBeforeDateTime = finishAtOrBeforeDateTime.plusSeconds(Integer.valueOf(input));
+        textInputEditTextEndDateTime.setText(TimeHelper.format(finishAtOrBeforeDateTime));
+        if (startAtOrAfterDateTime != null && duration == 0) {
+          duration =
+              finishAtOrBeforeDateTime.toEpochSecond() - startAtOrAfterDateTime.toEpochSecond();
           textInputEditTextDuration.setText(TimeHelper.getDurationStringFrom(duration));
         }
         hideSoftKeyboard();

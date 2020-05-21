@@ -1,5 +1,8 @@
 package nl.freelist.domain.crossCuttingConcerns;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
 public class Constants {
 
   public static final String SETTINGS_USER_UUID = "nl.freelist.SETTINGS_USER_UUID";
@@ -45,4 +48,10 @@ public class Constants {
   public static final int PRIO_NO_PROBLEM_TYPE = 8;
   public static final int PRIO_ONLY_RESCHEDULES_TYPE = 9;
   public static final int PRIO_PROBLEM_TYPE = 10;
+  public static final OffsetDateTime START_OF_TIME = OffsetDateTime
+      .of(2020, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+  public static final long SECONDS_FROM_BEGINNING_TO_END_OF_TIME = 4294967295L;
+  public static final OffsetDateTime END_OF_TIME = OffsetDateTime
+      .of(2020, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC).plusSeconds(
+          SECONDS_FROM_BEGINNING_TO_END_OF_TIME);
 }

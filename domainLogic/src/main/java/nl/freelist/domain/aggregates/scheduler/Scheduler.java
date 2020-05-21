@@ -1,35 +1,38 @@
-package nl.freelist.domain.aggregates.plan;
+package nl.freelist.domain.aggregates.scheduler;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.events.entry.EntryChildCountChangedEvent;
-import nl.freelist.domain.events.entry.EntryChildDurationChangedEvent;
-import nl.freelist.domain.events.entry.EntryCreatedEvent;
-import nl.freelist.domain.events.entry.EntryDurationChangedEvent;
-import nl.freelist.domain.events.entry.EntryEndDateTimeChangedEvent;
-import nl.freelist.domain.events.entry.EntryNotesChangedEvent;
-import nl.freelist.domain.events.entry.EntryParentChangedEvent;
-import nl.freelist.domain.events.entry.EntryPreferredDayConstraintsChangedEvent;
-import nl.freelist.domain.events.entry.EntryScheduledEvent;
-import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
-import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
-import nl.freelist.domain.events.person.SchedulerCreatedEvent;
+import nl.freelist.domain.events.scheduler.SchedulerCreatedEvent;
+import nl.freelist.domain.events.scheduler.calendar.EntryNotScheduledEvent;
+import nl.freelist.domain.events.scheduler.calendar.EntryScheduledEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryChildCountChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryChildDurationChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryCreatedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryDurationChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryEndDateTimeChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryNotesChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryParentChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryPreferredDayConstraintsChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryStartDateTimeChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryTitleChangedEvent;
 import nl.freelist.domain.valueObjects.Id;
 import nl.freelist.domain.valueObjects.TimeSlot;
-import nl.freelist.domain.valueObjects.constraints.Constraint;
 import nl.freelist.domain.valueObjects.constraints.ImpossibleDaysConstraint;
 
 public class Scheduler {
 
   private static final Logger LOGGER = Logger.getLogger(Scheduler.class.getName());
   // Todo: When adding new Scheduler event or command:
+  // Only Scheduler.applyEvent has the right to call Entry/Calendar.applyEvent
   // Add to this.applyEvent(Event event) and if Entry event also to Entry.apply(Event event)
   // Add to EventDatabaseHelper.jsonOf(Event event)
   // Add to EventDatabaseHelper.getEventsFor(String uuid)
@@ -40,21 +43,24 @@ public class Scheduler {
   // Possibly List<ViewModelEvent> in Repository.getAllEventsForID(String uuid) (for UI history)
 
   private Id personId;
-  private List<TimeSlot> scheduledSlots = new ArrayList<>();
-  private List<TimeSlot> freeSlots = new ArrayList<>();
   private HashMap<Id, Entry> entriesMap = new HashMap<>();
-  private int lastAppliedEventSequenceNumber;
-  private List<Constraint> startAndDueConstraints = new ArrayList<>();
-  private List<Constraint> timeBudgetConstraints = new ArrayList<>();
-  private List<Constraint> repeatConstraints = new ArrayList<>();
+  private Calendar calendar;
   private List<Event> eventList = new ArrayList<>();
+  private int lastAppliedEventSequenceNumber;
 
-  public Scheduler(
+  private Scheduler(
       // Todo: make private and expose via public static method
       //  Scheduler.Create so validation can be included
   ) {
-    lastAppliedEventSequenceNumber = -1;
     LOGGER.log(Level.INFO, "Scheduler initiated without events.");
+  }
+
+  public static Scheduler Create(Id personId) {
+    Scheduler scheduler = new Scheduler();
+    scheduler.personId = personId;
+    scheduler.lastAppliedEventSequenceNumber = -1;
+    scheduler.calendar = Calendar.Create();
+    return scheduler;
   }
 
   public void applyEvent(Event event) {
@@ -96,10 +102,6 @@ public class Scheduler {
         entryId = ((EntryDurationChangedEvent) event).getEntryId();
         (entriesMap.get(entryId)).applyEvent(event);
         break;
-      case "EntryScheduledEvent":
-        entryId = ((EntryScheduledEvent) event).getEntryId();
-        (entriesMap.get(entryId)).applyEvent(event);
-        break;
       case "EntryStartDateTimeChangedEvent":
         entryId = ((EntryStartDateTimeChangedEvent) event).getEntryId();
         (entriesMap.get(entryId)).applyEvent(event);
@@ -120,6 +122,21 @@ public class Scheduler {
         entryId = ((EntryPreferredDayConstraintsChangedEvent) event).getEntryId();
         (entriesMap.get(entryId)).applyEvent(event);
         break;
+      case "EntryScheduledEvent":
+        LOGGER.log(Level.INFO, "EntryScheduledEvent applied to person");
+        EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
+        // apply to calendar, and also to Entry - it is ok as for the outside world it is only
+        // applied to Scheduler aggregate
+        calendar.applyEvent(entryScheduledEvent);
+        entriesMap.get(entryScheduledEvent.getEntryId()).applyEvent(entryScheduledEvent);
+        break;
+      case "EntryNotScheduledEvent":
+        EntryNotScheduledEvent entryNotScheduledEvent = (EntryNotScheduledEvent) event;
+        // apply to calendar, and also to Entry - it is ok as for the outside world it is only
+        // applied to Scheduler aggregate
+        calendar.applyEvent(entryNotScheduledEvent);
+        entriesMap.get(entryNotScheduledEvent.getEntryId()).applyEvent(entryNotScheduledEvent);
+        break;
       default:
         LOGGER.log(
             Level.WARNING,
@@ -139,67 +156,62 @@ public class Scheduler {
       Id entryId,
       Id parentId,
       String titleAfter,
-      OffsetDateTime startDateTimeAfter,
+      OffsetDateTime startAtOrAfterDateTimeAfter,
       long durationAfter,
-      OffsetDateTime endDateTimeAfter,
+      OffsetDateTime finishAtOrBeforeDateTimeAfter,
       String notesAfter,
       List<ImpossibleDaysConstraint> impossibleDaysConstraintsAfter,
       int lastSavedEventSequenceNumber) {
     try {
-      OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-      Entry entry;
+      OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS);
+      Boolean rescheduleFlag = false;
 
-      // Optimistic locking only necessary in multi-user environment or if commands out of order
-      // now only UI + all commands are scheduled sequentially on same thread
-
-      // but if processing of changes that impact multiple entries takes longer than
-      // what a user needs to navigate to a different entry
-      // user could be making changes on stale data
-      // avoid by greying out screen whilst still being able to navigate?
-      // That't why it's still here
-      if (lastSavedEventSequenceNumber != this.lastAppliedEventSequenceNumber) {
-        throw new Exception(
-            "Optimistic concurrency exception. Scheduler:"
-                + this.lastAppliedEventSequenceNumber
-                + " UI: "
-                + lastSavedEventSequenceNumber);
+      if (startAtOrAfterDateTimeAfter == null) {
+        startAtOrAfterDateTimeAfter = now;
       }
+      if (finishAtOrBeforeDateTimeAfter == null) {
+        finishAtOrBeforeDateTimeAfter = Constants.END_OF_TIME;
+      }
+      Entry entry;
+      checkLastSavedEventSequenceNumber(lastSavedEventSequenceNumber);
 
       if (entriesMap.get(entryId) == null) {
         createEntry(now, parentId, entryId);
       }
       entry = entriesMap.get(entryId);
 
-      //checking takes place here, once an event is applied, it has ALREADY happened
-      if (entry.getTitle() == null || !entry.getTitle().equals(titleAfter)) {
-        //Todo: move to it's own bounded context - has nothing to do with scheduling invariants
+      // checking takes place here, once an event is applied, it has ALREADY happened
+      if (entry.isNewTitle(
+          titleAfter)) { // Todo: move to it's own bounded context - has nothing to do with
+        // scheduling invariants
         changeEntryTitle(now, entryId, titleAfter);
       }
-      if ((startDateTimeAfter == null && entry.getStartDateTime() != null)
-          || (startDateTimeAfter != null && !startDateTimeAfter.equals(entry.getStartDateTime()))) {
-        changeEntryStartDateTime(now, entryId, startDateTimeAfter);
+      if (entry.isNewStartAtOfAfterDateTime(startAtOrAfterDateTimeAfter)) {
+        rescheduleFlag = true;
+        changeEntryStartDateTime(now, entryId, startAtOrAfterDateTimeAfter);
       }
-      if (entry.getDuration() != durationAfter) {
-        changeEntryDuration(now, entryId, durationAfter, entry);
+      if (entry.isNewFinishAtOrBeforeDateTimeAfter(finishAtOrBeforeDateTimeAfter)) {
+        rescheduleFlag = true;
+        changeEntryEndDateTime(now, entryId, finishAtOrBeforeDateTimeAfter);
       }
-      if ((endDateTimeAfter == null && entry.getEndDateTime() != null)
-          || (endDateTimeAfter != null && !endDateTimeAfter.equals(entry.getEndDateTime()))) {
-        changeEntryEndDateTime(now, entryId, endDateTimeAfter);
-      }
-      if (entry.getNotes() == null || !entry.getNotes().equals(notesAfter)) {
-        //Todo: move to it's own bounded context - has nothing to do with scheduling invariants
+      if (entry.isNewNotes(
+          notesAfter)) { // Todo: move to it's own bounded context - has nothing to do with
+        // scheduling invariants
         changeEntryNotes(now, entryId, notesAfter);
       }
-      if (impossibleDaysConstraintsAfter.size() != entry.getImpossibleDaysConstraints().size()) {
+      if (entry.isNewImpossibleDaysConstraint(impossibleDaysConstraintsAfter)) {
+        rescheduleFlag = true;
         changeImpossibleDayConstraints(now, entryId, impossibleDaysConstraintsAfter);
       }
       // Todo: add parentchange
-      //    EntryParentChangedEvent entryParentChangedEvent = EntryParentChangedEvent.Create(
-      //      now,
-      //      uuid,
-      //        parentAfter
-      //    );
-
+      if (entry.isNewDuration(durationAfter)) {
+        rescheduleFlag = true;
+        changeEntryDuration(now, entryId, durationAfter, entry);
+      }
+      if (rescheduleFlag) {
+        entry = entriesMap.get(entryId);
+        scheduleEntry(entry);
+      }
     } catch (Exception e) {
       if (e.getMessage() != null) {
         LOGGER.log(Level.WARNING, e.getMessage());
@@ -209,7 +221,77 @@ public class Scheduler {
     return Result.Create(true, null, "", "");
   }
 
-  private void changeImpossibleDayConstraints(OffsetDateTime now, Id entryId,
+  private void checkLastSavedEventSequenceNumber(int lastSavedEventSequenceNumber)
+      throws Exception {
+    // Optimistic locking only necessary in multi-user environment or if commands out of order
+    // now only UI + all commands are scheduled sequentially on same thread
+    // but if processing of changes that impact multiple entries takes longer than
+    // what a user needs to navigate to a different entry
+    // user could be making changes on stale data
+    // avoid by greying out screen whilst still being able to navigate?
+    // That't why it's still here
+    if (lastSavedEventSequenceNumber != this.lastAppliedEventSequenceNumber) {
+      throw new Exception(
+          "Optimistic concurrency exception. Scheduler:"
+              + this.lastAppliedEventSequenceNumber
+              + " UI: "
+              + lastSavedEventSequenceNumber);
+    }
+  }
+
+  public Calendar getCalendar() {
+    return calendar;
+  }
+
+
+  private void scheduleEntry(Entry entry) {
+    TimeSlot scheduledTimeSlot = null;
+    TimeSlot freeTimeSlotToDelete = null;
+    List<TimeSlot> freeTimeSlotsToCreate = new ArrayList<>();
+    OffsetDateTime scheduledStartDateTime = null;
+
+    TimeSlot compatibleFreeTimeSlot =
+        calendar.getCompatibleFreeTimeSlots(
+            entry.getDuration(),
+            entry.getStartAtOrAfterDateTime(),
+            entry.getFinishAtOrBeforeDateTime());
+    if (compatibleFreeTimeSlot == null) {
+      System.out.println("No compatible freeTimeSlot found");
+      EntryNotScheduledEvent entryNotScheduledEvent =
+          EntryNotScheduledEvent.Create(
+              OffsetDateTime.now(ZoneOffset.UTC),
+              personId,
+              entry.getPersonId());
+      applyEvent(entryNotScheduledEvent);
+    } else {
+      freeTimeSlotToDelete = calendar.getFreeTimeSlot(compatibleFreeTimeSlot.getKey());
+
+      if (compatibleFreeTimeSlot.getStartDateTime().toEpochSecond() >= entry
+          .getStartAtOrAfterDateTime().toEpochSecond()) {
+        scheduledStartDateTime = compatibleFreeTimeSlot.getStartDateTime();
+      } else {
+        scheduledStartDateTime = entry.getStartAtOrAfterDateTime();
+      }
+      scheduledTimeSlot =
+          TimeSlot.Create(
+              scheduledStartDateTime,
+              scheduledStartDateTime.plusSeconds(entry.getDuration()),
+              entry.getEntryId());
+      freeTimeSlotsToCreate = compatibleFreeTimeSlot.minus(scheduledTimeSlot);
+      EntryScheduledEvent entryScheduledEvent =
+          EntryScheduledEvent.Create(
+              OffsetDateTime.now(ZoneOffset.UTC),
+              entry.getPersonId(),
+              scheduledTimeSlot,
+              freeTimeSlotToDelete,
+              freeTimeSlotsToCreate);
+      applyEvent(entryScheduledEvent);
+    }
+  }
+
+  private void changeImpossibleDayConstraints(
+      OffsetDateTime now,
+      Id entryId,
       List<ImpossibleDaysConstraint> impossibleDaysConstraintsAfter) {
     EntryPreferredDayConstraintsChangedEvent entryPreferredDayConstraintsChangedEvent =
         EntryPreferredDayConstraintsChangedEvent.Create(
@@ -221,11 +303,10 @@ public class Scheduler {
     EntryNotesChangedEvent entryNotesChangedEvent =
         EntryNotesChangedEvent.Create(now, personId, entryId, notesAfter);
     applyEvent(entryNotesChangedEvent);
-
   }
 
-  private void changeEntryEndDateTime(OffsetDateTime now, Id entryId,
-      OffsetDateTime endDateTimeAfter) {
+  private void changeEntryEndDateTime(
+      OffsetDateTime now, Id entryId, OffsetDateTime endDateTimeAfter) {
     EntryEndDateTimeChangedEvent entryEndDateTimeChangedEvent =
         EntryEndDateTimeChangedEvent.Create(now, personId, entryId, endDateTimeAfter);
     applyEvent(entryEndDateTimeChangedEvent);
@@ -308,50 +389,7 @@ public class Scheduler {
     return personId;
   }
 
-  public List<Event> getEventList() {
-    return eventList;
-  }
-
-  public Event getPreviousOf(Event event, int eventSequenceNumberToCountdownFrom) {
-    String eventTypeToFind = event.getClass().getSimpleName();
-
-    LOGGER.log(
-        Level.INFO,
-        "Asked for the previous event of "
-            + eventTypeToFind
-            + " with eventSequenceNumberToCountdownFrom lower than "
-            + eventSequenceNumberToCountdownFrom);
-    if (eventSequenceNumberToCountdownFrom
-        > (eventList.size() - 1)) { // eventSequenceNumbers start at 0 - just like List
-      LOGGER.log(
-          Level.WARNING,
-          "Asked to count down from "
-              + eventSequenceNumberToCountdownFrom
-              + " but max eventSequenceNumber of eventList is "
-              + (eventList.size() - 1));
-      return null;
-    }
-
-    for (int eventSequenceNumberCountdown =
-        eventSequenceNumberToCountdownFrom - 1; // Exclude the event to compare with
-        eventSequenceNumberCountdown >= 0;
-        eventSequenceNumberCountdown--) {
-      System.out.println(eventSequenceNumberCountdown);
-      Event eventToTest = eventList.get(eventSequenceNumberCountdown);
-      if (eventToTest.getClass().getSimpleName().equals(eventTypeToFind)) {
-        LOGGER.log(
-            Level.INFO,
-            "Returning Event with sequence number "
-                + eventSequenceNumberToCountdownFrom
-                + " of type "
-                + eventTypeToFind);
-        return eventToTest;
-      }
-    }
-    return null;
-  }
-
   public List<Entry> getEntries() {
-    return new ArrayList<Entry>(entriesMap.values());
+    return new ArrayList<>(entriesMap.values());
   }
 }

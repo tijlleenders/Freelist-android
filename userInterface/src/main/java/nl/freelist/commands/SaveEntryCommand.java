@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.freelist.data.Repository;
-import nl.freelist.domain.aggregates.plan.Scheduler;
+import nl.freelist.domain.aggregates.scheduler.Scheduler;
 import nl.freelist.domain.commands.Command;
 import nl.freelist.domain.crossCuttingConcerns.Result;
 import nl.freelist.domain.valueObjects.Id;

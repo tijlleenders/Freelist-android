@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.events.entry.EntryScheduledEvent;
 import nl.freelist.domain.events.person.PersonCreatedEvent;
 import nl.freelist.domain.valueObjects.Email;
 import nl.freelist.domain.valueObjects.Id;
@@ -50,14 +49,6 @@ public class Person {
         LOGGER.log(Level.INFO, "PersonCreatedEvent applied to person");
         PersonCreatedEvent personCreatedEvent = (PersonCreatedEvent) event;
         this.personId = personCreatedEvent.getAggregateId();
-        break;
-      case "EntryScheduledEvent": // Todo: one event can't be applied to two aggregates/entities
-        LOGGER.log(Level.INFO, "EntryScheduledEvent applied to person");
-        EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
-        if (!entryScheduledEvent.getAggregateId().equals(personId.toString())) {
-          LOGGER.log(Level.SEVERE, "EntryScheduledEvent can't be applied to person.");
-          break;
-        }
         break;
       default:
         LOGGER.log(

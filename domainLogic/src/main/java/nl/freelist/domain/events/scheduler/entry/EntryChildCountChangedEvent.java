@@ -1,43 +1,43 @@
-package nl.freelist.domain.events.entry;
+package nl.freelist.domain.events.scheduler.entry;
 
 import java.time.OffsetDateTime;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.valueObjects.Id;
 
-public class EntryChildDurationChangedEvent extends Event {
+public class EntryChildCountChangedEvent extends Event {
 
-  private long durationDelta;
+  private long childCountDelta;
   private Id entryId;
-  private String eventType = "EntryChildDurationChangedEvent";
+  private String eventType = "EntryChildCountChangedEvent";
 
-  private EntryChildDurationChangedEvent(
+  private EntryChildCountChangedEvent(
       OffsetDateTime occurredDateTime,
       Id entryId,
       Id personId,
-      long durationDelta
+      long childCountDelta
   ) {
     super(occurredDateTime, personId);
-    this.durationDelta = durationDelta;
+    this.childCountDelta = childCountDelta;
     this.entryId = entryId;
   }
 
-  public static EntryChildDurationChangedEvent Create(
+  public static EntryChildCountChangedEvent Create(
       OffsetDateTime occurredDateTime,
       Id entryId,
       Id personId,
-      long durationDelta
+      long childCountDelta
   ) {
 
-    return new EntryChildDurationChangedEvent(
+    return new EntryChildCountChangedEvent(
         occurredDateTime,
         entryId,
         personId,
-        durationDelta
+        childCountDelta
     );
   }
 
-  public long getDurationDelta() {
-    return durationDelta;
+  public long getChildCountDelta() {
+    return childCountDelta;
   }
 
   public String getEventType() {

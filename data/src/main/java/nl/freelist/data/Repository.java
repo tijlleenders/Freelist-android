@@ -14,17 +14,17 @@ import nl.freelist.data.dto.ViewModelEntries;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.dto.ViewModelEvent;
 import nl.freelist.domain.aggregates.Person;
-import nl.freelist.domain.aggregates.plan.Scheduler;
+import nl.freelist.domain.aggregates.scheduler.Scheduler;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.events.entry.EntryCreatedEvent;
-import nl.freelist.domain.events.entry.EntryDurationChangedEvent;
-import nl.freelist.domain.events.entry.EntryEndDateTimeChangedEvent;
-import nl.freelist.domain.events.entry.EntryNotesChangedEvent;
-import nl.freelist.domain.events.entry.EntryParentChangedEvent;
-import nl.freelist.domain.events.entry.EntryScheduledEvent;
-import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
-import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
+import nl.freelist.domain.events.scheduler.calendar.EntryScheduledEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryCreatedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryDurationChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryEndDateTimeChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryNotesChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryParentChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryStartDateTimeChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryTitleChangedEvent;
 import nl.freelist.domain.valueObjects.Id;
 
 public class Repository {
@@ -42,35 +42,6 @@ public class Repository {
   public Repository(Context appContext) {
     eventDatabaseHelper = EventDatabaseHelper.getInstance(appContext);
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
-  }
-
-  public List<sqlBundle> insert(Person person) { // Todo: fix like insert(entry)
-    Log.d(TAG, "Repository insert called with entry " + person.getPersonId());
-
-    List<sqlBundle> sqlBundleList = new ArrayList<>();
-
-    int lastSavedEventSequenceNumber =
-        eventDatabaseHelper.selectLastSavedEventSequenceNumber(person.getPersonId());
-    Log.d(TAG, "lastSavedEventSequenceNumber = " + lastSavedEventSequenceNumber);
-
-
-    List<Event> newEventsToSave =
-        person.getListOfEventsWithSequenceHigherThan(lastSavedEventSequenceNumber);
-    Log.d(TAG, "newEventsToSave list with size " + newEventsToSave.size() + " retrieved.");
-
-    int eventSequenceNumberForQuery = lastSavedEventSequenceNumber;
-
-    for (Event event : newEventsToSave) {
-      try {
-        sqlBundleList.addAll(
-            eventDatabaseHelper.getInitialQueriesForEvent(
-                "person", eventSequenceNumberForQuery, event));
-        eventSequenceNumberForQuery += 1;
-      } catch (Exception e) {
-        Log.d(TAG, "Error while executing insert(Person person):" + e.toString());
-      }
-    }
-    return sqlBundleList;
   }
 
   public void insert(Scheduler scheduler) throws Exception {

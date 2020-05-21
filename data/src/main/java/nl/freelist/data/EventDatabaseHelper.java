@@ -18,24 +18,25 @@ import nl.freelist.data.dto.ViewModelAppointment;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.gson.Converters;
 import nl.freelist.domain.aggregates.Person;
-import nl.freelist.domain.aggregates.plan.Entry;
-import nl.freelist.domain.aggregates.plan.Scheduler;
+import nl.freelist.domain.aggregates.scheduler.Entry;
+import nl.freelist.domain.aggregates.scheduler.Scheduler;
 import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.events.entry.EntryChildCountChangedEvent;
-import nl.freelist.domain.events.entry.EntryChildDurationChangedEvent;
-import nl.freelist.domain.events.entry.EntryCreatedEvent;
-import nl.freelist.domain.events.entry.EntryDurationChangedEvent;
-import nl.freelist.domain.events.entry.EntryEndDateTimeChangedEvent;
-import nl.freelist.domain.events.entry.EntryNotesChangedEvent;
-import nl.freelist.domain.events.entry.EntryParentChangedEvent;
-import nl.freelist.domain.events.entry.EntryPreferredDayConstraintsChangedEvent;
-import nl.freelist.domain.events.entry.EntryScheduledEvent;
-import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
-import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
 import nl.freelist.domain.events.person.PersonCreatedEvent;
-import nl.freelist.domain.events.person.SchedulerCreatedEvent;
+import nl.freelist.domain.events.scheduler.SchedulerCreatedEvent;
+import nl.freelist.domain.events.scheduler.calendar.EntryNotScheduledEvent;
+import nl.freelist.domain.events.scheduler.calendar.EntryScheduledEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryChildCountChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryChildDurationChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryCreatedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryDurationChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryEndDateTimeChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryNotesChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryParentChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryPreferredDayConstraintsChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryStartDateTimeChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryTitleChangedEvent;
 import nl.freelist.domain.valueObjects.Id;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,7 +115,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         break;
       case "scheduler":
         sqlBundleList.addAll(
-            getPersonQueriesForEvent(aggregateIdType, eventSequenceNumberForQuery, event));
+            getSchedulerQueriesForEvent(aggregateIdType, eventSequenceNumberForQuery, event));
         break;
       default:
         Log.e(TAG, "type of aggregate not recognized!");
@@ -124,7 +125,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
   }
 
   @Nullable
-  private List<sqlBundle> getPersonQueriesForEvent( // Todo: refactor below like with Entry
+  private List<sqlBundle> getSchedulerQueriesForEvent( // Todo: refactor below like with Entry
       String aggregateIdType, int eventSequenceNumberForQuery, Event event) throws Exception {
     Log.d(TAG, "getResourceQueriesForEvent called.");
     List<sqlBundle> sqlBundleList = new ArrayList<>();
@@ -175,7 +176,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
   }
 
   public Scheduler getSchedulerWithSavedEventsById(Id personId) {
-    Scheduler scheduler = new Scheduler();
+    Scheduler scheduler = Scheduler.Create(personId);
     List<Event> eventList = getEventsFor(personId);
     if (eventList.size() > 0) {
       scheduler.applyEvents(eventList);
@@ -292,6 +293,8 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         return gson.toJson(event, EntryParentChangedEvent.class);
       case "EntryScheduledEvent":
         return gson.toJson(event, EntryScheduledEvent.class);
+      case "EntryNotScheduledEvent":
+        return gson.toJson(event, EntryNotScheduledEvent.class);
       case "PersonCreatedEvent":
         return gson.toJson(event, PersonCreatedEvent.class);
       case "EntryStartDateTimeChangedEvent":
@@ -418,7 +421,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
   public List<Event> getEventsFor(Id uuid) {
 
     String SELECT_EVENTS_QUERY =
-        "SELECT type, data FROM events WHERE aggregateId = ? ORDER BY occurredDateTime ASC";
+        "SELECT type, data FROM events WHERE aggregateId = ? ORDER BY eventSequenceNumber ASC";
 
     Cursor cursor = db.rawQuery(SELECT_EVENTS_QUERY, new String[]{uuid.toString()});
     List<Event> eventList = new ArrayList<>();
@@ -449,6 +452,9 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
               break;
             case "EntryScheduledEvent":
               eventList.add(gson.fromJson(dataJson, EntryScheduledEvent.class));
+              break;
+            case "EntryNotScheduledEvent":
+              eventList.add(gson.fromJson(dataJson, EntryNotScheduledEvent.class));
               break;
             case "PersonCreatedEvent":
               eventList.add(gson.fromJson(dataJson, PersonCreatedEvent.class));
@@ -595,13 +601,15 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
             entry.getParentEntryId(),
             entry.getEntryId(),
             entry.getTitle(),
-            entry.getStartDateTime(),
+            entry.getStartAtOrAfterDateTime(),
             entry.getDuration(),
-            entry.getEndDateTime(),
+            entry.getFinishAtOrBeforeDateTime(),
             entry.getImpossibleDaysConstraints(),
             entry.getNotes(),
             entry.getChildCount(),
             entry.getChildDuration(),
+            entry.getScheduledStartDateTime(),
+            entry.getScheduledEndDateTime(),
             lastAppliedSchedulerSequenceNumber);
     return viewModelEntry;
   }

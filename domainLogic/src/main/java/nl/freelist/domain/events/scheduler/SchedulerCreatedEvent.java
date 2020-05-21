@@ -1,4 +1,4 @@
-package nl.freelist.domain.events.person;
+package nl.freelist.domain.events.scheduler;
 
 import java.time.OffsetDateTime;
 import nl.freelist.domain.events.Event;

@@ -176,6 +176,28 @@ public class TimeHelper { // Todo: move to value object in domain model
     // Todo: if within one week before after, format as yesterday/tomorrow at H:m, last/this Tuesday
     // at H:m
     // otherwise format as date something like Tue 8 Oct 2020 at H:m
+    long differenceInSecondsFromDisplayDateTime =
+        offsetDateTime.toEpochSecond() - OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond();
+    if (differenceInSecondsFromDisplayDateTime <= 0) {
+      if (differenceInSecondsFromDisplayDateTime > -60) {
+        return "Now";
+      }
+      if (differenceInSecondsFromDisplayDateTime > -3600) {
+        return "Minutes ago";
+      }
+      long hoursAgo = -differenceInSecondsFromDisplayDateTime % 3600;
+      if (hoursAgo < 24) {
+        return hoursAgo + " hours ago";
+      }
+      long daysAgo = -differenceInSecondsFromDisplayDateTime % (3600 * 24);
+      if (daysAgo < 30) {
+        return daysAgo + " days ago";
+      }
+    }
+
+    if (offsetDateTime.toEpochSecond() == Constants.END_OF_TIME.toEpochSecond()) {
+      return "";
+    }
     return offsetDateTime.format(DateTimeFormatter.ofPattern("EEE dd MMM yyyy 'at' H':'mm"));
   }
 
@@ -225,4 +247,5 @@ public class TimeHelper { // Todo: move to value object in domain model
     result.removeAll(timeSlotsToRemove);
     return result;
   }
+
 }

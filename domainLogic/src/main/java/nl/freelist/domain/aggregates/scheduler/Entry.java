@@ -1,4 +1,4 @@
-package nl.freelist.domain.aggregates.plan;
+package nl.freelist.domain.aggregates.scheduler;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -6,16 +6,17 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.freelist.domain.events.Event;
-import nl.freelist.domain.events.entry.EntryChildCountChangedEvent;
-import nl.freelist.domain.events.entry.EntryChildDurationChangedEvent;
-import nl.freelist.domain.events.entry.EntryCreatedEvent;
-import nl.freelist.domain.events.entry.EntryDurationChangedEvent;
-import nl.freelist.domain.events.entry.EntryEndDateTimeChangedEvent;
-import nl.freelist.domain.events.entry.EntryNotesChangedEvent;
-import nl.freelist.domain.events.entry.EntryParentChangedEvent;
-import nl.freelist.domain.events.entry.EntryPreferredDayConstraintsChangedEvent;
-import nl.freelist.domain.events.entry.EntryStartDateTimeChangedEvent;
-import nl.freelist.domain.events.entry.EntryTitleChangedEvent;
+import nl.freelist.domain.events.scheduler.calendar.EntryScheduledEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryChildCountChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryChildDurationChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryCreatedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryDurationChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryEndDateTimeChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryNotesChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryParentChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryPreferredDayConstraintsChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryStartDateTimeChangedEvent;
+import nl.freelist.domain.events.scheduler.entry.EntryTitleChangedEvent;
 import nl.freelist.domain.valueObjects.Id;
 import nl.freelist.domain.valueObjects.constraints.Constraint;
 import nl.freelist.domain.valueObjects.constraints.ImpossibleDaysConstraint;
@@ -39,9 +40,9 @@ public class Entry {
   private List<Id> parents;
   private List<Id> children;
   private String title = "";
-  private OffsetDateTime startDateTime;
+  private OffsetDateTime startAtOrAfterDateTime;
   private long duration = 0;
-  private OffsetDateTime endDateTime;
+  private OffsetDateTime finishAtOrBeforeDateTime;
   private List<ImpossibleDaysConstraint> impossibleDaysConstraints = new ArrayList<>();
   private String notes = "";
   private long childCount; // are applied within same transaction that add descendants
@@ -50,7 +51,11 @@ public class Entry {
   private List<Constraint> startAndDueConstraints = new ArrayList<>();
   private List<Constraint> timeBudgetConstraints = new ArrayList<>();
   private List<Constraint> repeatConstraints = new ArrayList<>();
-  private List<Event> eventList = new ArrayList<>();
+  private List<Event> eventList =
+      new ArrayList<>(); // needed as all events are stored on Scheduler? leave for now as helps in
+  // debugging
+  private OffsetDateTime scheduledStartDateTime = null;
+  private OffsetDateTime scheduledEndDateTime = null;
 
   public Entry(
       // Todo: make private and expose via public static method
@@ -87,36 +92,42 @@ public class Entry {
         break;
       case "EntryDurationChangedEvent":
         EntryDurationChangedEvent entryDurationChangedEvent = (EntryDurationChangedEvent) event;
-          this.duration = entryDurationChangedEvent.getDurationAfter();
+        this.duration = entryDurationChangedEvent.getDurationAfter();
         break;
       case "EntryScheduledEvent":
-        // Do nothing
+        EntryScheduledEvent entryScheduledEvent = (EntryScheduledEvent) event;
+        scheduledStartDateTime = entryScheduledEvent.getScheduledTimeSlot().getStartDateTime();
+        scheduledEndDateTime = entryScheduledEvent.getScheduledTimeSlot().getEndDateTime();
+        break;
+      case "EntryNotScheduledEvent":
+        scheduledStartDateTime = null;
+        scheduledEndDateTime = null;
         break;
       case "EntryStartDateTimeChangedEvent":
         EntryStartDateTimeChangedEvent entryStartDateTimeChangedEvent =
             (EntryStartDateTimeChangedEvent) event;
-          this.startDateTime = entryStartDateTimeChangedEvent.getStartDateTimeAfter();
+        this.startAtOrAfterDateTime = entryStartDateTimeChangedEvent.getStartDateTimeAfter();
         break;
       case "EntryEndDateTimeChangedEvent":
         EntryEndDateTimeChangedEvent entryEndDateTimeChangedEvent =
             (EntryEndDateTimeChangedEvent) event;
-          this.endDateTime = entryEndDateTimeChangedEvent.getEndDateTimeAfter();
+        this.finishAtOrBeforeDateTime = entryEndDateTimeChangedEvent.getEndDateTimeAfter();
         break;
       case "EntryChildDurationChangedEvent":
         EntryChildDurationChangedEvent entryChildDurationChangedEvent =
             (EntryChildDurationChangedEvent) event;
-          this.childDuration += (entryChildDurationChangedEvent.getDurationDelta());
+        this.childDuration += (entryChildDurationChangedEvent.getDurationDelta());
         break;
       case "EntryChildCountChangedEvent":
         EntryChildCountChangedEvent entryChildCountChangedEvent =
             (EntryChildCountChangedEvent) event;
-          this.childCount += entryChildCountChangedEvent.getChildCountDelta();
+        this.childCount += entryChildCountChangedEvent.getChildCountDelta();
         break;
       case "EntryPreferredDayConstraintsChangedEvent":
         EntryPreferredDayConstraintsChangedEvent entryPreferredDaysConstraintsChangedEvent =
             (EntryPreferredDayConstraintsChangedEvent) event;
         this.impossibleDaysConstraints =
-              entryPreferredDaysConstraintsChangedEvent.getPreferredDayConstraints();
+            entryPreferredDaysConstraintsChangedEvent.getPreferredDayConstraints();
         break;
       default:
         LOGGER.log(
@@ -159,12 +170,12 @@ public class Entry {
     return duration;
   }
 
-  public OffsetDateTime getStartDateTime() {
-    return startDateTime;
+  public OffsetDateTime getStartAtOrAfterDateTime() {
+    return startAtOrAfterDateTime;
   }
 
-  public OffsetDateTime getEndDateTime() {
-    return endDateTime;
+  public OffsetDateTime getFinishAtOrBeforeDateTime() {
+    return finishAtOrBeforeDateTime;
   }
 
   public long getChildCount() {
@@ -179,42 +190,64 @@ public class Entry {
     return impossibleDaysConstraints;
   }
 
-  public Event getPreviousOf(Event event, int eventSequenceNumberToCountdownFrom) {
-    String eventTypeToFind = event.getClass().getSimpleName();
-
-    LOGGER.log(
-        Level.INFO,
-        "Asked for the previous event of "
-            + eventTypeToFind
-            + " with eventSequenceNumberToCountdownFrom lower than "
-            + eventSequenceNumberToCountdownFrom);
-    if (eventSequenceNumberToCountdownFrom
-        > (eventList.size() - 1)) { // eventSequenceNumbers start at 0 - just like List
-      LOGGER.log(
-          Level.WARNING,
-          "Asked to count down from "
-              + eventSequenceNumberToCountdownFrom
-              + " but max eventSequenceNumber of eventList is "
-              + (eventList.size() - 1));
-      return null;
+  public boolean isNewTitle(String titleAfter) {
+    if (title == null || !title.equals(titleAfter)) {
+      return true;
+    } else {
+      return false;
     }
+  }
 
-    for (int eventSequenceNumberCountdown =
-            eventSequenceNumberToCountdownFrom - 1; // Exclude the event to compare with
-        eventSequenceNumberCountdown >= 0;
-        eventSequenceNumberCountdown--) {
-      System.out.println(eventSequenceNumberCountdown);
-      Event eventToTest = eventList.get(eventSequenceNumberCountdown);
-      if (eventToTest.getClass().getSimpleName().equals(eventTypeToFind)) {
-        LOGGER.log(
-            Level.INFO,
-            "Returning Event with sequence number "
-                + eventSequenceNumberToCountdownFrom
-                + " of type "
-                + eventTypeToFind);
-        return eventToTest;
-      }
+  public boolean isNewStartAtOfAfterDateTime(OffsetDateTime startAtOrAfterDateTimeAfter) {
+    if ((startAtOrAfterDateTimeAfter == null && startAtOrAfterDateTime != null)
+        || (startAtOrAfterDateTimeAfter != null
+        && !startAtOrAfterDateTimeAfter.equals(startAtOrAfterDateTime))) {
+      return true;
+    } else {
+      return false;
     }
-    return null;
+  }
+
+  public boolean isNewFinishAtOrBeforeDateTimeAfter(OffsetDateTime finishAtOrBeforeDateTimeAfter) {
+    if ((finishAtOrBeforeDateTimeAfter == null && finishAtOrBeforeDateTime != null)
+        || (finishAtOrBeforeDateTimeAfter != null
+        && !finishAtOrBeforeDateTimeAfter.equals(finishAtOrBeforeDateTime))) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public boolean isNewNotes(String notesAfter) {
+    if (notes == null || !notes.equals(notesAfter)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public boolean isNewImpossibleDaysConstraint(
+      List<ImpossibleDaysConstraint> impossibleDaysConstraintsAfter) {
+    if (impossibleDaysConstraintsAfter.size() != impossibleDaysConstraints.size()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public boolean isNewDuration(long durationAfter) {
+    if (duration != durationAfter) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public OffsetDateTime getScheduledStartDateTime() {
+    return scheduledStartDateTime;
+  }
+
+  public OffsetDateTime getScheduledEndDateTime() {
+    return scheduledEndDateTime;
   }
 }

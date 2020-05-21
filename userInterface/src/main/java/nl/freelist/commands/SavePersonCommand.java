@@ -50,7 +50,7 @@ public class SavePersonCommand extends Command {
       eventsToAddList.add(personCreatedEvent);
     }
 
-    repository.insert(person);
+//    repository.insert(person);
     //Todo: log if not successful + return false Result object
     return Result.Create(true, null, "", "");
   }

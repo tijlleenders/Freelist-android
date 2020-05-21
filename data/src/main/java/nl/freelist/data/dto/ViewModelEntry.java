@@ -17,9 +17,9 @@ public final class ViewModelEntry {
   private final String parentEntryId;
   private final String personId;
   private final String title;
-  private final OffsetDateTime startDateTime;
+  private final OffsetDateTime startAtOrAfterDateTime;
   private final String durationString;
-  private final OffsetDateTime endDateTime;
+  private final OffsetDateTime finishAtOrBeforeDateTime;
   private final List<ImpossibleDaysConstraint> impossibleDaysConstraints;
   private final String notes;
   private final String childrenDurationString;
@@ -32,36 +32,33 @@ public final class ViewModelEntry {
   private final int seconds;
   private long childrenCount;
   private long childrenDuration;
+  private final OffsetDateTime scheduledStartDateTime;
+  private final OffsetDateTime scheduledEndDateTime;
   private final int lastAppliedSchedulerSequenceNumber;
-
-  public OffsetDateTime getStartDateTime() {
-    return startDateTime;
-  }
-
-  public OffsetDateTime getEndDateTime() {
-    return endDateTime;
-  }
 
   public ViewModelEntry(
       Id personId,
       Id parentEntryId,
       Id entryId,
       String title,
-      OffsetDateTime startDateTime,
+      OffsetDateTime startAtOrAfterDateTime,
       long duration,
-      OffsetDateTime endDateTime,
+      OffsetDateTime finishAtOrBeforeDateTime,
       List<ImpossibleDaysConstraint> impossibleDaysConstraints,
       String notes,
       long childrenCount,
       long childrenDuration,
-      int lastAppliedSchedulerSequenceNumber) {
+      OffsetDateTime scheduledStartDateTime,
+      OffsetDateTime scheduledEndDateTime,
+      int lastAppliedSchedulerSequenceNumber
+  ) {
     this.personId = personId.toString();
     this.parentEntryId = parentEntryId.toString();
     this.entryId = entryId.toString();
     this.title = title;
-    this.startDateTime = startDateTime;
+    this.startAtOrAfterDateTime = startAtOrAfterDateTime;
     this.duration = duration;
-    this.endDateTime = endDateTime;
+    this.finishAtOrBeforeDateTime = finishAtOrBeforeDateTime;
     if (impossibleDaysConstraints == null) {
       this.impossibleDaysConstraints = new ArrayList<>();
     } else {
@@ -78,11 +75,21 @@ public final class ViewModelEntry {
     this.minutes = TimeHelper.getStandaloneMinutesFrom(duration);
     this.seconds = TimeHelper.getStandaloneSecondsFrom(duration);
     this.durationString = TimeHelper.getDurationStringFrom(duration);
+    this.scheduledStartDateTime = scheduledStartDateTime;
+    this.scheduledEndDateTime = scheduledEndDateTime;
     this.lastAppliedSchedulerSequenceNumber = lastAppliedSchedulerSequenceNumber;
 
     Log.d(
         TAG,
         "ViewModelEntry " + title + " (uuid:" + entryId + ")" + " parentUuid:" + parentEntryId);
+  }
+
+  public OffsetDateTime getStartAtOrAfterDateTime() {
+    return startAtOrAfterDateTime;
+  }
+
+  public OffsetDateTime getFinishAtOrBeforeDateTime() {
+    return finishAtOrBeforeDateTime;
   }
 
   public String getEntryId() {
@@ -163,6 +170,14 @@ public final class ViewModelEntry {
 
   public int getLastAppliedSchedulerSequenceNumber() {
     return lastAppliedSchedulerSequenceNumber;
+  }
+
+  public OffsetDateTime getScheduledStartDateTime() {
+    return scheduledStartDateTime;
+  }
+
+  public OffsetDateTime getScheduledEndDateTime() {
+    return scheduledEndDateTime;
   }
 
 }

@@ -18,6 +18,7 @@ public final class Id {
 
   public static Id fromString(String idString) {
     if (!validate(idString)) {
+      System.out.println("Id not constructed from valid idString");
       System.exit(-1);
     }
     Id id = Id.Create();

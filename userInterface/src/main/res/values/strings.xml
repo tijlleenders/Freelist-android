@@ -18,7 +18,7 @@
   <string name="hint_minutes">Minutes</string>
   <string name="ok">Ok</string>
   <string name="starts_at_or_after_time">time</string>
-  <string name="starts_at_or_after_date">Starts at or after</string>
+  <string name="starts_at_or_after_date">Start at or after</string>
   <string name="duration">Duration</string>
   <string name="finish_at_or_before_date">Finish at or before</string>
   <string name="finish_at_or_before_time">time</string>
