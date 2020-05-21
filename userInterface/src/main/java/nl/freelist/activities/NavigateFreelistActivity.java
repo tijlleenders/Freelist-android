@@ -33,7 +33,8 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   private static final String TAG = "NavigateFreelistActivity";
   private String personId;
-  private int lastSavedEventSequenceNumber = -1;
+  private String parentOfThis;
+  private int lastSavedSchedulerEventSequenceNumber = -1;
   private NavigateEntriesViewModel navigateEntriesViewModel;
   private FreelistEntryAdapter adapter;
   private RecyclerView recyclerView;
@@ -61,8 +62,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
     setContentView(R.layout.activity_navigate_freelist);
 
-    navigateEntriesViewModel = ViewModelProviders.of(this)
-        .get(NavigateEntriesViewModel.class);
+    navigateEntriesViewModel = ViewModelProviders.of(this).get(NavigateEntriesViewModel.class);
 
     MySettings mySettings = new MySettings(this);
     personId = mySettings.getId();
@@ -78,7 +78,6 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
     setupSwipeActions();
   }
-
 
   private void initializeViews() {
     Log.d(TAG, "initializeViews called.");
@@ -116,8 +115,6 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
             Toast.makeText(NavigateFreelistActivity.this, "Entry deleted", Toast.LENGTH_SHORT)
                 .show();
           }
-
-
         })
         .attachToRecyclerView(recyclerView);
   }
@@ -130,20 +127,17 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
           @Override
           public void onClick(View v) {
             Intent intent = new Intent(NavigateFreelistActivity.this, AddEditEntryActivity.class);
-            intent.putExtra(
-                Constants.EXTRA_REQUEST_TYPE_ADD, Constants.ADD_ENTRY_REQUEST);
+            intent.putExtra(Constants.EXTRA_REQUEST_TYPE_ADD, Constants.ADD_ENTRY_REQUEST);
             intent.putExtra(
                 Constants.EXTRA_ENTRY_PARENT_ID, navigateEntriesViewModel.getParentId());
-            intent.putExtra(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER,
-                lastSavedEventSequenceNumber);
+            intent.putExtra(
+                Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER,
+                lastSavedSchedulerEventSequenceNumber);
             startActivityForResult(intent, Constants.ADD_ENTRY_REQUEST);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
           }
         });
   }
-
-
-
 
   private void updateView() {
     updateRecyclerView();
@@ -152,10 +146,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   private void updateRecyclerView() {
     Log.d(TAG, "updateRecyclerView called.");
+    Log.d(TAG, "lastSchedulerEventSequenceNumber: " + lastSavedSchedulerEventSequenceNumber);
     navigateEntriesViewModel
         .getViewModelEntries()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+        .subscribeOn(Schedulers.single())
+        .observeOn(Schedulers.single())
         .subscribe(
             viewModelEntries -> {
               // update RecyclerView
@@ -164,13 +159,18 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
                     @Override
                     public void run() {
                       adapter.setEntries(viewModelEntries.getViewModelEntryList());
-                      lastSavedEventSequenceNumber = viewModelEntries
-                          .getLastAppliedSchedulerSequenceNumber();
-//                      Toast.makeText(
-//                          NavigateFreelistActivity.this,
-//                          "navigateEntriesViewModel recyclerView refreshed!",
-//                          Toast.LENGTH_SHORT)
-//                          .show();
+                      lastSavedSchedulerEventSequenceNumber =
+                          viewModelEntries.getLastAppliedSchedulerSequenceNumber();
+                      Log.d(
+                          TAG,
+                          "lastSchedulerEventSequenceNumber updated with result from viewModelEntries: "
+                              + lastSavedSchedulerEventSequenceNumber);
+                      //                      Toast.makeText(
+                      //                          NavigateFreelistActivity.this,
+                      //                          "navigateEntriesViewModel recyclerView
+                      // refreshed!",
+                      //                          Toast.LENGTH_SHORT)
+                      //                          .show();
                     }
                   });
             });
@@ -180,8 +180,8 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     Log.d(TAG, "updateBreadcrumb called.");
     navigateEntriesViewModel
         .getBreadcrumbEntries()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+        .subscribeOn(Schedulers.single())
+        .observeOn(Schedulers.single())
         .subscribe(
             entries -> {
               // update RecyclerView
@@ -190,11 +190,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
                     @Override
                     public void run() {
                       initializeBreadcrumb(entries);
-//                      Toast.makeText(
-//                          NavigateFreelistActivity.this,
-//                          "navigateEntriesViewModel breadcrumb refreshed!",
-//                          Toast.LENGTH_SHORT)
-//                          .show();
+                      //                      Toast.makeText(
+                      //                          NavigateFreelistActivity.this,
+                      //                          "navigateEntriesViewModel breadcrumb refreshed!",
+                      //                          Toast.LENGTH_SHORT)
+                      //                          .show();
                     }
                   });
             });
@@ -209,11 +209,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
       case 1:
         breadcrumb0.setText("Home");
         breadcrumb0.setOnClickListener(view -> updateRecyclerViewWithParentUuid(personId));
+        parentOfThis = personId;
         breadcrumbDivider_0_1.setText(">");
         breadcrumb1.setText(entries.get(0).getTitle());
-        breadcrumb1
-            .setOnClickListener(
-                view -> updateRecyclerViewWithParentUuid(entries.get(0).getEntryId()));
+        breadcrumb1.setOnClickListener(
+            view -> updateRecyclerViewWithParentUuid(entries.get(0).getEntryId()));
         breadcrumbDivider_1_2.setText("");
         breadcrumb2.setText("");
         break;
@@ -227,14 +227,13 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
             view -> updateRecyclerViewWithParentUuid(entries.get(0).getParentEntryId()));
         breadcrumbDivider_0_1.setText(">");
         breadcrumb1.setText(entries.get(0).getTitle());
-        breadcrumb1
-            .setOnClickListener(
-                view -> updateRecyclerViewWithParentUuid(entries.get(0).getEntryId()));
+        breadcrumb1.setOnClickListener(
+            view -> updateRecyclerViewWithParentUuid(entries.get(0).getEntryId()));
+        parentOfThis = entries.get(0).getEntryId();
         breadcrumbDivider_1_2.setText(">");
         breadcrumb2.setText(entries.get(1).getTitle());
-        breadcrumb2
-            .setOnClickListener(
-                view -> updateRecyclerViewWithParentUuid(entries.get(1).getEntryId()));
+        breadcrumb2.setOnClickListener(
+            view -> updateRecyclerViewWithParentUuid(entries.get(1).getEntryId()));
         break;
       default:
         breadcrumb0.setText("Home");
@@ -254,49 +253,55 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     updateView();
   }
 
-
   private void setupActionBars() {
     Log.d(TAG, "setupActionBars called.");
 
-    //TopAppBar
+    // TopAppBar
     getSupportActionBar().setTitle("My Freelists");
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-    //override onCreateOptionsMenu and onOptionsItemSelected for TopAppBar
+    // override onCreateOptionsMenu and onOptionsItemSelected for TopAppBar
     bottomAppBar.replaceMenu(R.menu.bottom_app_bar_menu);
-    bottomAppBar.getMenu().findItem(R.id.bottom_app_bar_freelists).getIcon()
-        .setColorFilter(Color.BLACK,
-            PorterDuff.Mode.SRC_IN);
-    bottomAppBar.setOnMenuItemClickListener(new BottomAppBar.OnMenuItemClickListener() {
-      @Override
-      public boolean onMenuItemClick(MenuItem menuItem) {
-        int id = menuItem.getItemId();
-        switch (id) {
-          case R.id.bottom_app_bar_freelists:
-            Toast.makeText(NavigateFreelistActivity.this, "Freelists already selected",
-                Toast.LENGTH_SHORT).show();
-            return true;
-          case R.id.bottom_app_bar_calendar:
-            Toast.makeText(NavigateFreelistActivity.this, "Calendar selected", Toast.LENGTH_SHORT)
-                .show();
-            Intent navigateFreelistIntent = new Intent(NavigateFreelistActivity.this,
-                CalendarActivity.class);
-            startActivity(navigateFreelistIntent);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            return true;
-          case R.id.bottom_app_bar_search:
-            Toast.makeText(NavigateFreelistActivity.this, "Search selected", Toast.LENGTH_SHORT)
-                .show();
-            Intent searchIntent = new Intent(NavigateFreelistActivity.this, SearchActivity.class);
-            startActivity(searchIntent);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            return true;
-        }
-        return false;
-      }
-    });
+    bottomAppBar
+        .getMenu()
+        .findItem(R.id.bottom_app_bar_freelists)
+        .getIcon()
+        .setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN);
+    bottomAppBar.setOnMenuItemClickListener(
+        new BottomAppBar.OnMenuItemClickListener() {
+          @Override
+          public boolean onMenuItemClick(MenuItem menuItem) {
+            int id = menuItem.getItemId();
+            switch (id) {
+              case R.id.bottom_app_bar_freelists:
+                Toast.makeText(
+                    NavigateFreelistActivity.this,
+                    "Freelists already selected",
+                    Toast.LENGTH_SHORT)
+                    .show();
+                return true;
+              case R.id.bottom_app_bar_calendar:
+                Toast.makeText(
+                    NavigateFreelistActivity.this, "Calendar selected", Toast.LENGTH_SHORT)
+                    .show();
+                Intent navigateFreelistIntent =
+                    new Intent(NavigateFreelistActivity.this, CalendarActivity.class);
+                startActivity(navigateFreelistIntent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                return true;
+              case R.id.bottom_app_bar_search:
+                Toast.makeText(NavigateFreelistActivity.this, "Search selected", Toast.LENGTH_SHORT)
+                    .show();
+                Intent searchIntent =
+                    new Intent(NavigateFreelistActivity.this, SearchActivity.class);
+                startActivity(searchIntent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                return true;
+            }
+            return false;
+          }
+        });
   }
-
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -350,7 +355,11 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
         Toast.makeText(this, "Undo selected", Toast.LENGTH_SHORT).show();
         return true;
       case android.R.id.home:
-        navigateEntriesViewModel.setParentId(personId);
+        if (parentOfThis != null) {
+          navigateEntriesViewModel.setParentId(parentOfThis);
+        } else {
+          navigateEntriesViewModel.setParentId(personId);
+        }
         updateView();
       default:
         return super.onOptionsItemSelected(item);
@@ -365,10 +374,10 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   @Override
   public void onItemClick(View view, int position) {
     Log.d(TAG, "onItemClick called.");
-    String parentToSet = adapter.getEntryAt(position).getEntryId();
+    String parentToSet;
+    Log.d(TAG, "navigate down clicked");
+    parentToSet = adapter.getEntryAt(position).getEntryId();
     navigateEntriesViewModel.setParentId(parentToSet);
     updateView();
   }
-
-
 }

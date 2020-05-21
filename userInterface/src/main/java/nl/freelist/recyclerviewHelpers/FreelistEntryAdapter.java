@@ -101,23 +101,23 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
       textViewDescription = itemView.findViewById(R.id.text_view_description);
       textViewDuration = itemView.findViewById(R.id.text_view_duration);
 
-      // Using lambda as below is more efficient than new inner class for every call
-      itemView
-          .setOnClickListener(view -> onItemClickListener.onItemClick(view, getAdapterPosition()));
+      itemView.setOnClickListener(
+          view -> {
+            Log.d(TAG, "item clicked");
+            onItemClickListener.onItemClick(view, getAdapterPosition());
+          });
 
-      itemView.setOnLongClickListener( //Todo: replace with lambda like with onItemClick?
+      itemView.setOnLongClickListener( // Todo: replace with lambda like with onItemClick?
           new OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
               Intent intent = new Intent(v.getContext(), AddEditEntryActivity.class);
-              intent.putExtra(
-                  Constants.EXTRA_REQUEST_TYPE_EDIT, Constants.EDIT_ENTRY_REQUEST);
+              intent.putExtra(Constants.EXTRA_REQUEST_TYPE_EDIT, Constants.EDIT_ENTRY_REQUEST);
               int position = getAdapterPosition();
-              ViewModelEntry entry =
-                  getEntryAt(
-                      position);
+              ViewModelEntry entry = getEntryAt(position);
               intent.putExtra(Constants.EXTRA_ENTRY_ID, entry.getEntryId());
-              intent.putExtra(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER,
+              intent.putExtra(
+                  Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER,
                   entry.getLastAppliedSchedulerSequenceNumber());
               ((Activity) v.getContext())
                   .startActivityForResult(intent, Constants.EDIT_ENTRY_REQUEST);
@@ -125,8 +125,7 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
                   .overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
               return false;
             }
-          }
-      );
+          });
     }
   }
 }
