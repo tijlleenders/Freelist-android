@@ -88,6 +88,7 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
     return entries.get(position);
   }
 
+
   class EntryHolder extends RecyclerView.ViewHolder {
 
     private final TextView textViewTitle;
@@ -126,6 +127,8 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
               return false;
             }
           });
+
+
     }
   }
 }
