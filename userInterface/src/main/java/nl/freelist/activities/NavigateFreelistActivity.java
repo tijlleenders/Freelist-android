@@ -1,8 +1,16 @@
 package nl.freelist.activities;
 
+import static nl.freelist.freelist.R.drawable;
+import static nl.freelist.freelist.R.id;
+import static nl.freelist.freelist.R.layout;
+import static nl.freelist.freelist.R.menu;
+
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -13,10 +21,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import io.reactivex.schedulers.Schedulers;
@@ -60,7 +70,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     Log.d(TAG, "onCreate called.");
     super.onCreate(savedInstanceState);
 
-    setContentView(R.layout.activity_navigate_freelist);
+    setContentView(layout.activity_navigate_freelist);
 
     navigateEntriesViewModel = ViewModelProviders.of(this).get(NavigateEntriesViewModel.class);
 
@@ -81,23 +91,23 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   private void initializeViews() {
     Log.d(TAG, "initializeViews called.");
-    breadcrumb0 = findViewById(R.id.breadcrumb_level_0_text);
-    breadcrumb1 = findViewById(R.id.breadcrumb_level_1_text);
-    breadcrumb2 = findViewById(R.id.breadcrumb_level_2_text);
-    breadcrumbDivider_0_1 = findViewById(R.id.breadcrumb_divider_0_1);
-    breadcrumbDivider_1_2 = findViewById(R.id.breadcrumb_divider_1_2);
-    recyclerView = findViewById(R.id.recycler_view);
+    breadcrumb0 = findViewById(id.breadcrumb_level_0_text);
+    breadcrumb1 = findViewById(id.breadcrumb_level_1_text);
+    breadcrumb2 = findViewById(id.breadcrumb_level_2_text);
+    breadcrumbDivider_0_1 = findViewById(id.breadcrumb_divider_0_1);
+    breadcrumbDivider_1_2 = findViewById(id.breadcrumb_divider_1_2);
+    recyclerView = findViewById(id.recycler_view);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
     recyclerView.setHasFixedSize(true);
     adapter = new FreelistEntryAdapter(this);
     recyclerView.setAdapter(adapter);
-    bottomAppBar = findViewById(R.id.bottom_app_bar);
+    bottomAppBar = findViewById(id.bottom_app_bar);
   }
 
   private void setupSwipeActions() {
     Log.d(TAG, "setupSwipeActions called.");
     new ItemTouchHelper(
-        new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
           @Override
           public boolean onMove(
               @NonNull RecyclerView recyclerView,
@@ -108,12 +118,164 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
           }
 
           @Override
+          public void onChildDraw(
+              @NonNull Canvas c,
+              @NonNull RecyclerView recyclerView,
+              @NonNull ViewHolder viewHolder,
+              float dX,
+              float dY,
+              int actionState,
+              boolean isCurrentlyActive) {
+
+            final ColorDrawable background = new ColorDrawable(0xFFFAFAFA);
+            background.setBounds(
+                viewHolder.itemView.getRight() + (int) dX,
+                viewHolder.itemView.getTop(),
+                viewHolder.itemView.getRight(),
+                viewHolder.itemView.getBottom());
+            background.draw(c);
+
+            Drawable firstIcon =
+                ContextCompat.getDrawable(getApplicationContext(), drawable.ic_line_chart);
+            Drawable secondIcon =
+                ContextCompat.getDrawable(getApplicationContext(), drawable.ic_score);
+            Drawable thirdIcon =
+                ContextCompat.getDrawable(getApplicationContext(), drawable.ic_bar_chart);
+            // iconDimensions
+            int iconHeight = 100;
+            int iconWidth = 100;
+            int iconMargin = 2;
+
+            // disable swiping too much?
+            if (-dX > ((iconWidth + iconMargin) * 5)) {
+              dX = -((iconWidth + iconMargin) * 5);
+            }
+
+            int iconTop =
+                viewHolder.itemView.getTop() + (viewHolder.itemView.getHeight() - iconHeight) / 2;
+            int iconBottom = iconTop + iconHeight;
+
+            int firstIconLeft =
+                (int) (viewHolder.itemView.getRight() - iconMargin - iconWidth * 1.5);
+            int firstIconRight =
+                (int) (viewHolder.itemView.getRight() - iconMargin - iconWidth * 0.5);
+            firstIcon.setBounds(firstIconLeft, iconTop, firstIconRight, iconBottom);
+            firstIcon.draw(c);
+
+            int secondIconLeft = viewHolder.itemView.getRight() - iconMargin * 2 - iconWidth * 3;
+            int secondIconRight = viewHolder.itemView.getRight() - iconMargin * 2 - iconWidth * 2;
+            secondIcon.setBounds(secondIconLeft, iconTop, secondIconRight, iconBottom);
+            secondIcon.draw(c);
+
+            int thirdIconLeft =
+                (int) (viewHolder.itemView.getRight() - iconMargin * 3 - iconWidth * 4.5);
+            int thirdIconRight =
+                (int) (viewHolder.itemView.getRight() - iconMargin * 3 - iconWidth * 3.5);
+            thirdIcon.setBounds(thirdIconLeft, iconTop, thirdIconRight, iconBottom);
+            thirdIcon.draw(c);
+
+            super.onChildDraw(
+                c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+          }
+
+          @Override
           public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-            // viewHolder.getAdapterPosition() //where did we swipe?
-            navigateEntriesViewModel.delete(
-                adapter.getEntryAt(viewHolder.getAdapterPosition()));
-            Toast.makeText(NavigateFreelistActivity.this, "Entry deleted", Toast.LENGTH_SHORT)
-                .show();
+            //                adapter.notifyItemChanged(viewHolder.getAdapterPosition());
+          }
+        })
+        .attachToRecyclerView(recyclerView);
+
+    new ItemTouchHelper(
+        new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+          @Override
+          public boolean onMove(
+              @NonNull RecyclerView recyclerView,
+              @NonNull RecyclerView.ViewHolder viewHolder,
+              @NonNull RecyclerView.ViewHolder viewHolder1) {
+            // drag and drop functionality
+            return false;
+          }
+
+          @Override
+          public void onChildDraw(
+              @NonNull Canvas c,
+              @NonNull RecyclerView recyclerView,
+              @NonNull ViewHolder viewHolder,
+              float dX,
+              float dY,
+              int actionState,
+              boolean isCurrentlyActive) {
+
+            final ColorDrawable background = new ColorDrawable(0xFFFAFAFA);
+            background.setBounds(
+                viewHolder.itemView.getPaddingLeft(),
+                viewHolder.itemView.getTop(),
+                (int) dX,
+                viewHolder.itemView.getBottom());
+            background.draw(c);
+
+            Drawable firstIcon =
+                ContextCompat.getDrawable(getApplicationContext(), drawable.ic_done_outline);
+            Drawable secondIcon =
+                ContextCompat.getDrawable(getApplicationContext(), drawable.ic_thumb_up);
+            Drawable thirdIcon =
+                ContextCompat.getDrawable(getApplicationContext(), drawable.ic_thumb_down);
+            Drawable fourthIcon =
+                ContextCompat.getDrawable(getApplicationContext(), drawable.ic_edit);
+            Drawable fifthIcon =
+                ContextCompat.getDrawable(getApplicationContext(), drawable.ic_delete);
+
+            int iconHeight = 80;
+            int iconWidth = 80;
+            int iconMargin = 2;
+
+            // disable swiping too much?
+            if (dX > (iconWidth + iconMargin) * 8.2) {
+              dX = (iconWidth + iconMargin) * 8.2F;
+            }
+
+            int iconTop =
+                viewHolder.itemView.getTop() + (viewHolder.itemView.getHeight() - iconHeight) / 2;
+            int iconBottom = iconTop + iconHeight;
+
+            int firstIconLeft =
+                (int) (viewHolder.itemView.getLeft() + iconMargin + iconWidth * 0.5);
+            int firstIconRight =
+                (int) (viewHolder.itemView.getLeft() + iconMargin + iconWidth * 1.5);
+            firstIcon.setBounds(firstIconLeft, iconTop, firstIconRight, iconBottom);
+            firstIcon.draw(c);
+
+            int secondIconLeft = viewHolder.itemView.getLeft() + iconMargin * 2 + iconWidth * 2;
+            int secondIconRight = viewHolder.itemView.getLeft() + iconMargin * 2 + iconWidth * 3;
+            secondIcon.setBounds(secondIconLeft, iconTop, secondIconRight, iconBottom);
+            secondIcon.draw(c);
+
+            int thirdIconLeft =
+                (int) (viewHolder.itemView.getLeft() + iconMargin * 2 + iconWidth * 3.5);
+            int thirdIconRight =
+                (int) (viewHolder.itemView.getLeft() + iconMargin * 2 + iconWidth * 4.5);
+            thirdIcon.setBounds(thirdIconLeft, iconTop, thirdIconRight, iconBottom);
+            thirdIcon.draw(c);
+
+            int fourthIconLeft = viewHolder.itemView.getLeft() + iconMargin * 2 + iconWidth * 5;
+            int fourthIconRight = viewHolder.itemView.getLeft() + iconMargin * 2 + iconWidth * 6;
+            fourthIcon.setBounds(fourthIconLeft, iconTop, fourthIconRight, iconBottom);
+            fourthIcon.draw(c);
+
+            int fifthIconLeft =
+                (int) (viewHolder.itemView.getLeft() + iconMargin * 2 + iconWidth * 6.5);
+            int fifthIconRight =
+                (int) (viewHolder.itemView.getLeft() + iconMargin * 2 + iconWidth * 7.5);
+            fifthIcon.setBounds(fifthIconLeft, iconTop, fifthIconRight, iconBottom);
+            fifthIcon.draw(c);
+
+            super.onChildDraw(
+                c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+          }
+
+          @Override
+          public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+            // adapter.notifyItemChanged(viewHolder.getAdapterPosition());
           }
         })
         .attachToRecyclerView(recyclerView);
@@ -121,7 +283,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
 
   private void setupFloatingActionButton() {
     Log.d(TAG, "setupFloatingActionButton called.");
-    FloatingActionButton buttonAddEntry = findViewById(R.id.button_add_entry);
+    FloatingActionButton buttonAddEntry = findViewById(id.button_add_entry);
     buttonAddEntry.setOnClickListener(
         new View.OnClickListener() {
           @Override
@@ -261,10 +423,10 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     // override onCreateOptionsMenu and onOptionsItemSelected for TopAppBar
-    bottomAppBar.replaceMenu(R.menu.bottom_app_bar_menu);
+    bottomAppBar.replaceMenu(menu.bottom_app_bar_menu);
     bottomAppBar
         .getMenu()
-        .findItem(R.id.bottom_app_bar_freelists)
+        .findItem(id.bottom_app_bar_freelists)
         .getIcon()
         .setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN);
     bottomAppBar.setOnMenuItemClickListener(
@@ -315,7 +477,7 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
   public boolean onOptionsItemSelected(MenuItem item) {
     Log.d(TAG, "onOptionsItemSelected called.");
     switch (item.getItemId()) {
-      case R.id.delete_all_entries:
+      case id.delete_all_entries:
         navigateEntriesViewModel
             .deleteAllEntriesFromRepository()
             .subscribeOn(Schedulers.io())
@@ -346,12 +508,12 @@ public class NavigateFreelistActivity extends AppCompatActivity implements ItemC
                       });
                 });
         return true;
-      case R.id.settings:
+      case id.settings:
         Toast.makeText(this, "Settings selected", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(NavigateFreelistActivity.this, SettingsActivity.class);
         startActivity(intent);
         return true;
-      case R.id.undo:
+      case id.undo:
         Toast.makeText(this, "Undo selected", Toast.LENGTH_SHORT).show();
         return true;
       case android.R.id.home:
