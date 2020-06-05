@@ -40,7 +40,8 @@
       <androidx.cardview.widget.CardView
         android:id="@+id/breadcrumb_level_1"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:cardElevation="0dp">
         <TextView
           android:id="@+id/breadcrumb_level_1_text"
           android:layout_width="wrap_content"
@@ -52,7 +53,8 @@
       <androidx.cardview.widget.CardView
         android:id="@+id/breadcrumb_level_0"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:cardElevation="0dp">
         <TextView
           android:id="@+id/breadcrumb_level_0_text"
           android:layout_width="wrap_content"
@@ -60,11 +62,11 @@
           android:text="Home"
           android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
       </androidx.cardview.widget.CardView>
-
       <androidx.cardview.widget.CardView
         android:id="@+id/breadcrumb_level_2"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:cardElevation="0dp">
         <TextView
           android:id="@+id/breadcrumb_level_2_text"
           android:layout_width="wrap_content"
@@ -93,7 +95,7 @@
     android:layout_gravity="bottom"
     app:backgroundTint="@color/colorPrimary"
     app:fabAlignmentMode="center"
-    app:fabCradleMargin="2dp"
+    app:fabCradleMargin="1dp"
     app:fabCradleRoundedCornerRadius="4dp"
     app:fabCradleVerticalOffset="0dp"
     app:hideOnScroll="false"
@@ -107,8 +109,13 @@
     android:layout_margin="10dp"
     android:layout_marginBottom="0dp"
     android:layout_marginEnd="0dp"
+    android:backgroundTint="@color/white"
     android:src="@drawable/ic_add"
-    app:backgroundTint="@color/colorPrimary"
-    app:layout_anchor="@id/bottom_app_bar" />
+    android:tint="@color/colorPrimary"
+    app:borderWidth="2dp"
+    app:iconSize="10dp"
+    app:iconTint="@color/colorPrimary"
+    app:layout_anchor="@id/bottom_app_bar"
+    app:rippleColor="@color/colorPrimary" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

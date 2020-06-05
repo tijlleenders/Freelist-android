@@ -12,19 +12,21 @@
     <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
   </style>
 
-  <style name="base_item_textview" parent="TextAppearance.AppCompat.Large">
-    <item name="android:layout_width">wrap_content</item>
-    <item name="android:layout_height">wrap_content</item>
+  <style name="base_item_textview" parent="TextAppearance.AppCompat.Large"></style>
+
+  <style name="title_textview" parent="TextAppearance.AppCompat.Large">
     <item name="android:layout_alignParentLeft">true</item>
     <item name="android:layout_alignParentStart">true</item>
-    <item name="android:layout_toLeftOf">@id/text_view_duration</item>
-    <item name="android:layout_toStartOf">@id/text_view_duration</item>
     <item name="android:ellipsize">end</item>
     <item name="android:maxLines">1</item>
     <item name="android:text">Title</item>
+    <item name="android:textSize">20sp</item>
+    <item name="android:layout_toLeftOf">@id/text_view_duration</item>
+    <item name="android:layout_toStartOf">@id/text_view_duration</item>
   </style>
 
-  <style name="stack_title_textview" parent="base_item_textview">
+  <style name="duration_textview" parent="TextAppearance.AppCompat.Medium">
+
   </style>
 
   <style name="single_downstream_item_textview" parent="base_item_textview">

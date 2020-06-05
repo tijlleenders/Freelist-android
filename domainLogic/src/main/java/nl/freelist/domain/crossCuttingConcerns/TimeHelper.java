@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -172,7 +173,7 @@ public class TimeHelper { // Todo: move to value object in domain model
     }
   }
 
-  public static String format(OffsetDateTime offsetDateTime) {
+  public static String formatForDateTime(OffsetDateTime offsetDateTime) {
     // Todo: if within one week before after, format as yesterday/tomorrow at H:m, last/this Tuesday
     // at H:m
     // otherwise format as date something like Tue 8 Oct 2020 at H:m
@@ -199,6 +200,84 @@ public class TimeHelper { // Todo: move to value object in domain model
       return "";
     }
     return offsetDateTime.format(DateTimeFormatter.ofPattern("EEE dd MMM yyyy 'at' H':'mm"));
+  }
+
+  public static String formatForDays(
+      OffsetDateTime offsetDateTime) { //Todo: work out in more detail next x last week ..day etc
+    OffsetDateTime today = OffsetDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS);
+    if (offsetDateTime.isEqual(today.minusDays(3))) {
+      return "Last ...day";
+    }
+    if (offsetDateTime.isEqual(today.minusDays(2))) {
+      return "Two days ago";
+    }
+    if (offsetDateTime.isEqual(today.minusDays(1))) {
+      return "Yesterday";
+    }
+    if (offsetDateTime.isEqual(today)) {
+      return "Today";
+    }
+    if (offsetDateTime.isEqual(today.plusDays(1))) {
+      return "Tomorrow";
+    }
+    if (offsetDateTime.isAfter(today.plusDays(1)) && offsetDateTime.isBefore(today.plusDays(11))) {
+      switch (offsetDateTime.getDayOfWeek()) {
+        case MONDAY:
+          return "Monday";
+        case TUESDAY:
+          return "Tuesday";
+        case WEDNESDAY:
+          return "Wednesday";
+        case THURSDAY:
+          return "Thursday";
+        case FRIDAY:
+          return "Friday";
+        case SATURDAY:
+          return "Saturday";
+        case SUNDAY:
+          return "Sunday";
+      }
+      ;
+    }
+    if (offsetDateTime.isEqual(today.plusDays(11))) {
+      switch (today.plusDays(11).getDayOfWeek()) {
+        case MONDAY:
+          return "Next week Monday";
+        case TUESDAY:
+          return "Next week Tuesday";
+        case WEDNESDAY:
+          return "Next week Wednesday";
+        case THURSDAY:
+          return "Next week Thursday";
+        case FRIDAY:
+          return "Next week Friday";
+        case SATURDAY:
+          return "Next week Saturday";
+        case SUNDAY:
+          return "Next week Sunday";
+      }
+      ;
+    }
+    if (offsetDateTime.isEqual(today.plusDays(11))) {
+      switch (today.plusDays(11).getDayOfWeek()) {
+        case MONDAY:
+          return "Monday in two weeks";
+        case TUESDAY:
+          return "Tuesday in two weeks";
+        case WEDNESDAY:
+          return "Wednesday in two weeks";
+        case THURSDAY:
+          return "Thursday in two weeks";
+        case FRIDAY:
+          return "Friday in two weeks";
+        case SATURDAY:
+          return "Saturday in two weeks";
+        case SUNDAY:
+          return "Sunday in two weeks";
+      }
+      ;
+    }
+    return offsetDateTime.toString();
   }
 
   public static Boolean slotListsEqual(List<TimeSlot> a, List<TimeSlot> b) {
@@ -248,4 +327,8 @@ public class TimeHelper { // Todo: move to value object in domain model
     return result;
   }
 
+  public static String formatForTimeDuration(OffsetDateTime scheduledStartDateTime, long duration) {
+    return scheduledStartDateTime.toLocalTime().toString() + "  -  " + getDurationStringFrom(
+        duration);
+  }
 }

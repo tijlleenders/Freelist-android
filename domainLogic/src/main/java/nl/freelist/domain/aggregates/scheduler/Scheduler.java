@@ -251,10 +251,7 @@ public class Scheduler {
     OffsetDateTime scheduledStartDateTime = null;
 
     TimeSlot compatibleFreeTimeSlot =
-        calendar.getCompatibleFreeTimeSlots(
-            entry.getDuration(),
-            entry.getStartAtOrAfterDateTime(),
-            entry.getFinishAtOrBeforeDateTime());
+        calendar.getCompatibleFreeTimeSlots(entry);
     if (compatibleFreeTimeSlot == null) {
       System.out.println("No compatible freeTimeSlot found");
       EntryNotScheduledEvent entryNotScheduledEvent =
@@ -272,11 +269,29 @@ public class Scheduler {
       } else {
         scheduledStartDateTime = entry.getStartAtOrAfterDateTime();
       }
+
       scheduledTimeSlot =
           TimeSlot.Create(
               scheduledStartDateTime,
               scheduledStartDateTime.plusSeconds(entry.getDuration()),
               entry.getEntryId());
+
+      // Move up scheduledStartDateTime till it complies with constraints
+      outerloop:
+      for (int i = 0; i < 8; i++) {
+        innerloop:
+        for (ImpossibleDaysConstraint impossibleDaysConstraint :
+            entry.getImpossibleDaysConstraints()) {
+          if (!impossibleDaysConstraint.validate(scheduledTimeSlot)) {
+            scheduledTimeSlot = TimeSlot.Create(
+                scheduledTimeSlot.getStartDateTime().truncatedTo(ChronoUnit.DAYS).plusDays(1),
+                scheduledTimeSlot.getStartDateTime().truncatedTo(ChronoUnit.DAYS).plusDays(1)
+                    .plusSeconds(entry.getDuration()), entry.getEntryId());
+            continue outerloop;
+          }
+        }
+      }
+
       freeTimeSlotsToCreate = compatibleFreeTimeSlot.minus(scheduledTimeSlot);
       EntryScheduledEvent entryScheduledEvent =
           EntryScheduledEvent.Create(

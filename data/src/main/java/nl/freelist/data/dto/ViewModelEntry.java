@@ -108,6 +108,9 @@ public final class ViewModelEntry {
     if (childrenCount > 0) {
       return Constants.STACK_ENTRY_VIEW_TYPE;
     } else {
+      if (lastAppliedSchedulerSequenceNumber == -1) { //Todo: remove magic number
+        return Constants.CALENDAR_ENTRY_DATE_VIEW_TYPE;
+      }
       return Constants.SINGLE_ENTRY_VIEW_TYPE;
     }
   }

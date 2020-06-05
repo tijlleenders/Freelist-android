@@ -20,8 +20,6 @@ import nl.freelist.data.gson.Converters;
 import nl.freelist.domain.aggregates.Person;
 import nl.freelist.domain.aggregates.scheduler.Entry;
 import nl.freelist.domain.aggregates.scheduler.Scheduler;
-import nl.freelist.domain.crossCuttingConcerns.Constants;
-import nl.freelist.domain.crossCuttingConcerns.TimeHelper;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.person.PersonCreatedEvent;
 import nl.freelist.domain.events.scheduler.SchedulerCreatedEvent;
@@ -87,15 +85,10 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
           "CREATE TABLE IF NOT EXISTS viewModelEntries (\n"
               + "   `uuid` TEXT NOT NULL\n"
               + "   , `parentUuid` TEXT NOT NULL\n"
+              + "   , `startDate` TEXT NOT NULL\n"
+              + "   , `type` TEXT\n"
               + "   , `json` TEXT\n"
               + "   , PRIMARY KEY(`uuid`))");
-      db.execSQL(
-          "CREATE TABLE IF NOT EXISTS viewModelAppointments (\n"
-              + "   `personId` TEXT NOT NULL\n"
-              + "   , `entryId` TEXT NOT NULL\n"
-              + "   , `date` TEXT NOT NULL\n"
-              + "   , `json` TEXT\n"
-              + "   , PRIMARY KEY(`personId`))");
       db.setTransactionSuccessful();
     } catch (Exception e) {
       Log.d(TAG, "Error while executing onCreate");
@@ -166,13 +159,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     sqlBundleList.add(new sqlBundle("events", eventContentValues));
 
     return sqlBundleList;
-  }
-
-  public Entry getEntryWithSavedEventsById(Id entryId) {
-    Entry entry = new Entry();
-    List<Event> eventList = getEventsFor(entryId);
-    entry.applyEvents(eventList);
-    return entry;
   }
 
   public Scheduler getSchedulerWithSavedEventsById(Id personId) {
@@ -323,49 +309,6 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     onUpgrade(db, oldVersion, newVersion);
   }
 
-  public List<ViewModelAppointment> getAllCalendarEntries() {
-    List<ViewModelAppointment> viewModelAppointmentList = new ArrayList<>();
-
-    String SELECT_CALENDAR_ENTRIES_QUERY = "SELECT * FROM viewModelCalendar";
-
-    Cursor cursor = db.rawQuery(SELECT_CALENDAR_ENTRIES_QUERY, new String[]{});
-
-    try {
-      if (cursor.moveToFirst()) {
-        do {
-          String calendarId = cursor.getString(cursor.getColumnIndex("calendarId"));
-          String entryId = cursor.getString(cursor.getColumnIndex("entryId"));
-          String title = cursor.getString(cursor.getColumnIndex("title"));
-          String date = cursor.getString(cursor.getColumnIndex("date"));
-          String time = cursor.getString(cursor.getColumnIndex("time"));
-          int duration = cursor.getInt(cursor.getColumnIndex("duration"));
-          int isDone = cursor.getInt(cursor.getColumnIndex("isDone"));
-          int lastSavedEventSequenceNumber =
-              cursor.getInt(cursor.getColumnIndex("lastSavedEventSequenceNumber"));
-
-          ViewModelAppointment viewModelAppointment =
-              new ViewModelAppointment(
-                  calendarId,
-                  entryId,
-                  title,
-                  Constants.CALENDAR_ENTRY_TODO_VIEW_TYPE,
-                  date,
-                  time,
-                  TimeHelper.getDurationStringFrom(duration));
-          viewModelAppointmentList.add(viewModelAppointment);
-        } while (cursor.moveToNext());
-      }
-    } catch (Exception e) {
-      Log.d(TAG, "Error while trying to get ancestor ids for uuid");
-    } finally {
-      if (cursor != null && !cursor.isClosed()) {
-        cursor.close();
-      }
-    }
-
-    return viewModelAppointmentList;
-  }
-
   public ViewModelEntry viewModelEntryFor(String entryId) {
     String SELECT_VIEWMODELENTRY_QUERY = "SELECT json FROM viewModelEntries WHERE uuid = ?";
 
@@ -389,10 +332,10 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return null;
   }
 
-  public List<ViewModelEntry> getAllViewModelEntriesForParent(String parentId) {
-    String SELECT_CHILDRENIDS_QUERY = "SELECT json FROM viewModelEntries WHERE parentUuid = ?";
+  public List<ViewModelEntry> getViewModelEntries(String personId) {
+    String SELECT_ALL_VIEWMODELENTRIES = "SELECT json FROM viewModelEntries";
 
-    Cursor cursor = db.rawQuery(SELECT_CHILDRENIDS_QUERY, new String[]{parentId});
+    Cursor cursor = db.rawQuery(SELECT_ALL_VIEWMODELENTRIES, null);
     List<String> jsonList = new ArrayList<>();
     try {
       if (cursor.moveToFirst()) {
@@ -402,7 +345,7 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
         } while (cursor.moveToNext());
       }
     } catch (Exception e) {
-      Log.d(TAG, "Error while trying to get viewModelEntries for parentUuid");
+      Log.d(TAG, "Error while trying to get all viewModelEntries");
     } finally {
       if (cursor != null && !cursor.isClosed()) {
         cursor.close();
@@ -567,29 +510,11 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     return sqlBundleList;
   }
 
-  private sqlBundle getViewModelAppointmentQueriesFrom(Entry entry) {
-    ViewModelAppointment viewModelAppointment;
-    viewModelAppointment = getViewModelAppointmentFrom(entry);
-    ContentValues viewModelAppointmentContentValues = new ContentValues();
-    viewModelAppointmentContentValues.put("personId", viewModelAppointment.getPersonId());
-    viewModelAppointmentContentValues.put("entryId", viewModelAppointment.getEntryId());
-    viewModelAppointmentContentValues.put("date", viewModelAppointment.getDate());
-    viewModelAppointmentContentValues.put("json", jsonOf(viewModelAppointment));
-    return new sqlBundle("viewModelAppointments", viewModelAppointmentContentValues);
-  }
-
   public void insert(Scheduler scheduler) throws Exception {
     Log.i(TAG, "Repository insert called with entry " + scheduler.getPersonId());
     List<sqlBundle> sqlBundleList = new ArrayList<>();
     sqlBundleList.addAll(getQueriesForSaving(scheduler));
     executeSqlBundles(sqlBundleList);
-  }
-
-  private ViewModelAppointment getViewModelAppointmentFrom(Entry entry) {
-    ViewModelAppointment viewModelAppointment;
-    viewModelAppointment =
-        new ViewModelAppointment("test", "test", "test", 6, "test", "test", "test");
-    return viewModelAppointment;
   }
 
   private ViewModelEntry getViewModelEntryFrom(
@@ -623,4 +548,5 @@ public class EventDatabaseHelper extends SQLiteOpenHelper {
     Gson gson = Converters.registerAll(new GsonBuilder()).create();
     return gson.toJson(viewModelAppointment);
   }
+
 }

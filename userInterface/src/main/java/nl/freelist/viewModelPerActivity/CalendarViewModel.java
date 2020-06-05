@@ -5,9 +5,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
-import java.util.List;
 import nl.freelist.data.Repository;
-import nl.freelist.data.dto.ViewModelAppointment;
+import nl.freelist.data.dto.ViewModelEntries;
 
 public class CalendarViewModel extends AndroidViewModel {
 
@@ -33,12 +32,12 @@ public class CalendarViewModel extends AndroidViewModel {
     super.onCleared();
   }
 
-  public Observable<List<ViewModelAppointment>> getAllCalendarEntries() {
-    Observable<List<ViewModelAppointment>> calendarEntryList = Observable
-        .fromCallable(
-            () -> repository.getAllCalendarEntriesForOwner(personId))
-        .observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
-    return calendarEntryList;
+  public Observable<ViewModelEntries> getViewModelEntries() {
+    Observable<ViewModelEntries> viewModelEntries =
+        Observable.fromCallable(() -> repository.getViewModelEntriesForCalendar(personId))
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io());
+    return viewModelEntries;
   }
 
 }

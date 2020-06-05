@@ -46,6 +46,10 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
     return new EntryHolder(itemView);
   }
 
+  public List<ViewModelEntry> getEntries() {
+    return entries;
+  }
+
   @Override
   public int getItemViewType(int position) {
     Log.d(TAG, "getItemViewType called.");
@@ -83,11 +87,14 @@ public class FreelistEntryAdapter extends RecyclerView.Adapter<FreelistEntryAdap
     notifyDataSetChanged(); // change later for onInsert onDelete (not efficient and no animations)
   }
 
+  public void refresh() {
+    notifyDataSetChanged();
+  }
+
   public ViewModelEntry getEntryAt(int position) {
     Log.d(TAG, "getEntryAt called.");
     return entries.get(position);
   }
-
 
   class EntryHolder extends RecyclerView.ViewHolder {
 

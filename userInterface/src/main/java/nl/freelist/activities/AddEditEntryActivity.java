@@ -44,11 +44,12 @@ public class AddEditEntryActivity extends AppCompatActivity
 
   private static final String TAG = "AddEditEntryActivity";
 
-  private String id; // Todo: make id a value object
+  private String entryId;
   private String parentId;
-  private String defaultId;
+  private String personId;
   private int lastSavedEventSequenceNumber = -1;
   private int saveCommandsInProgress = 0;
+  private Boolean isBrandNewEntry = true;
 
   private Repository repository;
 
@@ -97,7 +98,9 @@ public class AddEditEntryActivity extends AppCompatActivity
     // Todo: do something with bundle from ChooseCalendarOptionActivity
 
     super.onResume();
-    textInputLayoutTitle.requestFocus();
+    if (isBrandNewEntry) {
+      textInputLayoutTitle.requestFocus();
+    }
   }
 
   @Override
@@ -122,7 +125,7 @@ public class AddEditEntryActivity extends AppCompatActivity
     Bundle bundle = getIntent().getExtras();
 
     MySettings mySettings = new MySettings(this);
-    parentId = defaultId = mySettings.getId();
+    parentId = personId = mySettings.getId();
 
     preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowMondays", true);
     preferredDaysConstraintsCheckBoxStatesBundle.putBoolean("allowTuesdays", true);
@@ -143,8 +146,9 @@ public class AddEditEntryActivity extends AppCompatActivity
     }
 
     if (bundle != null && bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_EDIT)) { // do edit setup
-      id = bundle.getString(Constants.EXTRA_ENTRY_ID);
-      initializeForEditExisting(id);
+      entryId = bundle.getString(Constants.EXTRA_ENTRY_ID);
+      initializeForEditExisting(entryId);
+      isBrandNewEntry = false;
     } else if (bundle != null && bundle.containsKey(Constants.EXTRA_REQUEST_TYPE_ADD)) { // do add
       // setup
       initializeForAddNew(bundle);
@@ -166,9 +170,9 @@ public class AddEditEntryActivity extends AppCompatActivity
 
     SaveEntryCommand saveEntryCommand = // Todo: add parent
         new SaveEntryCommand(
-            id,
+            entryId,
             parentId,
-            defaultId,
+            personId,
             title,
             startAtOrAfterDateTime,
             duration,
@@ -178,7 +182,7 @@ public class AddEditEntryActivity extends AppCompatActivity
             lastSavedEventSequenceNumber,
             repository);
     saveCommandsInProgress += 1;
-    Toast.makeText(AddEditEntryActivity.this, "Saving...", Toast.LENGTH_SHORT).show();
+    //    Toast.makeText(AddEditEntryActivity.this, "Saving...", Toast.LENGTH_SHORT).show();
     AddEditEntryActivityViewModel.handle(saveEntryCommand)
         .subscribeOn(
             Schedulers.single()) // schedules all save commands sequentially in a single thread
@@ -204,7 +208,7 @@ public class AddEditEntryActivity extends AppCompatActivity
                             .show();
                       }
                       if (result != null && result.isSuccess()) {
-                        initializeForEditExisting(id);
+                        initializeForEditExisting(entryId);
                       }
                     }
                   });
@@ -213,7 +217,7 @@ public class AddEditEntryActivity extends AppCompatActivity
 
   private void initializeForAddNew(Bundle bundle) {
     if (bundle.containsKey(Constants.EXTRA_ENTRY_PARENT_ID)) {
-      id = UUID.randomUUID().toString();
+      entryId = UUID.randomUUID().toString();
       if (bundle.containsKey(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER)) {
         lastSavedEventSequenceNumber =
             bundle.getInt(Constants.EXTRA_SCHEDULER_EVENT_SEQUENCE_NUMBER);
@@ -414,11 +418,11 @@ public class AddEditEntryActivity extends AppCompatActivity
 
     textInputEditTextTitle.setText(title);
     if (startAtOrAfterDateTime != null) {
-      textInputEditTextStartDateTime.setText(TimeHelper.format(startAtOrAfterDateTime));
+      textInputEditTextStartDateTime.setText(TimeHelper.formatForDateTime(startAtOrAfterDateTime));
     }
     textInputEditTextDuration.setText(TimeHelper.getDurationStringFrom(duration));
     if (finishAtOrBeforeDateTime != null) {
-      textInputEditTextEndDateTime.setText(TimeHelper.format(finishAtOrBeforeDateTime));
+      textInputEditTextEndDateTime.setText(TimeHelper.formatForDateTime(finishAtOrBeforeDateTime));
     }
     textInputEditTextNotes.setText(notes);
 
@@ -634,13 +638,15 @@ public class AddEditEntryActivity extends AppCompatActivity
     switch (inputType) {
       case "startDate":
         startAtOrAfterDateTime = TimeHelper.getDateFromString(input);
-        textInputEditTextStartDateTime.setText(TimeHelper.format(startAtOrAfterDateTime));
+        textInputEditTextStartDateTime
+            .setText(TimeHelper.formatForDateTime(startAtOrAfterDateTime));
         hideSoftKeyboard();
         textInputEditTextStartDateTime.clearFocus();
         break;
       case "startTime":
         startAtOrAfterDateTime = startAtOrAfterDateTime.plusSeconds(Integer.valueOf(input));
-        textInputEditTextStartDateTime.setText(TimeHelper.format(startAtOrAfterDateTime));
+        textInputEditTextStartDateTime
+            .setText(TimeHelper.formatForDateTime(startAtOrAfterDateTime));
         hideSoftKeyboard();
         saveChangedFields();
         break;
@@ -654,7 +660,8 @@ public class AddEditEntryActivity extends AppCompatActivity
               > (finishAtOrBeforeDateTime.toEpochSecond()
               - startAtOrAfterDateTime.toEpochSecond()))) {
             finishAtOrBeforeDateTime = startAtOrAfterDateTime.plusSeconds(duration);
-            textInputEditTextEndDateTime.setText(TimeHelper.format(finishAtOrBeforeDateTime));
+            textInputEditTextEndDateTime
+                .setText(TimeHelper.formatForDateTime(finishAtOrBeforeDateTime));
           }
         }
         textInputLayoutDuration.setEndIconVisible(false);
@@ -663,13 +670,15 @@ public class AddEditEntryActivity extends AppCompatActivity
         break;
       case "endDate":
         finishAtOrBeforeDateTime = TimeHelper.getDateFromString(input);
-        textInputEditTextEndDateTime.setText(TimeHelper.format(finishAtOrBeforeDateTime));
+        textInputEditTextEndDateTime
+            .setText(TimeHelper.formatForDateTime(finishAtOrBeforeDateTime));
         hideSoftKeyboard();
         textInputEditTextEndDateTime.clearFocus();
         break;
       case "endTime":
         finishAtOrBeforeDateTime = finishAtOrBeforeDateTime.plusSeconds(Integer.valueOf(input));
-        textInputEditTextEndDateTime.setText(TimeHelper.format(finishAtOrBeforeDateTime));
+        textInputEditTextEndDateTime
+            .setText(TimeHelper.formatForDateTime(finishAtOrBeforeDateTime));
         if (startAtOrAfterDateTime != null && duration == 0) {
           duration =
               finishAtOrBeforeDateTime.toEpochSecond() - startAtOrAfterDateTime.toEpochSecond();

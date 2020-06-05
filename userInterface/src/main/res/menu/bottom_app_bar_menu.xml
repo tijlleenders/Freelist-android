@@ -12,7 +12,7 @@
     app:showAsAction="ifRoom"/>
   <item
     android:id="@+id/bottom_app_bar_calendar"
-    android:icon="@drawable/ic_event"
+    android:icon="@drawable/ic_calendar"
     android:title="@string/action_calendar"
     app:showAsAction="ifRoom"/>
   <item

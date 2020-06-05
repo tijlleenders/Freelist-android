@@ -5,16 +5,13 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
-import java.util.List;
 import nl.freelist.data.Repository;
 import nl.freelist.data.dto.ViewModelEntries;
 import nl.freelist.data.dto.ViewModelEntry;
-import nl.freelist.domain.valueObjects.Id;
 
 public class NavigateEntriesViewModel extends AndroidViewModel {
+  //Todo: should this have multiple observables ie lastEventSequence separate from the list?
 
-  private String parentId;
-  private String personId;
   private Repository repository;
 
   public NavigateEntriesViewModel(@NonNull Application application) {
@@ -22,9 +19,12 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
     repository = new Repository(getApplication().getApplicationContext());
   }
 
-  public Observable<ViewModelEntries> getViewModelEntries() {
+  public Observable<ViewModelEntries> getViewModelEntries(String personId) {
+    //Todo: Cache a copy of viewModelEntries, if UI has not issued a command don't need to re-fetch
+    //investigate as viewmodel should not know about the activity> then better place to cache is in activity itself?
+    //this would mean making the Observable work so that changes are 'pushed' to activity - not fetched like now
     Observable<ViewModelEntries> viewModelEntries =
-        Observable.fromCallable(() -> repository.getViewModelEntriesForParent(parentId, personId))
+        Observable.fromCallable(() -> repository.getViewModelEntries(personId))
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io());
     return viewModelEntries;
@@ -34,19 +34,6 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
   protected void onCleared() {
     // Todo: Unsubscribe if observing anything?
     super.onCleared();
-  }
-
-  public Observable<List<ViewModelEntry>> getBreadcrumbEntries() {
-    Observable<List<ViewModelEntry>> viewModelEntryList =
-        Observable.fromCallable(
-            () -> repository.getBreadcrumbViewModelEntries(Id.fromString(parentId)))
-            .observeOn(Schedulers.io())
-            .subscribeOn(Schedulers.io());
-    return viewModelEntryList;
-  }
-
-  public String getParentId() {
-    return parentId;
   }
 
   public Observable<Boolean> deleteAllEntriesFromRepository() {
@@ -59,13 +46,4 @@ public class NavigateEntriesViewModel extends AndroidViewModel {
     // Todo: implement with UseCase
   }
 
-  public void setParentId(String parentId) {
-    this.parentId = parentId;
-  } // not in constructor as this changes while navigating and ViewModel does not have to be
-  // re-created
-
-  public void setPersonId(String personId) {
-    this.personId = personId;
-  } // not in constructor as this changes while navigating and ViewModel does not have to be
-  // re-created
 }

@@ -7,7 +7,7 @@
   <color name="colorEntryMultipleBackground">#33006600</color>
   <color name="colorEntryParentBackground">#66003300</color>
   <color name="colorCanvasBackground">#fafafa</color>
-  <color name="colorPastelBlue">#87e9ff</color>
+  <color name="colorPastelBlue">#40C4FF</color>
   <color name="white">#FFFFFF</color>
   <color name="transparent">#000000FF</color>
 </resources>

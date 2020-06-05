@@ -15,6 +15,7 @@ import nl.freelist.domain.events.scheduler.calendar.EntryNotScheduledEvent;
 import nl.freelist.domain.events.scheduler.calendar.EntryScheduledEvent;
 import nl.freelist.domain.valueObjects.Id;
 import nl.freelist.domain.valueObjects.TimeSlot;
+import nl.freelist.domain.valueObjects.constraints.ImpossibleDaysConstraint;
 
 public class Calendar {
 
@@ -109,20 +110,31 @@ public class Calendar {
     return scheduledTimeSlots.get(entryId);
   }
 
-  public TimeSlot getCompatibleFreeTimeSlots(
-      long duration, OffsetDateTime startAtOrAfter, OffsetDateTime finishAtOrBefore) {
+  public TimeSlot getCompatibleFreeTimeSlots(Entry entry) {
+    long duration = entry.getDuration();
+    OffsetDateTime startAtOrAfter = entry.getStartAtOrAfterDateTime();
+    OffsetDateTime finishAtOrBefore = entry.getFinishAtOrBeforeDateTime();
     if (duration == 0) {
       return null;
     }
     long searchKey = (duration << 32) | (startAtOrAfter.toEpochSecond() - Constants.START_OF_TIME
         .toEpochSecond());
     NavigableMap<Long, TimeSlot> tempFreeTimeSlots = freeTimeSlots.headMap(searchKey, true);
+
+    outerloop:
     for (TimeSlot timeSlot : tempFreeTimeSlots.values()) {
       if (timeSlot.getStartDateTime().toEpochSecond()
-          <= (finishAtOrBefore.toEpochSecond() - duration)
-          && timeSlot.getEndDateTime().toEpochSecond() >= finishAtOrBefore.toEpochSecond()) {
-        return timeSlot;
+          > (finishAtOrBefore.toEpochSecond() - duration)
+          && timeSlot.getEndDateTime().toEpochSecond() < finishAtOrBefore.toEpochSecond()) {
+        continue outerloop; //to next candidate
       }
+      for (ImpossibleDaysConstraint impossibleDaysConstraint : entry
+          .getImpossibleDaysConstraints()) {
+        if (!impossibleDaysConstraint.validate(timeSlot)) {
+          continue outerloop;
+        }
+      }
+      return timeSlot;
     }
     return null;
   }

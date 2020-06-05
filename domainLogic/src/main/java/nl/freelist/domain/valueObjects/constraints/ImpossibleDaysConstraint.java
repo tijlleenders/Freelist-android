@@ -23,6 +23,9 @@ public final class ImpossibleDaysConstraint extends Constraint {
   @Override
   public Boolean validate(TimeSlot timeSlot) {
     OffsetDateTime pointer = timeSlot.getStartDateTime();
+    if (pointer.plusDays(7).isBefore(timeSlot.getEndDateTime())) {
+      return true;
+    }
     while (pointer.isBefore(timeSlot.getEndDateTime())) {
       if (pointer.getDayOfWeek() == dayOfWeek) { // Todo: replace ENUM?
         return false;

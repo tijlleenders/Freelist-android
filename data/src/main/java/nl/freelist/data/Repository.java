@@ -4,18 +4,18 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import nl.freelist.data.comparators.CalendarEntryComparator;
 import nl.freelist.data.comparators.EventComparator;
-import nl.freelist.data.dto.ViewModelAppointment;
 import nl.freelist.data.dto.ViewModelEntries;
 import nl.freelist.data.dto.ViewModelEntry;
 import nl.freelist.data.dto.ViewModelEvent;
 import nl.freelist.domain.aggregates.Person;
 import nl.freelist.domain.aggregates.scheduler.Scheduler;
-import nl.freelist.domain.crossCuttingConcerns.Constants;
 import nl.freelist.domain.events.Event;
 import nl.freelist.domain.events.scheduler.calendar.EntryScheduledEvent;
 import nl.freelist.domain.events.scheduler.entry.EntryCreatedEvent;
@@ -61,62 +61,59 @@ public class Repository {
     return eventDatabaseHelper.viewModelEntryFor(entryId.toString());
   }
 
-  public ViewModelEntries getViewModelEntriesForParent(String parentId, String personId) {
-    List<ViewModelEntry> viewModelEntryList = eventDatabaseHelper
-        .getAllViewModelEntriesForParent(parentId);
-    int lastAppliedSchedulerSequenceNumber = eventDatabaseHelper
-        .selectLastSavedEventSequenceNumber(Id.fromString(personId));
-    ViewModelEntries result = new ViewModelEntries(viewModelEntryList,
-        lastAppliedSchedulerSequenceNumber);
+  public ViewModelEntries getViewModelEntries(String personId) {
+    List<ViewModelEntry> viewModelEntryList = eventDatabaseHelper.getViewModelEntries(personId);
+    int lastAppliedSchedulerSequenceNumber =
+        eventDatabaseHelper.selectLastSavedEventSequenceNumber(Id.fromString(personId));
+    ViewModelEntries result =
+        new ViewModelEntries(viewModelEntryList, personId, lastAppliedSchedulerSequenceNumber);
     return result;
   }
 
-  public List<ViewModelEntry> getBreadcrumbViewModelEntries(Id parentEntryId) {
-    List<ViewModelEntry> allViewModelEntries = new ArrayList<>();
-    if (!parentEntryId.equals(
-        sharedPreferences.getString(Constants.SETTINGS_USER_UUID, null))) {
-      ViewModelEntry parentViewModelEntry = getViewModelEntryById(parentEntryId);
-      if (parentViewModelEntry == null) {
-        return allViewModelEntries;
+  public ViewModelEntries getViewModelEntriesForCalendar(String personId) {
+    List<ViewModelEntry> viewModelEntryList = eventDatabaseHelper.getViewModelEntries(personId);
+    int lastAppliedSchedulerSequenceNumber =
+        eventDatabaseHelper.selectLastSavedEventSequenceNumber(Id.fromString(personId));
+    List<ViewModelEntry> tempList = new ArrayList<>(viewModelEntryList);
+    HashSet<OffsetDateTime> datesToAdd = new HashSet<>();
+    for (ViewModelEntry entry : viewModelEntryList) {
+      if (entry.getDuration() == 0 || entry.getChildrenCount() > 0) {
+        tempList.remove(entry);
       } else {
-        allViewModelEntries.add(parentViewModelEntry);
-      }
-
-      if (!parentViewModelEntry.getParentEntryId()
-          .equals(
-              sharedPreferences.getString(Constants.SETTINGS_USER_UUID, null))) {
-        ViewModelEntry parentOfParentViewModelEntry =
-            getViewModelEntryById(Id.fromString(parentViewModelEntry.getParentEntryId()));
-        if (parentOfParentViewModelEntry == null) {
-          return allViewModelEntries;
-        } else {
-          allViewModelEntries.add(0, parentOfParentViewModelEntry);
-        }
+        datesToAdd.add(entry.getScheduledStartDateTime().truncatedTo(ChronoUnit.DAYS));
       }
     }
-    return allViewModelEntries;
-  }
-
-
-  public List<ViewModelAppointment> getAllCalendarEntriesForOwner(String fromString) {
-    List<ViewModelAppointment> viewModelAppointmentList =
-        eventDatabaseHelper.getAllCalendarEntries();
-    Collections.sort(viewModelAppointmentList, new CalendarEntryComparator());
-
-    List<ViewModelAppointment> viewModelAppointmentListSorted = new ArrayList<>();
-    String date = "";
-    for (ViewModelAppointment viewModelAppointment : viewModelAppointmentList) {
-      if (!viewModelAppointment.getDate().equals(date)) {
-        date = viewModelAppointment.getDate();
-        viewModelAppointmentListSorted // Add date section headers
-            .add(
-                new ViewModelAppointment(
-                    "", "", date, Constants.CALENDAR_ENTRY_DATE_VIEW_TYPE, date, "", ""));
-      }
-      viewModelAppointmentListSorted.add(viewModelAppointment);
+    // Todo: Add date entries
+    for (OffsetDateTime dateToAdd : datesToAdd) {
+      ViewModelEntry dateEntry =
+          new ViewModelEntry(
+              Id.Create(),
+              Id.Create(),
+              Id.Create(),
+              "",
+              null,
+              0L,
+              null,
+              null,
+              "",
+              0L,
+              0L,
+              dateToAdd,
+              null,
+              -1
+          );
+      tempList.add(dateEntry);
     }
-
-    return viewModelAppointmentListSorted;
+    tempList.sort(
+        (o1, o2) -> { // add comparator logic for date label entries
+          if (o1.getScheduledStartDateTime().isBefore(o2.getScheduledStartDateTime())) {
+            return -1;
+          }
+          return 0;
+        });
+    ViewModelEntries result =
+        new ViewModelEntries(tempList, personId, lastAppliedSchedulerSequenceNumber);
+    return result;
   }
 
   public Boolean deleteAllEntriesFromRepository() {
@@ -126,7 +123,7 @@ public class Repository {
   }
 
   public List<ViewModelEvent> getAllEventsForId(
-      Id uuid) { //Todo: implement with document-based viewModel
+      Id uuid) { // Todo: implement with document-based viewModel
     List<Event> eventList = eventDatabaseHelper.getEventsFor(uuid);
     Collections.sort(eventList, new EventComparator().reversed());
 
@@ -179,23 +176,4 @@ public class Repository {
     }
     return viewModelEventListSorted;
   }
-
-  // Todo: refactor later (in EventDatabaseHelper), options not in MVP
-  //  public ViewModelCalendarOption getViewModelCalendarOptionFrom(
-  //      Calendar calendar) { //Todo: refactor to go through aggregate root
-  //    ViewModelCalendarOption viewModelCalendarOption = new ViewModelCalendarOption(
-  //        calendar.getNumberOfProblems(),
-  //        calendar.getNumberOfReschedules(),
-  //        calendar.getCalendarUuid().toString(),
-  //        calendar.getLastScheduledEntryUuidString(),
-  //        calendar.getEntryLastScheduledDateTimeRange(),
-  //        calendar.getResourceLastAppliedEventSequenceNumber(),
-  //        calendar.getEntryLastAppliedEventSequenceNumber(),
-  //        calendar
-  //    );
-  //    return viewModelCalendarOption;
-  //  }
-
-
-
 }
