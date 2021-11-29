@@ -1,3 +1,5 @@
+## DEPRECATED: Please contribute to [the ZinZen web app project.](https://github.com/tijlleenders/ZinZen)
+
 ## Freelist: a platform for planning your purpose(s).
 
 Freelist gives you the peace of mind to live in the now by making sure that:
